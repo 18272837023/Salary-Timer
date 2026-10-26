@@ -1,4 +1,4 @@
-# Salary Timer
+# Salary Timer 1
 
 A free salary timer that shows what you earn per second, minute and hour — live.
 
