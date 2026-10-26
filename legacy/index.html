@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<title>Salary Timer — See What You Earn Every Second (Free, No Sign-Up)</title>
+<meta name="description" content="A free salary timer that shows what you earn per second, minute and hour — live. Built for hourly workers, shift workers and salaried 9-to-5ers. Add overtime, unpaid breaks, payday countdown, a savings jar and a wishlist. No sign-up, nothing leaves your browser." />
+<meta name="keywords" content="salary timer, salary per second, real time salary calculator, hourly wage timer, salary per minute calculator, payday countdown, overtime pay calculator, work clock, earnings tracker, salary timer for shift workers" />
+<link rel="canonical" href="https://salarytimer.app/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Salary Timer" />
+<meta property="og:title" content="Salary Timer — see what you earn every second" />
+<meta property="og:description" content="Type in your salary once and watch it tick up while you work. Free, no sign-up, works on any device." />
+<meta property="og:url" content="https://salarytimer.app/" />
+<meta property="og:image" content="https://salarytimer.app/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Salary Timer — a live earnings counter for your workday" />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Salary Timer — see what you earn every second" />
+<meta name="twitter:description" content="A live counter for your workday. Free, no sign-up." />
+<meta name="twitter:image" content="https://salarytimer.app/og.png" />
+<meta name="theme-color" content="#FFFFFF" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='28' fill='%235BD6A6'/%3E%3Ctext x='50' y='72' font-size='62' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%23fff'%3E$%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --white:#FFFFFF;
+  --cream:#FFFDF8;
+  --ink:#33313B;
+  --ink-2:#4B4854;
+  --muted:#7C7889;
+  --faint:#A8A4B4;
+  --line:#F1EDE6;
+  --line-2:#E6E1D8;
+
+  --mint:#5BD6A6;
+  --mint-deep:#2FA97B;
+  --mint-soft:#E9FBF3;
+  --peach:#FFB7A0;
+  --peach-deep:#F08A6C;
+  --peach-soft:#FFF1EB;
+  --butter:#FFD37E;
+  --butter-deep:#E0A73C;
+  --butter-soft:#FFF8E6;
+  --lilac:#BCA9FF;
+  --lilac-deep:#8B71F0;
+  --lilac-soft:#F3EFFF;
+  --pink:#FFA8C5;
+  --pink-deep:#EF7BA3;
+  --pink-soft:#FFEFF5;
+
+  --r-lg:30px;
+  --r-md:22px;
+  --r-sm:14px;
+
+  --shadow-soft:0 18px 40px -26px rgba(51,49,59,.35);
+  --shadow-card:0 2px 0 rgba(51,49,59,.035), 0 14px 34px -24px rgba(51,49,59,.30);
+
+  --display:"Baloo 2", ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --body:"Nunito", ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--white);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16.5px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{max-width:100%}
+h1,h2,h3,h4{font-family:var(--display); font-weight:800; letter-spacing:-.015em; line-height:1.12; margin:0}
+p{margin:0 0 14px}
+a{color:inherit}
+::selection{background:var(--mint-soft); color:var(--mint-deep)}
+
+.wrap{width:100%; max-width:1120px; margin:0 auto; padding:0 22px}
+.section{padding:76px 0}
+.section.tight{padding:56px 0}
+
+/* ---------- decorative blobs ---------- */
+.blob{position:absolute; border-radius:50%; filter:blur(46px); opacity:.55; pointer-events:none; z-index:0}
+.blob.m{background:#BFF4DE}
+.blob.p{background:#FFDCCF}
+.blob.l{background:#E3DAFF}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--display); font-weight:800; font-size:16px;
+  border-radius:999px; padding:13px 24px; border:2px solid transparent;
+  text-decoration:none; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, background .16s;
+  white-space:nowrap;
+}
+.btn-mint{background:var(--mint); color:#08382A; box-shadow:0 4px 0 var(--mint-deep)}
+.btn-mint:hover{filter:brightness(1.03)}
+.btn-mint:active{transform:translateY(4px); box-shadow:0 0 0 var(--mint-deep)}
+.btn-ink{background:var(--ink); color:#fff; box-shadow:0 4px 0 #1D1B24}
+.btn-ink:active{transform:translateY(4px); box-shadow:0 0 0 #1D1B24}
+.btn-ghost{background:#fff; color:var(--ink); border-color:var(--line-2); box-shadow:0 4px 0 var(--line)}
+.btn-ghost:active{transform:translateY(4px); box-shadow:0 0 0 var(--line)}
+.btn-sm{padding:9px 16px; font-size:14.5px; box-shadow-width:3px}
+.btn-sm.btn-ghost{box-shadow:0 3px 0 var(--line)}
+.btn-sm:active{transform:translateY(3px); box-shadow:none}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(16px);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);
+  border-bottom:1px solid transparent;
+  transition:border-color .25s;
+}
+header.stuck{border-bottom-color:var(--line)}
+.nav{display:flex; align-items:center; justify-content:space-between; height:74px; gap:16px}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:19px; text-decoration:none}
+.brand .mark{
+  width:36px; height:36px; border-radius:12px; display:grid; place-items:center;
+  background:var(--mint); color:#08382A; font-size:19px; font-weight:800;
+  box-shadow:0 3px 0 var(--mint-deep);
+  transform:rotate(-6deg);
+}
+.nav-links{display:flex; gap:6px; align-items:center}
+.nav-links a{
+  text-decoration:none; font-weight:700; font-size:14.5px; color:var(--muted);
+  padding:8px 13px; border-radius:999px; transition:.15s;
+}
+.nav-links a:hover{color:var(--ink); background:var(--cream)}
+
+/* ---------- hero ---------- */
+.hero{position:relative; padding:56px 0 24px; overflow:hidden}
+.hero .blob.m{width:520px; height:520px; top:-220px; right:-120px}
+.hero .blob.p{width:380px; height:380px; top:120px; left:-180px}
+.hero-inner{position:relative; z-index:1; display:grid; grid-template-columns:1fr 296px; gap:44px; align-items:center}
+.hero-copy{max-width:730px}
+.hero-stickers{display:flex; flex-direction:column; gap:14px}
+.sticker{
+  display:flex; align-items:center; gap:12px; background:#fff; border:2px solid var(--line);
+  border-radius:20px; padding:13px 16px; box-shadow:var(--shadow-card); font-size:13.5px;
+}
+.sticker span{font-size:24px; line-height:1}
+.sticker b{display:block; font-family:var(--display); font-weight:800; font-size:14.5px; line-height:1.25}
+.sticker small{display:block; color:var(--muted); font-weight:700; font-size:12px}
+.sticker:nth-child(1){transform:rotate(-2.5deg)}
+.sticker:nth-child(2){transform:rotate(1.8deg); margin-left:14px}
+.sticker:nth-child(3){transform:rotate(-1.2deg)}
+.badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--butter-soft);
+  border:2px solid #FFE9B8; color:#8A6416; font-weight:800; font-size:13px;
+  padding:7px 15px; border-radius:999px; font-family:var(--display); margin-bottom:22px;
+}
+h1{font-size:clamp(34px, 4.9vw, 52px); letter-spacing:-.03em; margin-bottom:18px; line-height:1.24}
+h1 .hl{
+  white-space:nowrap; color:var(--mint-deep);
+  background:var(--mint-soft); border-radius:16px; padding:0 12px 2px;
+  box-decoration-break:clone; -webkit-box-decoration-break:clone;
+  display:inline-block; transform:rotate(-1.2deg);
+}
+.lede{font-size:clamp(16.5px, 2vw, 19px); color:var(--muted); max-width:620px; margin-bottom:26px; font-weight:600}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:22px}
+.trust{display:flex; gap:18px; flex-wrap:wrap; color:var(--faint); font-size:13.5px; font-weight:700}
+.trust span{display:inline-flex; align-items:center; gap:6px}
+
+/* ---------- the app ---------- */
+.app-shell{position:relative; z-index:1; margin-top:38px}
+.app{
+  background:#fff; border:2px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card); padding:26px;
+}
+.app-top{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:20px}
+.status{
+  display:inline-flex; align-items:center; gap:8px; font-family:var(--display); font-weight:800; font-size:14px;
+  padding:8px 15px; border-radius:999px; background:var(--mint-soft); color:var(--mint-deep);
+  border:2px solid #CFF3E4;
+}
+.status .dot{width:8px; height:8px; border-radius:50%; background:var(--mint); animation:breathe 2.2s infinite}
+.status.idle{background:var(--cream); color:var(--muted); border-color:var(--line)}
+.status.idle .dot{background:var(--faint); animation:none}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(91,214,166,.55)} 50%{box-shadow:0 0 0 8px rgba(91,214,166,0)}}
+
+.app-actions{display:flex; gap:8px; flex-wrap:wrap}
+
+.demo-bar{
+  display:none; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  background:var(--butter-soft); border:2px solid #FFE9B8; border-radius:16px;
+  padding:11px 16px; margin-bottom:18px; font-size:13.5px; font-weight:700; color:#7A5A14;
+}
+.demo-bar.on{display:flex}
+.demo-bar b{font-family:var(--display); font-weight:800}
+
+.grid-main{display:grid; grid-template-columns:1fr 300px; gap:16px}
+.tick-card{
+  background:linear-gradient(180deg, #FFFFFF 0%, var(--cream) 100%);
+  border:2px solid var(--line); border-radius:var(--r-md); padding:28px 28px 24px; position:relative; overflow:hidden;
+}
+.tick-card::after{
+  content:"🪙"; position:absolute; right:22px; top:18px; font-size:30px; opacity:.5; transform:rotate(12deg);
+}
+.tick-label{font-family:var(--display); font-weight:700; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.ticker{
+  font-family:var(--display); font-weight:800; font-size:clamp(52px, 8vw, 84px);
+  letter-spacing:-.04em; line-height:1.02; margin:4px 0 2px;
+  font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:1px;
+  transition:filter .3s;
+}
+.ticker .cur{font-size:.5em; color:var(--faint); margin-right:3px; font-weight:700}
+.ticker .cents{color:var(--mint-deep)}
+.tick-sub{color:var(--muted); font-weight:700; font-size:14.5px; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.tick-sub b{color:var(--ink-2)}
+.tick-sub .sep{width:4px; height:4px; border-radius:50%; background:var(--line-2)}
+.blurred{filter:blur(11px); user-select:none}
+
+.chip-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px; padding-top:20px; border-top:2px dashed var(--line)}
+.chip{background:#fff; border:2px solid var(--line); border-radius:16px; padding:12px 14px}
+.chip .k{font-size:11.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+.chip .v{font-family:var(--display); font-weight:800; font-size:19px; font-variant-numeric:tabular-nums; margin-top:2px}
+
+.side-stack{display:flex; flex-direction:column; gap:16px}
+.ring-card{
+  background:#fff; border:2px solid var(--line); border-radius:var(--r-md); padding:18px;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.ring-wrap{position:relative; width:150px; height:150px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none; stroke:var(--line); stroke-width:12}
+.ring-fg{fill:none; stroke:var(--mint); stroke-width:12; stroke-linecap:round; transition:stroke-dashoffset .5s linear}
+.ring-center{position:absolute; inset:0; display:grid; place-content:center; text-align:center}
+.ring-pct{font-family:var(--display); font-weight:800; font-size:30px; line-height:1}
+.ring-cap{font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-top:3px}
+.cd{text-align:center; margin-top:2px}
+.cd .k{font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--faint)}
+.cd .v{font-family:var(--display); font-weight:800; font-size:20px; font-variant-numeric:tabular-nums}
+
+.slack-card{
+  background:var(--peach-soft); border:2px solid #FFE0D3; border-radius:var(--r-md); padding:16px 18px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.slack-card .k{font-family:var(--display); font-weight:800; font-size:14px}
+.slack-card .v{font-size:12.5px; font-weight:700; color:var(--muted); margin-top:1px}
+.slack-btn{
+  border:2px solid #F6C6B2; background:#fff; color:var(--peach-deep); font-family:var(--display);
+  font-weight:800; font-size:13.5px; border-radius:999px; padding:9px 15px; cursor:pointer;
+  box-shadow:0 3px 0 #F6C6B2; transition:.12s; white-space:nowrap;
+}
+.slack-btn:active{transform:translateY(3px); box-shadow:none}
+.slack-btn.on{background:var(--peach); color:#5A2A18; border-color:var(--peach-deep)}
+
+/* ---------- module cards ---------- */
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:16px}
+.mod{background:#fff; border:2px solid var(--line); border-radius:var(--r-md); padding:20px 22px; box-shadow:var(--shadow-card); position:relative}
+.mod h3{font-size:17px; display:flex; align-items:center; gap:8px; margin-bottom:4px}
+.mod .hint{font-size:12.5px; color:var(--faint); font-weight:700; margin-bottom:12px}
+.mod .big{font-family:var(--display); font-weight:800; font-size:28px; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.mod .rowline{display:flex; justify-content:space-between; align-items:baseline; font-size:13.5px; font-weight:700; color:var(--muted); padding:5px 0}
+.mod .rowline b{color:var(--ink); font-family:var(--display); font-size:15px}
+
+.jar{height:14px; border-radius:999px; background:var(--lilac-soft); overflow:hidden; margin:12px 0 6px; border:2px solid #EAE2FF}
+.jar > i{display:block; height:100%; background:linear-gradient(90deg, var(--lilac), #A98CFF); width:0; transition:width .5s}
+.jar-note{margin-top:10px; font-size:12.5px; font-weight:800; color:var(--mint-deep); background:var(--mint-soft); border-radius:12px; padding:8px 10px; text-align:center}
+.bar{height:12px; border-radius:999px; background:var(--cream); overflow:hidden; border:2px solid var(--line)}
+.bar > i{display:block; height:100%; background:var(--mint); width:0; transition:width .5s}
+
+.wishlist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; max-height:190px; overflow:auto}
+.wishlist li{display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:700}
+.wishlist .em{font-size:18px}
+.wishlist .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wishlist .hr{color:var(--faint); font-size:12.5px; font-variant-numeric:tabular-nums}
+.wishlist button{border:none; background:none; color:var(--faint); cursor:pointer; font-size:15px; padding:0 2px}
+.wishlist button:hover{color:var(--pink-deep)}
+
+.mini-form{display:flex; gap:6px; margin-top:10px}
+.mini-form input{flex:1; min-width:0; border:2px solid var(--line); border-radius:12px; padding:8px 10px; font-family:var(--body); font-weight:700; font-size:13.5px; color:var(--ink); outline:none; background:var(--cream)}
+.mini-form input:focus{border-color:var(--mint); background:#fff}
+.mini-form input[type=number]{max-width:88px}
+.mini-form button{border:2px solid var(--line-2); background:#fff; border-radius:12px; padding:0 12px; font-family:var(--display); font-weight:800; cursor:pointer; color:var(--ink-2)}
+
+/* ---------- panel ---------- */
+.scrim{position:fixed; inset:0; background:rgba(51,49,59,.34); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:.25s; z-index:80}
+.scrim.on{opacity:1; pointer-events:auto}
+.panel{
+  position:fixed; top:0; right:0; height:100%; width:min(440px,100%); background:#fff; z-index:90;
+  transform:translateX(103%); transition:transform .32s cubic-bezier(.32,.72,0,1);
+  display:flex; flex-direction:column; box-shadow:-30px 0 60px -40px rgba(51,49,59,.5);
+  border-left:2px solid var(--line);
+}
+.panel.on{transform:translateX(0)}
+.panel-head{padding:20px 24px; border-bottom:2px solid var(--line); display:flex; align-items:center; justify-content:space-between}
+.panel-head h3{font-size:20px}
+.panel-body{padding:20px 24px 10px; overflow-y:auto; flex:1}
+.panel-foot{padding:16px 24px 22px; border-top:2px solid var(--line); background:var(--cream)}
+
+.field{margin-bottom:18px}
+.field > label{display:block; font-family:var(--display); font-weight:800; font-size:13.5px; margin-bottom:7px}
+.help{font-size:12px; color:var(--faint); font-weight:700; margin-top:5px}
+input[type=number], input[type=time], input[type=date], select{
+  width:100%; padding:11px 12px; border-radius:14px; border:2px solid var(--line);
+  background:var(--cream); color:var(--ink); font-family:var(--body); font-weight:700; font-size:15px;
+  outline:none; transition:.15s; appearance:none;
+}
+input:focus, select:focus{border-color:var(--mint); background:#fff; box-shadow:0 0 0 4px var(--mint-soft)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C7889' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; background-size:16px; padding-right:34px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+.seg{display:grid; grid-template-columns:repeat(3,1fr); gap:5px; background:var(--cream); border:2px solid var(--line); padding:5px; border-radius:16px}
+.seg button{border:none; background:transparent; padding:9px 4px; border-radius:11px; font-family:var(--display); font-weight:800; font-size:13.5px; color:var(--muted); cursor:pointer; transition:.15s}
+.seg button.on{background:#fff; color:var(--ink); box-shadow:0 2px 0 var(--line-2)}
+.days{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+.days button{border:2px solid var(--line); background:var(--cream); color:var(--muted); padding:10px 0; border-radius:12px; font-family:var(--display); font-weight:800; font-size:12.5px; cursor:pointer; transition:.14s}
+.days button.on{background:var(--ink); color:#fff; border-color:var(--ink)}
+.switch-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:10px 0}
+.switch{position:relative; width:46px; height:27px; flex:0 0 auto}
+.switch input{opacity:0; width:0; height:0; position:absolute}
+.switch .track{position:absolute; inset:0; border-radius:999px; background:var(--line-2); transition:.2s; cursor:pointer}
+.switch .track::after{content:""; position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .2s}
+.switch input:checked + .track{background:var(--mint)}
+.switch input:checked + .track::after{transform:translateX(19px)}
+
+.break-list{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+.break-item{display:flex; align-items:center; gap:8px; background:var(--cream); border:2px solid var(--line); border-radius:14px; padding:8px 10px}
+.break-item input{padding:6px 8px; font-size:13.5px; border-radius:10px; background:#fff}
+.break-item .x{border:none; background:none; color:var(--faint); font-size:17px; cursor:pointer; padding:0 4px}
+.break-item .x:hover{color:var(--pink-deep)}
+.add-link{background:none; border:none; color:var(--mint-deep); font-family:var(--display); font-weight:800; font-size:13.5px; cursor:pointer; padding:6px 0}
+
+.preview{background:var(--mint-soft); border:2px solid #CFF3E4; border-radius:18px; padding:14px 16px; margin-top:6px}
+.preview .k{font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--mint-deep)}
+.preview .v{font-family:var(--display); font-weight:800; font-size:26px; color:var(--mint-deep); letter-spacing:-.02em}
+.preview .s{font-size:12px; font-weight:700; color:var(--mint-deep); opacity:.8}
+
+/* ---------- modal ---------- */
+.modal{position:fixed; inset:0; z-index:95; display:grid; place-items:center; padding:20px; opacity:0; pointer-events:none; transition:.2s}
+.modal.on{opacity:1; pointer-events:auto}
+.modal .sheet{background:#fff; border-radius:26px; border:2px solid var(--line); box-shadow:var(--shadow-soft); width:min(460px,100%); padding:26px; transform:translateY(10px); transition:.25s}
+.modal.on .sheet{transform:none}
+.sheet h3{font-size:21px; margin-bottom:4px}
+.sheet .sub{font-size:13px; color:var(--faint); font-weight:700; margin-bottom:16px}
+.sheet .line{display:flex; justify-content:space-between; padding:9px 0; border-bottom:2px dashed var(--line); font-weight:700; font-size:14.5px; color:var(--muted)}
+.sheet .line b{font-family:var(--display); color:var(--ink); font-size:15.5px}
+.sheet .total{display:flex; justify-content:space-between; padding:14px 0 6px; font-family:var(--display); font-weight:800; font-size:19px}
+
+/* ---------- content sections ---------- */
+.eyebrow{font-family:var(--display); font-weight:800; font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--mint-deep); margin-bottom:12px}
+h2{font-size:clamp(28px, 4vw, 42px); letter-spacing:-.025em; margin-bottom:14px}
+.sec-lede{color:var(--muted); font-size:17px; font-weight:600; max-width:680px; margin-bottom:34px}
+
+.cards-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.cards-2{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+.pcard{background:#fff; border:2px solid var(--line); border-radius:24px; padding:24px; box-shadow:var(--shadow-card); transition:transform .18s, box-shadow .18s}
+.pcard:hover{transform:translateY(-3px); box-shadow:var(--shadow-soft)}
+.pcard .ico{width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:21px; margin-bottom:14px}
+.i-mint{background:var(--mint-soft)}
+.i-peach{background:var(--peach-soft)}
+.i-butter{background:var(--butter-soft)}
+.i-lilac{background:var(--lilac-soft)}
+.i-pink{background:var(--pink-soft)}
+.pcard h3{font-size:18px; margin-bottom:6px}
+.pcard p{font-size:14.5px; color:var(--muted); font-weight:600; margin:0}
+
+.feature{display:grid; grid-template-columns:1fr 1fr; gap:34px; align-items:center; padding:26px 0}
+.feature:nth-child(even) .txt{order:2}
+.feature .txt h3{font-size:24px; margin-bottom:10px}
+.feature .txt p{color:var(--muted); font-weight:600; font-size:15.5px}
+.feature .art{
+  border-radius:26px; border:2px solid var(--line); background:var(--cream); min-height:210px;
+  display:grid; place-items:center; padding:24px; box-shadow:var(--shadow-card);
+}
+.mock{width:100%; max-width:300px; background:#fff; border:2px solid var(--line); border-radius:18px; padding:16px}
+.mock .l{font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--faint)}
+.mock .n{font-family:var(--display); font-weight:800; font-size:34px; letter-spacing:-.03em; margin:2px 0 8px}
+.mock .r{display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:var(--muted); padding:4px 0}
+.mock .r b{color:var(--ink)}
+
+.persona{display:flex; gap:14px; align-items:flex-start; padding:18px; border-radius:20px; border:2px solid var(--line); background:#fff}
+.persona .em{font-size:26px; line-height:1}
+.persona h4{font-size:16px; margin-bottom:3px}
+.persona p{font-size:13.5px; color:var(--muted); font-weight:600; margin:0}
+
+.quote{background:var(--butter-soft); border:2px solid #FFE9B8; border-radius:24px; padding:26px 28px; position:relative}
+.quote p{font-family:var(--display); font-weight:700; font-size:19px; line-height:1.4; color:#6B4E12; margin:0}
+.quote .who{font-family:var(--body); font-weight:800; font-size:13px; color:#8A6416; margin-top:10px; letter-spacing:.02em}
+
+.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; counter-reset:s}
+.step{background:#fff; border:2px solid var(--line); border-radius:24px; padding:24px; position:relative; box-shadow:var(--shadow-card)}
+.step .num{
+  width:34px; height:34px; border-radius:12px; background:var(--mint); color:#08382A;
+  display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:16px;
+  box-shadow:0 3px 0 var(--mint-deep); margin-bottom:12px; transform:rotate(-4deg);
+}
+.step h3{font-size:17px; margin-bottom:5px}
+.step p{font-size:14px; color:var(--muted); font-weight:600; margin:0}
+
+details.faq{border:2px solid var(--line); border-radius:20px; padding:0; margin-bottom:10px; background:#fff; overflow:hidden; transition:.18s}
+details.faq[open]{border-color:#D7F2E7; background:var(--cream)}
+details.faq summary{
+  cursor:pointer; list-style:none; padding:17px 22px; font-family:var(--display); font-weight:800; font-size:16.5px;
+  display:flex; justify-content:space-between; gap:16px; align-items:center;
+}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+"; font-size:22px; color:var(--mint-deep); transition:transform .2s; line-height:1}
+details.faq[open] summary::after{transform:rotate(45deg)}
+details.faq .a{padding:0 22px 18px; font-size:15px; color:var(--muted); font-weight:600; max-width:820px}
+
+.cta-band{
+  background:linear-gradient(135deg, var(--mint-soft), var(--butter-soft) 60%, var(--pink-soft));
+  border:2px solid var(--line); border-radius:32px; padding:48px 34px; text-align:center; position:relative; overflow:hidden;
+}
+.cta-band h2{margin-bottom:10px}
+.cta-band p{color:var(--muted); font-weight:700; max-width:520px; margin:0 auto 22px}
+
+footer{border-top:2px solid var(--line); padding:46px 0 34px; margin-top:20px}
+.foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:26px; margin-bottom:30px}
+.foot-grid h5{font-family:var(--display); font-weight:800; font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin:0 0 10px}
+.foot-grid ul{list-style:none; margin:0; padding:0}
+.foot-grid li{margin-bottom:7px}
+.foot-grid a{text-decoration:none; color:var(--muted); font-weight:700; font-size:14px}
+.foot-grid a:hover{color:var(--ink)}
+.foot-bottom{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--faint); font-size:12.5px; font-weight:700; border-top:2px solid var(--line); padding-top:20px}
+
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,16px); background:var(--ink); color:#fff;
+  padding:12px 20px; border-radius:999px; font-family:var(--display); font-weight:800; font-size:14px;
+  opacity:0; pointer-events:none; transition:.22s; z-index:120;
+}
+.toast.on{opacity:1; transform:translate(-50%,0)}
+
+@media (max-width: 960px){
+  .hero-inner{grid-template-columns:1fr; gap:24px}
+  .hero-stickers{display:none}
+  .grid-main{grid-template-columns:1fr}
+  .side-stack{flex-direction:row; flex-wrap:wrap}
+  .side-stack > *{flex:1 1 220px}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .cards-3{grid-template-columns:1fr 1fr}
+  .feature{grid-template-columns:1fr; gap:20px}
+  .feature:nth-child(even) .txt{order:0}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
+@media (max-width: 620px){
+  body{font-size:16px}
+  .section{padding:52px 0}
+  .app{padding:16px}
+  .tick-card{padding:20px 18px}
+  .chip-row{grid-template-columns:1fr 1fr}
+  .chip:nth-child(3){grid-column:1/-1}
+  .grid-3, .cards-3, .cards-2, .steps{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr}
+  .hero-cta .btn{width:100%}
+  .panel{width:100%}
+  .tick-sub .sep{display:none}
+  .app-actions{gap:6px}
+  .app-actions .btn{font-size:13px; padding:8px 13px}
+}
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="mark">$</span> Salary Timer</a>
+    <nav class="nav-links">
+      <a href="#timer">Live timer</a>
+      <a href="#features">Features</a>
+      <a href="#who">Who it's for</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-mint btn-sm" href="#timer">Start my timer</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="blob m"></div>
+  <div class="blob p"></div>
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-copy">
+      <span class="badge">🪙 Free forever · no sign-up · nothing leaves your browser</span>
+      <h1>The <span class="hl">salary timer</span><br>for every second you work.</h1>
+      <p class="lede">Type in your pay once. Then watch the number climb in real time — through meetings, coffee breaks and that last impossible hour before clock-out. It's the smallest, silliest, most motivating tab you'll open all day.</p>
+      <div class="hero-cta">
+        <a class="btn btn-mint" href="#timer">Start my salary timer</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <div class="trust">
+        <span>✓ Works offline</span>
+        <span>✓ Any currency</span>
+        <span>✓ Overtime &amp; unpaid breaks</span>
+        <span>✓ No account needed</span>
+      </div>
+      </div>
+
+      <div class="hero-stickers" aria-hidden="true">
+        <div class="sticker"><span>🪙</span><div><b>Every second counts</b><small>literally — down to the cent</small></div></div>
+        <div class="sticker"><span>☕</span><div><b>Breaks are unpaid</b><small>so the timer pauses for them</small></div></div>
+        <div class="sticker"><span>🎯</span><div><b>Save for something real</b><small>priced in hours, not dollars</small></div></div>
+      </div>
+    </div>
+
+    <!-- ============ THE TIMER APP ============ -->
+    <div class="app-shell" id="timer">
+      <div class="app">
+        <div class="app-top">
+          <div class="status" id="statusPill"><span class="dot"></span><span id="statusText">On the clock</span></div>
+          <div class="app-actions">
+            <button class="btn btn-ghost btn-sm" id="privacyBtn">🙈 Hide numbers</button>
+            <button class="btn btn-ghost btn-sm" id="settleBtn">📋 Today's settlement</button>
+            <button class="btn btn-ink btn-sm" id="setupBtn">⚙️ Set my pay</button>
+          </div>
+        </div>
+
+        <div class="demo-bar" id="demoBar">
+          <span>👋 You're looking at a demo salary of <b>$78,000/yr</b>. The clock is running so you can see how it feels.</span>
+          <button class="btn btn-ink btn-sm" id="demoCta">Make it mine</button>
+        </div>
+
+        <div class="grid-main">
+          <div class="tick-card">
+            <div class="tick-label">Earned today</div>
+            <div class="ticker" id="ticker">
+              <span class="cur" id="curSym">$</span><span id="intPart">0</span><span class="cents" id="decPart">.00</span>
+            </div>
+            <div class="tick-sub">
+              <span>at <b id="rateLabel">$0.00/hr</b></span>
+              <span class="sep"></span>
+              <span><b id="workedLabel">0h 00m</b> paid today</span>
+              <span class="sep"></span>
+              <span><b id="monthLabel">$0.00</b> this month</span>
+            </div>
+
+            <div class="chip-row">
+              <div class="chip"><div class="k">Per minute</div><div class="v" id="perMin">$0.00</div></div>
+              <div class="chip"><div class="k">Per hour</div><div class="v" id="perHour">$0.00</div></div>
+              <div class="chip"><div class="k">Per second</div><div class="v" id="perSec">$0.0000</div></div>
+            </div>
+          </div>
+
+          <div class="side-stack">
+            <div class="ring-card">
+              <div class="ring-wrap">
+                <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+                  <circle class="ring-bg" cx="75" cy="75" r="62"></circle>
+                  <circle class="ring-fg" id="ring" cx="75" cy="75" r="62" stroke-dasharray="389.6" stroke-dashoffset="389.6"></circle>
+                </svg>
+                <div class="ring-center">
+                  <div class="ring-pct" id="pctLabel">0%</div>
+                  <div class="ring-cap">of shift</div>
+                </div>
+              </div>
+              <div class="cd">
+                <div class="k" id="cdLabel">Clock out in</div>
+                <div class="v" id="cdValue">--:--:--</div>
+              </div>
+            </div>
+
+            <div class="slack-card">
+              <div>
+                <div class="k" id="slackTitle">Slack mode</div>
+                <div class="v" id="slackValue">Tap when you wander off</div>
+              </div>
+              <button class="slack-btn" id="slackBtn">☕ Away</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- module cards -->
+        <div class="grid-3">
+          <div class="mod">
+            <h3>🏺 Savings jar</h3>
+            <div class="hint" id="jarHint">Save 10% of what you earn</div>
+            <div class="big" id="jarAmount">$0</div>
+            <div class="jar"><i id="jarFill"></i></div>
+            <div class="rowline"><span>Goal</span><b id="jarGoal">$2,000</b></div>
+            <div class="rowline"><span>Left to go</span><b id="jarLeft">$2,000</b></div>
+            <div class="jar-note" id="jarNote">Fill it with your next shift 🐷</div>
+          </div>
+
+          <div class="mod">
+            <h3>🎁 Wishlist</h3>
+            <div class="hint">Every price, in hours of your life</div>
+            <ul class="wishlist" id="wishlist"></ul>
+            <div class="mini-form">
+              <input id="wishName" placeholder="Concert ticket" maxlength="24" />
+              <input id="wishPrice" type="number" placeholder="120" inputmode="decimal" />
+              <button id="wishAdd">+</button>
+            </div>
+          </div>
+
+          <div class="mod">
+            <h3>💸 This month, honestly</h3>
+            <div class="hint">Base pay plus extras, minus unpaid days</div>
+            <div class="rowline"><span>Base earned</span><b id="mBase">$0.00</b></div>
+            <div class="rowline"><span>Extras (bonus, tips, OT)</span><b id="mExtra">$0.00</b></div>
+            <div class="rowline"><span>Unpaid days off</span><b id="mUnpaid">$0.00</b></div>
+            <div class="rowline" style="border-top:2px dashed var(--line); margin-top:4px; padding-top:9px">
+              <span>Total</span><b id="mTotal" style="font-size:19px">$0.00</b>
+            </div>
+            <div class="mini-form">
+              <input id="extraLabel" placeholder="Bonus / tips" maxlength="18" />
+              <input id="extraAmt" type="number" placeholder="50" inputmode="decimal" />
+              <button id="extraAdd">+</button>
+            </div>
+            <div class="rowline" style="margin-top:8px">
+              <span>Unpaid days this month</span>
+              <input id="unpaidDays" type="number" min="0" max="31" value="0" style="width:64px; padding:6px 8px; font-size:13px; text-align:center" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAIN POINTS ============ -->
+<section class="section" id="pain">
+  <div class="wrap">
+    <div class="eyebrow">The problem</div>
+    <h2>You work 160 hours a month.<br>You feel about four of them.</h2>
+    <p class="sec-lede">A salary timer exists because money and time are the two things we're worst at feeling. Here's what that costs you.</p>
+
+    <div class="cards-3">
+      <div class="pcard">
+        <div class="ico i-peach">📅</div>
+        <h3>Payday amnesia</h3>
+        <p>Thirty days of effort arrive as one number in your bank app, already spoken for by rent. The work itself never feels like it added up to anything.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-butter">😴</div>
+        <h3>The 3pm slump</h3>
+        <p>Three hours left and no way to feel progress. The clock moves, the counter doesn't — so the afternoon just feels like a long grey nothing.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-lilac">💬</div>
+        <h3>"Can we grab 15 minutes?"</h3>
+        <p>Meetings are free at the moment you accept them. You only find out what that half hour cost when the month is over and nothing moved.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-mint">⏳</div>
+        <h3>Overtime that vanishes</h3>
+        <p>Four extra evenings, one slightly bigger payslip, zero sense of which hours produced it. Extra effort disappears into the average.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-pink">🎯</div>
+        <h3>Savings are abstract</h3>
+        <p>"Save $2,000" is a number with no weight. "74 hours of my life" is something you can actually decide about.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-butter">🔍</div>
+        <h3>You don't know your real rate</h3>
+        <p>Salary ÷ 2,080 is not your hourly rate if you work 47 hours a week and answer Slack on Sundays. Most people are paid less per hour than they think.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="eyebrow">What's inside</div>
+    <h2>A salary timer that knows how work actually works</h2>
+    <p class="sec-lede">Most salary calculators assume a tidy 9-to-5. Real jobs have unpaid lunches, rotating shifts, holiday schedules, tips, overtime and days you'd rather forget. This one handles all of it.</p>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>A live counter, down to the second</h3>
+        <p>Your salary per second is calculated from your actual schedule — not a generic 2,080-hour year. The number updates continuously while you're on paid time, so a two-hour meeting has a visible price and the last hour of a shift has a visible finish line.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Earned today</div>
+          <div class="n" style="color:var(--mint-deep)">$127.43</div>
+          <div class="r"><span>Per minute</span><b>$0.58</b></div>
+          <div class="r"><span>Per hour</span><b>$34.62</b></div>
+          <div class="r"><span>Per second</span><b>$0.0096</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>Schedules for real jobs, not brochures</h3>
+        <p>Five-day week, four-day week, six-day week, or pick your own days. Add public holidays and one-off days off. If you work nights, set a shift that crosses midnight — the timer follows it. Your hourly rate is recalculated the moment your schedule changes, because a 4-day week pays a very different hourly rate than a 5-day one.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Your week</div>
+          <div style="display:flex; gap:5px; margin:10px 0 14px">
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--mint)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--mint)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--mint)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--mint)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--mint)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--line)"></span>
+            <span style="flex:1;height:34px;border-radius:10px;background:var(--line)"></span>
+          </div>
+          <div class="r"><span>Shift</span><b>09:00 – 17:30</b></div>
+          <div class="r"><span>Unpaid break</span><b>30 min</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>Unpaid breaks, handled honestly</h3>
+        <p>Add as many breaks as your day really has: lunch, the school run, the gym, the 20 minutes you spend making coffee. The counter freezes during them. No fake numbers, no pretending your lunch break is billable.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Today</div>
+          <div class="r"><span>12:30 – 13:00 · Lunch</span><b>paused</b></div>
+          <div class="r"><span>15:10 – 15:20 · Coffee</span><b>paused</b></div>
+          <div class="r"><span>Paid time</span><b>6h 40m</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>Overtime, tips and bonuses</h3>
+        <p>After clock-out the timer can keep running at 1.25×, 1.5× or 2×, so late evenings are worth something visible. Tips, commission and one-off bonuses can be added in a tap and roll straight into your month total.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Overtime</div>
+          <div class="n" style="font-size:28px">+$41.20</div>
+          <div class="r"><span>1.5× for 48 min</span><b>✓</b></div>
+          <div class="r"><span>Tips added</span><b>$18.00</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>Payday countdown &amp; a savings jar</h3>
+        <p>Set your payday and the site tells you how many days, hours and shifts are left. Then pick a savings rate and watch a little jar fill with every paid second — the only savings account that fills while you're sitting in a meeting.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Payday in</div>
+          <div class="n" style="font-size:30px">9 days</div>
+          <div class="r"><span>Jar</span><b>$184 / $2,000</b></div>
+          <div class="r"><span>This week</span><b>$312.40</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>A wishlist priced in hours</h3>
+        <p>Add the things you're actually saving for. Every item shows its price in hours of your life, and a progress bar fills as you earn. "$120 concert ticket" becomes "3.5 hours" — which is a completely different decision.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Wishlist</div>
+          <div class="r"><span>🎧 Headphones</span><b>5.2 h</b></div>
+          <div class="r"><span>🎫 Concert</span><b>3.5 h</b></div>
+          <div class="r"><span>🏝️ Weekend away</span><b>15.0 h</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="txt">
+        <h3>Privacy mode for open offices</h3>
+        <p>One tap blurs every number on screen. Handy when you're on a train, in a shared desk, or showing a colleague the timer without showing them your salary.</p>
+      </div>
+      <div class="art">
+        <div class="mock">
+          <div class="l">Earned today</div>
+          <div class="n" style="filter:blur(9px); color:var(--mint-deep)">$127.43</div>
+          <div class="r"><span>Per hour</span><b style="filter:blur(7px)">$34.62</b></div>
+          <div class="r"><span>🙈 Hidden</span><b>tap to reveal</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHO ============ -->
+<section class="section" id="who" style="background:var(--cream); border-top:2px solid var(--line); border-bottom:2px solid var(--line)">
+  <div class="wrap">
+    <div class="eyebrow">Who it's for</div>
+    <h2>Built for anyone whose time has a price</h2>
+    <p class="sec-lede">If you're paid for hours — any hours, in any arrangement — this was made for you.</p>
+
+    <div class="cards-3">
+      <div class="persona"><div class="em">🏥</div><div><h4>Nurses &amp; shift workers</h4><p>Twelve-hour shifts, rotating patterns, night differentials. Set the shift once and the timer follows your rota.</p></div></div>
+      <div class="persona"><div class="em">🛒</div><div><h4>Retail &amp; hospitality</h4><p>Variable hours, tips, split shifts. Watch a Sunday shift turn into a number you can actually plan with.</p></div></div>
+      <div class="persona"><div class="em">💻</div><div><h4>Salaried 9-to-5ers</h4><p>The classic case: a fixed salary, a fixed schedule, and no idea what an hour of your life is worth.</p></div></div>
+      <div class="persona"><div class="em">🧑‍💻</div><div><h4>Freelancers &amp; contractors</h4><p>Know your true hourly rate before you quote. Add unpaid admin time and the real number gets honest fast.</p></div></div>
+      <div class="persona"><div class="em">🏠</div><div><h4>Remote &amp; hybrid workers</h4><p>When work and home blur, a visible counter draws the line back at 5:30.</p></div></div>
+      <div class="persona"><div class="em">🎓</div><div><h4>Students &amp; part-timers</h4><p>Four hours after class, one visible total. Suddenly a shift is worth more than "a bit of cash".</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENARIOS ============ -->
+<section class="section" id="scenarios">
+  <div class="wrap">
+    <div class="eyebrow">In real life</div>
+    <h2>Four moments where the number changes your mind</h2>
+    <p class="sec-lede">A salary timer isn't really about money. It's about seeing the trade you're making while you're still allowed to make it.</p>
+
+    <div class="cards-2">
+      <div class="pcard">
+        <div class="ico i-peach">🕒</div>
+        <h3>2:47pm, the meeting has no end</h3>
+        <p>You glance at the tab: $96.20 earned, 42% of the shift gone. The meeting isn't more bearable — but it's finally measurable. You leave on time, because you can see what staying costs.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-mint">🤔</div>
+        <h3>"Can you cover Saturday?"</h3>
+        <p>Instead of guessing, you check the real rate: an eight-hour Saturday at 1.5× is worth $415. Now it's a decision about a weekend, not a vague favour.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-lilac">🏝️</div>
+        <h3>The $1,800 trip</h3>
+        <p>The wishlist turns it into 52 hours. Four working days. Somehow that's easier to commit to than a number on a savings app — and the jar fills every single shift.</p>
+      </div>
+      <div class="pcard">
+        <div class="ico i-butter">⚖️</div>
+        <h3>Two job offers</h3>
+        <p>$62k with a 45-minute commute versus $58k from your spare room. Run both through the timer with real hours. The higher salary is often the lower rate.</p>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top:26px">
+      <p>"I used to think my salary was fine. Then I worked out it was $19.40 an hour after the commute, the unpaid lunch and the 47-hour weeks. I asked for a raise two weeks later."</p>
+      <div class="who">— the moment most people have around day three</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW ============ -->
+<section class="section tight" id="how" style="background:var(--cream); border-top:2px solid var(--line); border-bottom:2px solid var(--line)">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2>Twenty seconds to set up. Then it just runs.</h2>
+    <div class="steps" style="margin-top:30px">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Tell it what you earn</h3>
+        <p>Yearly, monthly or hourly — whichever you actually know. Pick your currency. That's the only number it needs.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Tell it when you work</h3>
+        <p>Working days, start and finish times, unpaid breaks, holidays. Add overtime rules if you get them.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Watch, and go back to work</h3>
+        <p>The counter runs only during paid time. Leave the tab open, or check in at lunch — it's always mid-sentence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="eyebrow">Questions</div>
+    <h2>Everything people ask before they start</h2>
+    <p class="sec-lede">Short answers, no small print.</p>
+
+    <details class="faq" open>
+      <summary>What exactly is a salary timer?</summary>
+      <div class="a">A salary timer is a live counter that converts your working time into money as it passes. Instead of calculating what you earned at the end of a month, it shows the number moving in real time — so you can see the value of an hour, a meeting, or an extra shift while it's happening.</div>
+    </details>
+
+    <details class="faq">
+      <summary>How does it calculate my salary per second?</summary>
+      <div class="a">It takes your pay, converts it to an hourly rate using your real schedule (paid hours per day × working days × 52), then divides by 3,600. That per-second figure is added only while you're inside a paid window of your shift — never during breaks, before you start, or after you clock out (unless you've turned on overtime).</div>
+    </details>
+
+    <details class="faq">
+      <summary>How do I work out my hourly rate from an annual salary?</summary>
+      <div class="a">The common shortcut is salary ÷ 2,080, which assumes 40 hours a week, 52 weeks a year. It's wrong for almost everyone. This site does the honest version: your actual paid hours per day, minus unpaid breaks, times the number of days you actually work, times 52. Work a 4-day week and your hourly rate jumps; work 50-hour weeks and it drops.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Does it count my lunch break as paid time?</summary>
+      <div class="a">No — and that's deliberate. Any break you add is treated as unpaid, and the counter freezes while you're on it. If your lunch is genuinely paid, just don't add it as a break and the timer will keep running through it.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Can I use it if I'm paid hourly instead of a salary?</summary>
+      <div class="a">Yes, and it's the most accurate mode. Switch the pay type to hourly and the timer uses your rate directly — no annual-hours estimation involved. It's ideal for retail, hospitality, warehouse, agency and gig work.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Does it handle overtime and shift work?</summary>
+      <div class="a">Yes. Turn on overtime and the timer keeps counting after your shift ends at 1.25×, 1.5× or 2×, whichever matches your contract. Shifts that cross midnight are supported, so night shifts work correctly. Rotating patterns are handled by changing your working days.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Is my salary data private?</summary>
+      <div class="a">Completely. Everything is calculated in your browser and saved to your own device's local storage. There's no account, no server storing your numbers, no analytics on what you earn. Privacy mode blurs the figures on screen when someone's looking over your shoulder.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Do I need to install an app or create an account?</summary>
+      <div class="a">No. It's a website — open it, use it, close the tab. Your settings stay saved on that device for next time. It works on phones, tablets and desktops, and it keeps working offline once loaded.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Is a salary timer accurate enough to rely on?</summary>
+      <div class="a">For tracking and motivation, yes. It's a gross-pay estimate: it doesn't model tax, pension contributions, deductions or pay-period rounding, so treat it as "what I earned before deductions" rather than "what will hit my bank". Many people find the pre-tax number more motivating anyway.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Can freelancers use it for billing?</summary>
+      <div class="a">Yes — set an hourly rate and use the timer as a live session tracker. It won't produce invoices, but it will show you what a task is really worth, including the unpaid admin around it. Many freelancers use it to sanity-check quotes before sending them.</div>
+    </details>
+
+    <details class="faq">
+      <summary>Why does watching money tick up actually help?</summary>
+      <div class="a">Because abstract rewards don't motivate behaviour; visible ones do. A salary arrives once a month, far from the effort that produced it. A counter that moves every second shortens that gap — which is why people report leaving on time more often, saying no to unpaid extras, and negotiating harder after a week of watching.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section tight">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>Your next hour is already worth something.</h2>
+      <p>Set it up once and watch it. It takes twenty seconds, costs nothing, and you'll never look at 4:45pm the same way.</p>
+      <a class="btn btn-mint" href="#timer">Start my salary timer</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top" style="margin-bottom:10px"><span class="mark">$</span> Salary Timer</a>
+        <p style="font-size:13.5px; color:var(--muted); font-weight:600; max-width:260px; margin-top:8px">A free live counter for your working hours. Built for people who'd rather see the number than wait for the payslip.</p>
+      </div>
+      <div>
+        <h5>Tools</h5>
+        <ul>
+          <li><a href="#timer">Live salary timer</a></li>
+          <li><a href="#timer">Salary per second calculator</a></li>
+          <li><a href="#timer">Payday countdown</a></li>
+          <li><a href="#timer">Overtime calculator</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Learn</h5>
+        <ul>
+          <li><a href="#features">How salary timers work</a></li>
+          <li><a href="#faq">Hourly rate from annual salary</a></li>
+          <li><a href="#faq">Are lunch breaks paid?</a></li>
+          <li><a href="#who">Salary timer for shift workers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>About</h5>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#faq">Privacy</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="yr"></span> Salary Timer. Estimates only — not financial or tax advice.</span>
+      <span>Made with 🪙 for people who count the hours.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ SETUP PANEL ============ -->
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-label="Pay setup">
+  <div class="panel-head">
+    <h3>⚙️ Your pay setup</h3>
+    <button class="btn btn-ghost btn-sm" id="closeBtn">Close</button>
+  </div>
+  <div class="panel-body">
+    <div class="field">
+      <label>How are you paid?</label>
+      <div class="seg" id="modeSeg">
+        <button data-mode="annual" class="on">Yearly</button>
+        <button data-mode="monthly">Monthly</button>
+        <button data-mode="hourly">Hourly</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="amountLabel">Annual salary (gross)</label>
+      <div class="row2" style="grid-template-columns:1.5fr 1fr">
+        <input type="number" id="amountInput" min="0" step="any" inputmode="decimal" placeholder="78000" />
+        <select id="currencySelect">
+          <option value="USD">USD $</option>
+          <option value="EUR">EUR €</option>
+          <option value="GBP">GBP £</option>
+          <option value="CAD">CAD $</option>
+          <option value="AUD">AUD $</option>
+          <option value="JPY">JPY ¥</option>
+          <option value="INR">INR ₹</option>
+          <option value="SGD">SGD $</option>
+          <option value="BRL">BRL R$</option>
+          <option value="MXN">MXN $</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Working days</label>
+      <div class="days" id="daysRow"></div>
+      <div class="help">Tap the days you actually work — not the ones in your contract.</div>
+    </div>
+
+    <div class="field">
+      <div class="row2">
+        <div><label>Shift starts</label><input type="time" id="startInput" /></div>
+        <div><label>Shift ends</label><input type="time" id="endInput" /></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Unpaid breaks</label>
+      <div class="break-list" id="breakList"></div>
+      <button class="add-link" id="addBreak">+ Add a break</button>
+    </div>
+
+    <div class="field">
+      <label>Payday</label>
+      <select id="paydaySelect"></select>
+      <div class="help">Used for the payday countdown.</div>
+    </div>
+
+    <div class="field">
+      <div class="switch-row" style="padding-top:0">
+        <div><div style="font-family:var(--display);font-weight:800;font-size:14px">Overtime after clock-out</div><div class="help" style="margin-top:1px">Keep counting at a higher rate</div></div>
+        <label class="switch"><input type="checkbox" id="otToggle" /><span class="track"></span></label>
+      </div>
+      <div id="otMultWrap" style="margin-top:4px">
+        <select id="otMult">
+          <option value="1.25">1.25× overtime</option>
+          <option value="1.5">1.5× overtime</option>
+          <option value="1.75">1.75× overtime</option>
+          <option value="2">2× overtime</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="switch-row" style="padding-top:0">
+        <div><div style="font-family:var(--display);font-weight:800;font-size:14px">Privacy mode</div><div class="help" style="margin-top:1px">Blur every number on screen</div></div>
+        <label class="switch"><input type="checkbox" id="privacyToggle" /><span class="track"></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Savings jar</label>
+      <div class="row2">
+        <input type="number" id="jarGoalInput" min="0" step="50" placeholder="Goal" />
+        <select id="jarRateSelect">
+          <option value="5">Save 5%</option>
+          <option value="10">Save 10%</option>
+          <option value="15">Save 15%</option>
+          <option value="20">Save 20%</option>
+          <option value="30">Save 30%</option>
+        </select>
+      </div>
+      <div class="help">The jar fills from your earnings at this rate.</div>
+    </div>
+
+    <div class="preview">
+      <div class="k">Your real hourly rate</div>
+      <div class="v" id="previewRate">$0.00</div>
+      <div class="s" id="previewSub">—</div>
+    </div>
+  </div>
+  <div class="panel-foot">
+    <button class="btn btn-mint" id="saveBtn" style="width:100%">Start the clock</button>
+  </div>
+</aside>
+
+<!-- ============ SETTLEMENT MODAL ============ -->
+<div class="modal" id="settleModal">
+  <div class="sheet">
+    <h3>📋 Today's settlement</h3>
+    <div class="sub" id="settleDate">—</div>
+    <div id="settleLines"></div>
+    <div class="total"><span>Today</span><span id="settleTotal">$0.00</span></div>
+    <button class="btn btn-ghost" id="settleClose" style="width:100%; margin-top:10px">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"WebApplication",
+      "name":"Salary Timer",
+      "url":"https://salarytimer.app/",
+      "applicationCategory":"FinanceApplication",
+      "operatingSystem":"Any",
+      "browserRequirements":"Requires JavaScript",
+      "description":"A free live salary timer that shows what you earn per second, minute and hour in real time, with unpaid breaks, overtime, payday countdown, savings jar and wishlist.",
+      "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+      "featureList":["Real-time salary counter","Salary per second calculation","Unpaid break handling","Overtime multiplier","Payday countdown","Savings jar","Wishlist priced in hours","Privacy mode"]
+    },
+    {
+      "@type":"FAQPage",
+      "mainEntity":[
+        {"@type":"Question","name":"What is a salary timer?","acceptedAnswer":{"@type":"Answer","text":"A salary timer is a live counter that converts your working time into money as it passes, so you can see the value of an hour, a meeting or an extra shift while it is happening."}},
+        {"@type":"Question","name":"How does it calculate my salary per second?","acceptedAnswer":{"@type":"Answer","text":"It converts your pay to an hourly rate using your real schedule, then divides by 3,600. The per-second amount is added only during paid time inside your shift."}},
+        {"@type":"Question","name":"Does it count my lunch break as paid time?","acceptedAnswer":{"@type":"Answer","text":"No. Breaks you add are treated as unpaid and the counter freezes during them. If your lunch is paid, simply do not add it as a break."}},
+        {"@type":"Question","name":"Is my salary data private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Everything is calculated in your browser and stored in local storage on your device. There is no account and no server storing your numbers."}},
+        {"@type":"Question","name":"Can I use it if I am paid hourly?","acceptedAnswer":{"@type":"Answer","text":"Yes. Switch the pay type to hourly and the timer uses that rate directly, which is the most accurate mode for retail, hospitality, warehouse and gig work."}}
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEY = "salarytimer.site.v1";
+  var DEFAULTS = {
+    mode:"annual", amount:78000, currency:"USD",
+    start:"09:00", end:"17:30",
+    days:[1,2,3,4,5],
+    breaks:[{start:"12:30", end:"13:00"}],
+    payday:15,
+    overtime:true, otMult:1.5,
+    privacy:false,
+    jarGoal:2000, jarRate:10,
+    extras:[], unpaidDays:0,
+    wishlist:[
+      {id:"w1", name:"Noise-cancelling headphones", price:180, emoji:"🎧"},
+      {id:"w2", name:"Concert ticket", price:120, emoji:"🎫"},
+      {id:"w3", name:"Weekend away", price:520, emoji:"🏝️"}
+    ]
+  };
+
+  var SYMBOLS = {USD:"$",EUR:"€",GBP:"£",CAD:"CA$",AUD:"A$",JPY:"¥",INR:"₹",SGD:"S$",BRL:"R$",MXN:"MX$"};
+
+  var $ = function(s){ return document.querySelector(s); };
+  var S = load();
+  var firstRun = !S;
+  var demo = firstRun;
+
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return null;
+      var o = JSON.parse(raw), out = {};
+      for(var k in DEFAULTS) out[k] = (o[k] !== undefined ? o[k] : clone(DEFAULTS[k]));
+      if(!Array.isArray(out.days) || !out.days.length) out.days = DEFAULTS.days.slice();
+      if(!Array.isArray(out.breaks)) out.breaks = clone(DEFAULTS.breaks);
+      if(!Array.isArray(out.extras)) out.extras = [];
+      if(!Array.isArray(out.wishlist)) out.wishlist = [];
+      return out;
+    }catch(e){ return null; }
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+  /* ---------- helpers ---------- */
+  function pad(n){ return (n<10?"0":"")+n; }
+  function toMin(t){ var p = String(t||"0:0").split(":"); return (parseInt(p[0],10)||0)*60 + (parseInt(p[1],10)||0); }
+  function dkey(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function fmtHM(m){ m = Math.max(0, Math.floor(m)); return Math.floor(m/60)+"h "+pad(m%60)+"m"; }
+  function fmtClock(sec){ sec = Math.max(0, Math.floor(sec)); return pad(Math.floor(sec/3600))+":"+pad(Math.floor((sec%3600)/60))+":"+pad(sec%60); }
+  function money(v, d){
+    if(!isFinite(v)) v = 0;
+    d = (d === undefined) ? 2 : d;
+    try{ return new Intl.NumberFormat("en-US",{minimumFractionDigits:d, maximumFractionDigits:d}).format(v); }
+    catch(e){ return v.toFixed(d); }
+  }
+  function sym(){ return SYMBOLS[S.currency] || "$"; }
+  function cur(v, d){ return sym() + money(v, d); }
+
+  /* ---------- model ---------- */
+  function derive(){
+    var sM = toMin(S.start), eM = toMin(S.end);
+    var win = eM - sM; if(win <= 0) win += 1440;
+    var brk = 0;
+    (S.breaks||[]).forEach(function(b){
+      var b1 = toMin(b.start), b2 = toMin(b.end);
+      if(b2 <= b1) b2 += 1440;
+      brk += Math.max(0, Math.min(b2, sM+win) - Math.max(b1, sM));
+    });
+    brk = Math.min(brk, win - 5);
+    var paidMin = Math.max(1, win - brk);
+    var dayCount = S.days.length || 5;
+    var weeklyH = (paidMin/60) * dayCount;
+    var annualH = weeklyH * 52;
+
+    var hourly;
+    if(S.mode === "hourly") hourly = S.amount;
+    else if(S.mode === "monthly") hourly = annualH > 0 ? (S.amount*12)/annualH : 0;
+    else hourly = annualH > 0 ? S.amount/annualH : 0;
+
+    return {sM:sM, eM:eM, win:win, brk:brk, paidMin:paidMin, dayCount:dayCount,
+      weeklyH:weeklyH, annualH:annualH, hourly:hourly, daily:hourly*paidMin/60,
+      perMin:hourly/60, perSec:hourly/3600};
+  }
+
+  function isWorkday(date){
+    return S.days.indexOf(date.getDay()) !== -1;
+  }
+
+  function breaksToday(){
+    var sM = toMin(S.start), win = derive().win;
+    return (S.breaks||[]).map(function(b){
+      var b1 = toMin(b.start), b2 = toMin(b.end);
+      if(b2 <= b1) b2 += 1440;
+      if(b1 < sM) b1 += 1440;
+      if(b2 < b1) b2 += 1440;
+      return {start:b1, end:b2};
+    }).filter(function(b){ return b.end > sM && b.start < sM + win; })
+      .sort(function(a,b){ return a.start - b.start; });
+  }
+
+  function compute(){
+    var d = derive();
+    var now = new Date();
+    var t = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60 + now.getMilliseconds()/60000;
+    var overnight = d.eM <= d.sM;
+    var shiftEnd = d.sM + d.win;
+    var workday = isWorkday(now);
+    var tt = (overnight && t < d.eM) ? t + 1440 : t;
+
+    if(demo){
+      t = d.sM + d.win * 0.62;
+      tt = t;
+      workday = true;
+    }
+
+    var status = "off", paidElapsed = 0, otMin = 0;
+
+    if(!workday){
+      status = "dayoff";
+    } else if(tt < d.sM){
+      status = "before";
+    } else if(tt <= shiftEnd){
+      var elapsed = tt - d.sM;
+      breaksToday().forEach(function(b){
+        elapsed -= Math.max(0, Math.min(tt, b.end) - Math.max(d.sM, b.start));
+      });
+      paidElapsed = Math.max(0, Math.min(elapsed, d.paidMin));
+      var onBreak = breaksToday().some(function(b){ return tt >= b.start && tt < b.end; });
+      status = onBreak ? "break" : "working";
+    } else {
+      paidElapsed = d.paidMin;
+      if(S.overtime){ otMin = tt - shiftEnd; status = "overtime"; }
+      else status = "done";
+    }
+
+    var earned = (paidElapsed/60)*d.hourly + (otMin/60)*d.hourly*(S.otMult||1.5);
+    return {d:d, status:status, paidElapsed:paidElapsed, otMin:otMin, earned:earned,
+      progress: Math.max(0, Math.min(1, paidElapsed/d.paidMin)),
+      now:now, t:t, tt:tt, shiftEnd:shiftEnd, overnight:overnight};
+  }
+
+  /* ---------- month / year bases ---------- */
+  var cache = {key:null, val:null};
+  function bases(){
+    var now = new Date();
+    var key = dkey(now) + "|" + JSON.stringify({a:S.amount,m:S.mode,d:S.days,s:S.start,e:S.end,b:S.breaks});
+    if(cache.key === key) return cache.val;
+
+    var d = derive();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    var monthBefore = 0, monthDays = 0, monthTotal = 0;
+    var mDays = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    for(var i=1;i<=mDays;i++){
+      var dt = new Date(now.getFullYear(), now.getMonth(), i);
+      if(!isWorkday(dt)) continue;
+      monthTotal++;
+      if(dt < today){ monthBefore += d.daily; monthDays++; }
+    }
+
+    var yearBefore = 0, yearDays = 0;
+    var jan1 = new Date(now.getFullYear(), 0, 1);
+    for(var k=0;k<366;k++){
+      var dy = new Date(jan1.getFullYear(), jan1.getMonth(), jan1.getDate()+k);
+      if(dy.getFullYear() !== now.getFullYear()) break;
+      if(dy >= today) continue;
+      if(isWorkday(dy)){ yearBefore += d.daily; yearDays++; }
+    }
+
+    var val = {d:d, monthBefore:monthBefore, monthDays:monthDays, monthTotal:monthTotal,
+      yearBefore:yearBefore, yearDays:yearDays};
+    cache = {key:key, val:val};
+    return val;
+  }
+
+  function extrasThisMonth(){
+    var now = new Date();
+    return (S.extras||[]).filter(function(e){
+      var dt = new Date(e.ts);
+      return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
+    }).reduce(function(a,b){ return a + (Number(b.amount)||0); }, 0);
+  }
+
+  function nextPayday(){
+    var now = new Date();
+    var day = S.payday === "last" ? new Date(now.getFullYear(), now.getMonth()+1, 0).getDate() : Number(S.payday);
+    var d = new Date(now.getFullYear(), now.getMonth(), Math.min(day, new Date(now.getFullYear(), now.getMonth()+1, 0).getDate()));
+    if(d < new Date(now.getFullYear(), now.getMonth(), now.getDate())){
+      var nextMonth = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      var last = new Date(nextMonth.getFullYear(), nextMonth.getMonth()+1, 0).getDate();
+      d = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(day, last));
+    }
+    return d;
+  }
+
+  /* ---------- state for slack ---------- */
+  var slack = {on:false, started:0, total:0};
+
+  /* ---------- render ---------- */
+  var memo = {};
+  function setText(id, v){
+    if(memo[id] === v) return;
+    memo[id] = v;
+    var el = document.getElementById(id);
+    if(el) el.textContent = v;
+  }
+
+  function render(){
+    var r = compute(), d = r.d;
+    var bs = bases();
+
+    if($("#curSym").textContent !== sym()) $("#curSym").textContent = sym();
+
+    var whole = Math.floor(r.earned);
+    var cents = Math.floor((r.earned - whole)*100);
+    setText("intPart", money(whole, 0));
+    setText("decPart", "." + pad(cents));
+
+    setText("rateLabel", cur(d.hourly, 2) + "/hr");
+    setText("workedLabel", fmtHM(r.paidElapsed));
+    setText("perMin", cur(d.perMin, 2));
+    setText("perHour", cur(d.hourly, 2));
+    setText("perSec", cur(d.perSec, 4));
+
+    var monthBase = bs.monthBefore + r.earned;
+    var monthTotal = monthBase + extrasThisMonth() - (Number(S.unpaidDays)||0) * d.daily;
+
+    setText("monthLabel", cur(monthTotal, 2));
+
+    // ring
+    var C = 2*Math.PI*62;
+    var ring = $("#ring");
+    ring.setAttribute("stroke-dasharray", C.toFixed(1));
+    ring.setAttribute("stroke-dashoffset", (C*(1-r.progress)).toFixed(1));
+    setText("pctLabel", Math.round(r.progress*100) + "%");
+
+    // status
+    var map = {
+      working:{t:"On the clock", live:true},
+      break:{t:"On an unpaid break", live:false},
+      overtime:{t:"Overtime", live:true},
+      before:{t:"Shift hasn't started", live:false},
+      done:{t:"Clocked out", live:false},
+      dayoff:{t:"Day off", live:false}
+    };
+    var st = map[r.status] || map.dayoff;
+    if(demo) st = {t:"Previewing a shift", live:true};
+    setText("statusText", st.t);
+    $("#statusPill").classList.toggle("idle", !st.live);
+    $("#demoBar").classList.toggle("on", demo);
+
+    // countdown
+    if(r.status === "working" || r.status === "break"){
+      setText("cdLabel", "Clock out in");
+      setText("cdValue", fmtClock((r.shiftEnd - r.tt)*60));
+    } else if(r.status === "overtime"){
+      setText("cdLabel", "Overtime for");
+      setText("cdValue", fmtClock(r.otMin*60));
+    } else if(r.status === "before"){
+      setText("cdLabel", "Shift starts in");
+      setText("cdValue", fmtClock((d.sM - r.t)*60));
+    } else if(r.status === "done"){
+      setText("cdLabel", "Shift complete");
+      setText("cdValue", fmtHM(d.paidMin));
+    } else {
+      setText("cdLabel", "Next shift");
+      setText("cdValue", nextShiftShort());
+    }
+
+    // month card
+    setText("mBase", cur(monthBase, 2));
+    setText("mExtra", "+" + cur(extrasThisMonth(), 2));
+    setText("mUnpaid", "−" + cur((Number(S.unpaidDays)||0)*d.daily, 2));
+    setText("mTotal", cur(monthTotal, 2));
+
+    // jar
+    var jarAmt = Math.max(0, monthBase) * ((S.jarRate||10)/100);
+    setText("jarAmount", cur(jarAmt, 0));
+    setText("jarGoal", cur(S.jarGoal||0, 0));
+    setText("jarHint", "Saving " + (S.jarRate||10) + "% of everything you earn");
+    var jarPct = S.jarGoal > 0 ? Math.min(100, jarAmt/S.jarGoal*100) : 0;
+    $("#jarFill").style.width = jarPct.toFixed(1) + "%";
+    setText("jarLeft", cur(Math.max(0, (S.jarGoal||0) - jarAmt), 0));
+    setText("jarNote", jarPct >= 100 ? "Goal reached 🎉" : Math.round(jarPct) + "% there — keep going 🐷");
+
+    // wishlist
+    renderWishlist(monthTotal, d.hourly);
+
+    // slack
+    var slackSec = (slack.total + (slack.on ? (Date.now()-slack.started)/1000 : 0));
+    if(slack.on){
+      setText("slackTitle", "Slacking for");
+      setText("slackValue", fmtClock(slackSec) + " · clock paused");
+    } else if(slackSec > 5){
+      setText("slackTitle", "Slacked today");
+      setText("slackValue", fmtClock(slackSec) + " · no pay, no guilt");
+    } else {
+      setText("slackTitle", "Slack mode");
+      setText("slackValue", "Tap when you wander off");
+    }
+
+    // privacy
+    var priv = !!S.privacy;
+    document.querySelectorAll(".ticker, .chip .v, .mod .big, .mod .rowline b, .mod .rowline input, #rateLabel, #workedLabel, #monthLabel, .ring-pct").forEach(function(el){
+      el.classList.toggle("blurred", priv);
+    });
+    $("#privacyBtn").textContent = priv ? "👀 Show numbers" : "🙈 Hide numbers";
+  }
+
+  function nextShiftShort(){
+    var now = new Date();
+    for(var i=0;i<8;i++){
+      var dt = new Date(now.getFullYear(), now.getMonth(), now.getDate()+i);
+      if(!isWorkday(dt)) continue;
+      if(i===0){
+        var mins = now.getHours()*60 + now.getMinutes();
+        if(mins < toMin(S.start)) return "Today " + S.start;
+        continue;
+      }
+      var nm = i===1 ? "Tomorrow" : dt.toLocaleDateString("en-US",{weekday:"long"});
+      return nm + " " + S.start;
+    }
+    return "—";
+  }
+
+  function renderWishlist(monthTotal, hourly){
+    var ul = $("#wishlist");
+    var html = "";
+    (S.wishlist||[]).forEach(function(w){
+      var hrs = hourly > 0 ? (w.price/hourly) : 0;
+      var pct = w.price > 0 ? Math.min(100, monthTotal/w.price*100) : 0;
+      html += '<li data-id="'+w.id+'">'
+        + '<span class="em">'+(w.emoji||"🎁")+'</span>'
+        + '<span class="nm">'+escapeHtml(w.name)+'</span>'
+        + '<span class="hr">'+(hrs>0? hrs.toFixed(1)+" h" : "—")+'</span>'
+        + '<span style="width:52px;height:6px;border-radius:99px;background:var(--line);overflow:hidden;display:inline-block">'
+        + '<i style="display:block;height:100%;width:'+pct.toFixed(0)+'%;background:var(--mint)"></i></span>'
+        + '<button class="rm" aria-label="Remove">×</button>'
+        + '</li>';
+    });
+    if(!html) html = '<li style="color:var(--faint);font-weight:700;font-size:13px">Nothing yet — add something you are saving for.</li>';
+    if(memo.wish !== html){ memo.wish = html; ul.innerHTML = html; }
+    ul.querySelectorAll(".rm").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.closest("li").dataset.id;
+        S.wishlist = S.wishlist.filter(function(w){ return w.id !== id; });
+        save(); memo.wish = null; render();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];
+    });
+  }
+
+  /* ---------- panel ---------- */
+  function openPanel(){ syncPanel(); $("#scrim").classList.add("on"); $("#panel").classList.add("on"); document.body.style.overflow="hidden"; }
+  function closePanel(){ $("#scrim").classList.remove("on"); $("#panel").classList.remove("on"); document.body.style.overflow=""; }
+
+  function renderDays(){
+    var names = ["S","M","T","W","T","F","S"];
+    var html = "";
+    for(var i=0;i<7;i++) html += '<button data-day="'+i+'" class="'+(S.days.indexOf(i)!==-1?'on':'')+'">'+names[i]+'</button>';
+    $("#daysRow").innerHTML = html;
+    $("#daysRow").querySelectorAll("button").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var day = parseInt(btn.dataset.day,10);
+        var idx = S.days.indexOf(day);
+        if(idx === -1) S.days.push(day); else S.days.splice(idx,1);
+        S.days.sort(function(a,b){ return a-b; });
+        btn.classList.toggle("on");
+        preview();
+      });
+    });
+  }
+
+  function renderBreaks(){
+    var box = $("#breakList");
+    var html = "";
+    (S.breaks||[]).forEach(function(b,i){
+      html += '<div class="break-item" data-i="'+i+'">'
+        + '<input type="time" value="'+b.start+'" data-k="start" />'
+        + '<span style="color:var(--faint);font-weight:800">→</span>'
+        + '<input type="time" value="'+b.end+'" data-k="end" />'
+        + '<button class="x" aria-label="Remove">×</button>'
+        + '</div>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll(".break-item").forEach(function(row){
+      var i = parseInt(row.dataset.i,10);
+      row.querySelectorAll("input").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          S.breaks[i][inp.dataset.k] = inp.value || "12:00";
+          preview();
+        });
+      });
+      row.querySelector(".x").addEventListener("click", function(){
+        S.breaks.splice(i,1);
+        renderBreaks(); preview();
+      });
+    });
+  }
+
+  function syncPanel(){
+    $("#modeSeg").querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.dataset.mode === S.mode); });
+    $("#amountInput").value = S.amount;
+    $("#currencySelect").value = S.currency;
+    $("#startInput").value = S.start;
+    $("#endInput").value = S.end;
+    $("#otToggle").checked = !!S.overtime;
+    $("#otMult").value = String(S.otMult);
+    $("#otMultWrap").style.display = S.overtime ? "block" : "none";
+    $("#privacyToggle").checked = !!S.privacy;
+    $("#jarGoalInput").value = S.jarGoal;
+    $("#jarRateSelect").value = String(S.jarRate);
+    $("#unpaidDays").value = S.unpaidDays || 0;
+    $("#amountLabel").textContent = S.mode === "annual" ? "Annual salary (gross)" : S.mode === "monthly" ? "Monthly salary (gross)" : "Hourly rate";
+    renderDays(); renderBreaks(); preview();
+  }
+
+  function readPanel(){
+    var amt = parseFloat($("#amountInput").value);
+    S.amount = isFinite(amt) && amt >= 0 ? amt : 0;
+    S.currency = $("#currencySelect").value;
+    S.start = $("#startInput").value || "09:00";
+    S.end = $("#endInput").value || "17:30";
+    S.overtime = $("#otToggle").checked;
+    S.otMult = parseFloat($("#otMult").value) || 1.5;
+    S.privacy = $("#privacyToggle").checked;
+    var jg = parseFloat($("#jarGoalInput").value);
+    S.jarGoal = isFinite(jg) ? jg : 0;
+    S.jarRate = parseFloat($("#jarRateSelect").value) || 10;
+  }
+
+  function preview(){
+    readPanel();
+    var d = derive();
+    $("#previewRate").textContent = cur(d.hourly, 2);
+    $("#previewSub").textContent = cur(d.daily,2) + " per day · " + money(d.annualH,0) + " paid hours a year · " + d.dayCount + " days a week";
+  }
+
+  /* ---------- settlement ---------- */
+  function openSettle(){
+    var r = compute(), d = r.d;
+    var lines = [];
+    lines.push(["Shift", S.start + " – " + S.end]);
+    lines.push(["Paid hours in shift", fmtHM(d.paidMin)]);
+    lines.push(["Unpaid breaks", fmtHM(d.brk)]);
+    lines.push(["Paid time so far", fmtHM(r.paidElapsed)]);
+    if(r.otMin > 0) lines.push(["Overtime (" + S.otMult + "×)", fmtHM(r.otMin)]);
+    lines.push(["Hourly rate", cur(d.hourly,2)]);
+
+    $("#settleDate").textContent = r.now.toLocaleDateString("en-US",{weekday:"long", month:"long", day:"numeric"});
+    $("#settleLines").innerHTML = lines.map(function(l){
+      return '<div class="line"><span>'+l[0]+'</span><b>'+l[1]+'</b></div>';
+    }).join("");
+    $("#settleTotal").textContent = cur(r.earned, 2);
+    $("#settleModal").classList.add("on");
+  }
+
+  var toastTimer;
+  function toast(msg){
+    var el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("on"); }, 1900);
+  }
+
+  /* ---------- init ---------- */
+  function init(){
+    document.getElementById("yr").textContent = new Date().getFullYear();
+
+    if(firstRun){ S = clone(DEFAULTS); }
+    save();
+
+    // payday options
+    var pd = $("#paydaySelect");
+    var opts = "";
+    for(var i=1;i<=31;i++) opts += '<option value="'+i+'">Day '+i+' of the month</option>';
+    opts += '<option value="last">Last day of the month</option>';
+    pd.innerHTML = opts;
+    pd.value = String(S.payday);
+
+    window.addEventListener("scroll", function(){ $("#hdr").classList.toggle("stuck", window.scrollY > 4); }, {passive:true});
+
+    $("#setupBtn").addEventListener("click", openPanel);
+    $("#closeBtn").addEventListener("click", closePanel);
+    $("#scrim").addEventListener("click", closePanel);
+    $("#settleBtn").addEventListener("click", openSettle);
+    $("#settleClose").addEventListener("click", function(){ $("#settleModal").classList.remove("on"); });
+    $("#settleModal").addEventListener("click", function(e){ if(e.target === this) this.classList.remove("on"); });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape"){ closePanel(); $("#settleModal").classList.remove("on"); }
+    });
+
+    $("#modeSeg").querySelectorAll("button").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        S.mode = btn.dataset.mode;
+        $("#modeSeg").querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b === btn); });
+        $("#amountLabel").textContent = S.mode === "annual" ? "Annual salary (gross)" : S.mode === "monthly" ? "Monthly salary (gross)" : "Hourly rate";
+        preview();
+      });
+    });
+
+    ["#amountInput","#startInput","#endInput","#jarGoalInput"].forEach(function(s){ $(s).addEventListener("input", preview); });
+    $("#currencySelect").addEventListener("change", preview);
+    $("#jarRateSelect").addEventListener("change", preview);
+    $("#otToggle").addEventListener("change", function(){ $("#otMultWrap").style.display = this.checked ? "block" : "none"; preview(); });
+    $("#otMult").addEventListener("change", preview);
+    $("#privacyToggle").addEventListener("change", preview);
+    $("#paydaySelect").addEventListener("change", function(){ S.payday = this.value; });
+
+    $("#addBreak").addEventListener("click", function(){
+      S.breaks.push({start:"15:00", end:"15:15"});
+      renderBreaks(); preview();
+    });
+
+    $("#saveBtn").addEventListener("click", function(){
+      readPanel();
+      S.payday = $("#paydaySelect").value;
+      if(!S.amount || S.amount <= 0){ toast("Add your pay first 🙂"); $("#amountInput").focus(); return; }
+      if(!S.days.length){ toast("Pick at least one working day"); return; }
+      save(); cache.key = null; memo = {};
+      demo = false;
+      closePanel(); render();
+      toast("Saved — the clock is running");
+    });
+
+    $("#privacyBtn").addEventListener("click", function(){
+      S.privacy = !S.privacy; save(); render();
+      toast(S.privacy ? "Numbers hidden 🙈" : "Numbers visible 👀");
+    });
+
+    $("#slackBtn").addEventListener("click", function(){
+      if(!slack.on){ slack.on = true; slack.started = Date.now(); this.textContent = "Back to work"; this.classList.add("on"); }
+      else { slack.total += (Date.now()-slack.started)/1000; slack.on = false; this.textContent = "☕ Away"; this.classList.remove("on"); }
+      render();
+    });
+
+    $("#wishAdd").addEventListener("click", function(){
+      var name = $("#wishName").value.trim();
+      var price = parseFloat($("#wishPrice").value);
+      if(!name || !isFinite(price) || price <= 0){ toast("Name and price, please"); return; }
+      var emojis = ["🎁","🎧","🎫","👟","🏝️","📱","💻","🚲","⌚","🍽️","🎮","📚"];
+      S.wishlist.push({id:"w"+Date.now(), name:name, price:price, emoji:emojis[Math.floor(Math.random()*emojis.length)]});
+      save(); memo.wish = null;
+      $("#wishName").value = ""; $("#wishPrice").value = "";
+      render(); toast("Added to your wishlist");
+    });
+
+    $("#extraAdd").addEventListener("click", function(){
+      var label = $("#extraLabel").value.trim() || "Extra";
+      var amt = parseFloat($("#extraAmt").value);
+      if(!isFinite(amt) || amt === 0){ toast("Enter an amount"); return; }
+      S.extras.push({id:"e"+Date.now(), label:label, amount:amt, ts:Date.now()});
+      save();
+      $("#extraLabel").value = ""; $("#extraAmt").value = "";
+      render(); toast("Extra income added");
+    });
+
+    $("#unpaidDays").addEventListener("change", function(){
+      var v = parseInt(this.value,10);
+      S.unpaidDays = isFinite(v) ? Math.max(0, Math.min(31, v)) : 0;
+      save(); render();
+    });
+
+    render();
+    $("#demoCta").addEventListener("click", openPanel);
+
+    var last = 0;
+    function loop(ts){
+      if(ts - last > 100){ last = ts; render(); }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    setInterval(function(){ cache.key = null; }, 60000);
+    document.addEventListener("visibilitychange", function(){ if(!document.hidden){ cache.key = null; render(); } });
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+/**
+ * Site-wide constants and the canonical list of long-tail landing pages.
+ *
+ * Everything that needs the production domain (canonical tags, Open Graph URLs,
+ * sitemap, robots) reads it from here, so going live is a one-line change:
+ * set NEXT_PUBLIC_SITE_URL at build time.
+ */
+
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://salarytimer.app"
+).replace(/\/+$/, "");
+
+export const SITE_NAME = "Salary Timer";
+
+/** The homepage <title>. Kept here so the tab title, og:title and twitter:title
+ *  can never drift apart. */
+/** The homepage <title>. Kept here so the tab title, og:title and twitter:title
+ *  can never drift apart. */
+export const SITE_TITLE = `${SITE_NAME} — Free to See What You Earn Every Second`;
+
+export const SITE_DESCRIPTION =
+  "A free salary timer that shows what you earn per second, minute and hour — live. Built for hourly workers, shift workers and salaried 9-to-5ers.";
+
+export const OG_IMAGE = "/og.png";
+
+export function absoluteUrl(path = "/"): string {
+  return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/**
+ * Absolute URL of a landing page, with the trailing slash the site is built
+ * with (`trailingSlash: true`). Canonical tags, sitemap entries and structured
+ * data all have to agree on exactly one form.
+ */
+export function pageUrl(path: string): string {
+  const absolute = absoluteUrl(path);
+  return absolute.endsWith("/") ? absolute : `${absolute}/`;
+}
+
+export interface ToolRoute {
+  href: string;
+  /** short label for the header / footer */
+  label: string;
+  /** <title> (no brand suffix — layout template adds “· Salary Timer”) */
+  title: string;
+  /** meta description of the landing page */
+  description: string;
+  /** one-line pitch used in cross-links */
+  blurb: string;
+  emoji: string;
+  /** matching Learn article for bidirectional internal links */
+  relatedLearnHref?: string;
+}
+
+/**
+ * The long-tail matrix. Each entry is a real page with its own H1, copy,
+ * FAQ and structured data — not a redirect to the homepage. That is what
+ * makes these pages rank instead of competing with each other.
+ */
+export const TOOLS: ToolRoute[] = [
+  {
+    href: "/hourly-rate-calculator",
+    label: "Hourly rate calculator",
+    title: "Hourly Rate Calculator — real pay per hour",
+    description:
+      "Turn an annual or monthly salary into your real hourly rate, using the hours you actually work. Unpaid lunch, overtime and a 4-day week all change the number.",
+    blurb: "Salary ÷ 2,080 lies. Get the rate you actually earn.",
+    emoji: "🧮",
+    relatedLearnHref: "/learn/hourly-rate-from-annual-salary",
+  },
+  {
+    href: "/salary-per-second",
+    label: "Salary per second",
+    title: "Salary Per Second — live earn rate",
+    description:
+      "Work out your salary per second, per minute and per hour, then watch it tick up live. The most honest number in personal finance, and the smallest.",
+    blurb: "The smallest number in personal finance, and the most honest.",
+    emoji: "⏱️",
+    relatedLearnHref: "/learn/how-salary-timers-work",
+  },
+  {
+    href: "/paycheck-countdown",
+    label: "Paycheck countdown",
+    title: "Paycheck Countdown — days until payday",
+    description:
+      "Set your payday once and see exactly how many days, working hours and shifts stand between you and the money. A live countdown that also shows what you've earned so far.",
+    blurb: "How many shifts until the money lands?",
+    emoji: "📅",
+    relatedLearnHref: "/learn/how-salary-timers-work",
+  },
+  {
+    href: "/shift-worker-salary-timer",
+    label: "Shift worker timer",
+    // Transactional intent — keep “timer” tool framing; Learn page uses guide framing.
+    title: "Shift Worker Salary Timer — nights & rotas",
+    description:
+      "A salary timer built for shift work: overnight shifts that cross midnight, rotating rotas, unpaid breaks and night-shift overtime, all counted correctly.",
+    blurb: "Built for nights, rotas and 12-hour shifts.",
+    emoji: "🌙",
+    relatedLearnHref: "/learn/salary-timer-for-shift-workers",
+  },
+  {
+    href: "/overtime-pay-calculator",
+    label: "Overtime calculator",
+    title: "Overtime Pay Calculator — 1.5× & 2×",
+    description:
+      "See what an extra hour is actually worth before you agree to it. Set your overtime multiplier and watch the extra pay accumulate in real time.",
+    blurb: "What that extra hour is really worth.",
+    emoji: "🌇",
+    relatedLearnHref: "/learn/how-salary-timers-work",
+  },
+];
+
+export const NAV_LINKS = [
+  { href: "/#timer", label: "Live timer" },
+  { href: "/#features", label: "Features" },
+  { href: "/#who", label: "Who it's for" },
+  { href: "/#faq", label: "FAQ" },
+  { href: "/learn", label: "Learn" },
+];
+
+/**
+ * Informational articles under `/learn/*`.
+ *
+ * Kept separate from TOOLS on purpose: tools are utility landing pages that
+ * stay at the root (`/hourly-rate-calculator`), while Learn is the content
+ * cluster for long-tail questions. Articles link across to the matching tool.
+ */
+export interface LearnArticle {
+  /** full path, e.g. "/learn/how-salary-timers-work" */
+  href: string;
+  /** footer + breadcrumb label */
+  label: string;
+  /** <title> / og:title */
+  title: string;
+  /** meta description */
+  description: string;
+  /** one-line pitch on the /learn index */
+  blurb: string;
+  /** related tool href, if any — used for cross-links */
+  relatedToolHref?: string;
+}
+
+export const LEARN: LearnArticle[] = [
+  {
+    href: "/learn/how-salary-timers-work",
+    label: "How salary timers work",
+    title: "How a Salary Timer Works — the live pay counter explained",
+    description:
+      "A salary timer turns your working hours into a live counter. Here's how the math works, what gets counted, and why watching money tick up changes how a shift feels.",
+    blurb: "The idea, the math, and why the number moves.",
+    relatedToolHref: "/",
+  },
+  {
+    href: "/learn/hourly-rate-from-annual-salary",
+    label: "Hourly rate from annual salary",
+    title: "Hourly Rate from Annual Salary — skip the 2,080 myth",
+    description:
+      "Salary ÷ 2,080 is a fiction for most jobs. Learn how to convert an annual salary into a real hourly rate using the hours you actually work.",
+    blurb: "Why ÷ 2,080 lies, and what to use instead.",
+    relatedToolHref: "/hourly-rate-calculator",
+  },
+  {
+    href: "/learn/are-lunch-breaks-paid",
+    label: "Are lunch breaks paid?",
+    title: "Are Lunch Breaks Paid? — unpaid time and your real rate",
+    description:
+      "Most lunch breaks are unpaid. Here's how that changes your real hourly rate, and why a salary timer that keeps counting through lunch is lying to you.",
+    blurb: "Unpaid lunch, your real rate, and the pause that matters.",
+    relatedToolHref: "/",
+  },
+  {
+    href: "/learn/salary-timer-for-shift-workers",
+    label: "Salary timer for shift workers",
+    // Informational intent — deliberately different from the tool page title.
+    title: "Shift Work Guide — nights, rotas and cross-midnight pay",
+    description:
+      "Office-hour calculators break on night shifts. Learn how a salary timer should handle overnight work, rotating rotas, unpaid breaks and overtime for shift workers.",
+    blurb: "Nights, rotas and 12-hour shifts explained.",
+    relatedToolHref: "/shift-worker-salary-timer",
+  },
+];
+
+/** Look up a tool by its route so pages never repeat the copy. */
+export function getTool(href: string): ToolRoute {
+  const found = TOOLS.find((t) => t.href === href);
+  if (!found) throw new Error(`Unknown tool route: ${href}`);
+  return found;
+}
+
+/** Look up a Learn article by its route. */
+export function getLearn(href: string): LearnArticle {
+  const found = LEARN.find((a) => a.href === href);
+  if (!found) throw new Error(`Unknown learn route: ${href}`);
+  return found;
+}

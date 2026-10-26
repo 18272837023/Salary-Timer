@@ -1,0 +1,27 @@
+{
+  "name": "salary-timer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Salary Timer — a live earnings counter for your workday. Static-exported Next.js site built for long-tail SEO.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "node scripts/e2e.cjs",
+    "serve:out": "npx --yes serve out -l 8850"
+  },
+  "dependencies": {
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.7.2",
+    "ws": "^8.22.0"
+  }
+}
