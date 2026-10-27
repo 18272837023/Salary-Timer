@@ -23,6 +23,10 @@ jobs:
         env:
           NEXT_PUBLIC_SITE_URL: https://salarytimer.work
 
+      # `out/*` puts files at <target>/out/... unless the leading component is
+      # stripped. Nginx serves <target> as its root, so without this the upload
+      # lands one directory too deep and the live site keeps serving the old
+      # build while the job still reports success.
       - name: Deploy to Server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -31,13 +35,48 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           source: "out/*"
           target: "/var/www/salarytimer/"
+          strip_components: 1
           overwrite: true
 
-      - name: Restart Nginx
+      - name: Fix permissions & reload Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
           script: |
+            set -e
+            # Clean up the nested directory left behind by the old deploy path.
+            if [ -d /var/www/salarytimer/out ]; then
+              sudo rm -rf /var/www/salarytimer/out
+            fi
+            sudo find /var/www/salarytimer -type d -exec chmod 755 {} \;
+            sudo find /var/www/salarytimer -type f -exec chmod 644 {} \;
             sudo nginx -t && sudo systemctl reload nginx
+
+      # A green deploy is not proof the site changed. Assert the live bundle
+      # actually carries the current default so a silent stale deploy fails loudly.
+      - name: Verify live bundle
+        run: |
+          set -euo pipefail
+          html=$(curl -fsS "https://salarytimer.work/?cb=${GITHUB_SHA}")
+          found=0
+          for path in $(printf '%s' "$html" | grep -oE '/_next/static/chunks/[^"]+\.js' | sort -u); do
+            body=$(curl -fsS "https://salarytimer.work${path}") || continue
+            if printf '%s' "$body" | grep -q 'salarytimer\.site\.v2'; then
+              found=1
+              if printf '%s' "$body" | grep -q 'overtime:!0,otMult'; then
+                echo "::error::Deployed bundle still defaults overtime to true ($path)"
+                exit 1
+              fi
+              if ! printf '%s' "$body" | grep -q 'onboarded:!1,v:3'; then
+                echo "::error::Deployed bundle is missing the v3 settings marker ($path)"
+                exit 1
+              fi
+            fi
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "::error::Could not locate the settings chunk on the live site"
+            exit 1
+          fi
+          echo "Live bundle OK: overtime defaults to false, settings schema v3."
