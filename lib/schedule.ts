@@ -166,7 +166,11 @@ export function compute(
   if (!workday) {
     status = "dayoff";
   } else if (shiftMin < startMin) {
-    status = "before";
+    // For overnight shifts the gap between end and start is ambiguous:
+    // 06:30 could mean "just finished" or "not started yet".  Treat it as
+    // done so a night-shift worker doesn't see "Shift hasn't started"
+    // immediately after clocking out.
+    status = overnight ? (settings.overtime ? "overtime" : "done") : "before";
   } else if (shiftMin <= shiftEndMin) {
     const breaks = breaksToday(settings);
     let elapsed = shiftMin - startMin;

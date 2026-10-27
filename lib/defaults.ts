@@ -21,7 +21,7 @@ export function defaultSettings(): Settings {
     days: [1, 2, 3, 4, 5],
     breaks: [{ id: "b1", start: "12:30", end: "13:00" }],
     payday: 15,
-    overtime: true,
+    overtime: false,
     otMult: 1.5,
     privacy: false,
     jarGoalCents: 200_000, // $2,000
@@ -142,7 +142,7 @@ export function normalize(raw: unknown): Settings | null {
       input.payday === "last"
         ? "last"
         : Math.min(31, Math.max(1, Math.round(num(input.payday, 15)))),
-    overtime: input.overtime !== false,
+    overtime: input.overtime === true,
     otMult: Math.min(3, Math.max(1, num(input.otMult, 1.5))),
     privacy: input.privacy === true,
     jarGoalCents: Math.max(0, Math.round(num(input.jarGoalCents, base.jarGoalCents))),
