@@ -70,6 +70,12 @@ export interface Settings {
   wishlist: WishItem[];
   /** false until the visitor saves their own numbers — drives demo mode */
   onboarded: boolean;
+  /**
+   * Schema version of the persisted payload. Absent on payloads written before
+   * the overtime-default fix, which is how `normalize()` knows to run the
+   * one-time migration that turns the inherited `overtime: true` back off.
+   */
+  v?: number;
 }
 
 export type ShiftStatus =

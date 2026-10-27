@@ -5,6 +5,12 @@ const LEGACY_KEY = "salarytimer.site.v1";
 
 export const DEMO_SALARY_CENTS = 7_800_000; // $78,000
 
+/**
+ * Bump when a persisted payload needs a one-time migration.
+ * 3 — overtime stopped being on by default.
+ */
+export const SETTINGS_VERSION = 3;
+
 let uid = 0;
 export function makeId(prefix = "i"): string {
   uid += 1;
@@ -34,6 +40,7 @@ export function defaultSettings(): Settings {
       { id: "w3", name: "Weekend away", priceCents: 52_000, emoji: "🏝️" },
     ],
     onboarded: false,
+    v: SETTINGS_VERSION,
   };
 }
 
@@ -96,6 +103,12 @@ export function normalize(raw: unknown): Settings | null {
   const input = raw as Record<string, unknown>;
   const base = defaultSettings();
 
+  // Payloads written before v3 stored `overtime: true` simply because that was
+  // the default — most of those users never chose it, and the result was a
+  // counter that kept paying them long after they clocked out. Drop it once.
+  const storedVersion = num(input.v, 0);
+  const inheritedOvertime = storedVersion < SETTINGS_VERSION;
+
   const mode = input.mode;
   const currency = input.currency;
   const days = Array.isArray(input.days)
@@ -142,7 +155,7 @@ export function normalize(raw: unknown): Settings | null {
       input.payday === "last"
         ? "last"
         : Math.min(31, Math.max(1, Math.round(num(input.payday, 15)))),
-    overtime: input.overtime === true,
+    overtime: inheritedOvertime ? false : input.overtime === true,
     otMult: Math.min(3, Math.max(1, num(input.otMult, 1.5))),
     privacy: input.privacy === true,
     jarGoalCents: Math.max(0, Math.round(num(input.jarGoalCents, base.jarGoalCents))),
@@ -151,6 +164,7 @@ export function normalize(raw: unknown): Settings | null {
     unpaidDays: Math.min(31, Math.max(0, Math.round(num(input.unpaidDays, 0)))),
     wishlist,
     onboarded: input.onboarded === true,
+    v: SETTINGS_VERSION,
   };
 }
 
@@ -201,7 +215,16 @@ export function loadSettings(): Settings | null {
 
   try {
     const current = store.getItem(KEY);
-    if (current) return normalize(JSON.parse(current));
+    if (current) {
+      const parsed: unknown = JSON.parse(current);
+      const next = normalize(parsed);
+      if (next) {
+        // Stamp the version so the one-time migration doesn't run again.
+        const storedVersion = num((parsed as Record<string, unknown>).v, 0);
+        if (storedVersion < SETTINGS_VERSION) saveSettings(next);
+        return next;
+      }
+    }
   } catch {
     /* corrupt payload — fall through to a fresh start */
   }

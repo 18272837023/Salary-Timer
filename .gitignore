@@ -1,6 +1,7 @@
 node_modules/
 .next/
 out/
+.tmptest/
 *.tsbuildinfo
 next-env.d.ts
 *.log

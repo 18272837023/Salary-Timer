@@ -10,6 +10,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:e2e": "node scripts/e2e.cjs",
+    "test:unit": "tsc lib/defaults.ts lib/schedule.ts lib/types.ts --target ES2022 --module commonjs --moduleResolution node --outDir .tmptest --skipLibCheck && node scripts/unit-compute.cjs && node scripts/unit-migration.cjs",
     "serve:out": "npx --yes serve out -l 8850"
   },
   "dependencies": {
