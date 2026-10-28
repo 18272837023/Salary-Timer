@@ -7,3 +7,8 @@ next-env.d.ts
 *.log
 .DS_Store
 .env*.local
+
+# local working notes / tooling artefacts (this repo is public)
+.workbuddy-ai/
+docs/
+nul
