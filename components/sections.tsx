@@ -1,5 +1,5 @@
 import { Link } from "@/components/SmartLink";
-import { LEARN, TOOLS, getLearn } from "@/lib/site";
+import { CLUSTERS, TOOLS, entryArticle, getLearn } from "@/lib/site";
 
 export interface FaqItem {
   q: string;
@@ -498,31 +498,45 @@ export function CtaBand() {
 }
 
 /**
- * Homepage Learn cluster — pushes equity into /learn/* with keyword-rich
- * anchors, and gives Google a clear topical hub under the main salary timer page.
+ * Homepage Learn block.
+ *
+ * Deliberately points at the three *topics*, not at eleven individual articles.
+ * The homepage's job is to state the entity and hand off to the topic map; the
+ * hubs then distribute authority to their own nodes. Listing every article here
+ * would flatten the hierarchy and cost the homepage 11 outbound links it cannot
+ * afford.
  */
 export function LearnLinks() {
+  const entry = entryArticle();
+
   return (
     <section className="section tight" id="learn">
       <div className="wrap">
         <div className="eyebrow">Learn</div>
         <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>
-          Guides to how salary timers work
+          The three topics behind the salary timer
         </h2>
         <p className="sec-lede">
-          Short reads on the math behind a live salary timer — then jump back to the free tool
-          above when you&apos;re ready to start the clock.
+          Everything this site explains belongs to one of three questions: what an hour is worth,
+          what counts as paid time, and when the money arrives. Start at the{" "}
+          <Link href="/learn">full topic map</Link> — or take the shortest route in.
         </p>
-        <ul className="learn-index" style={{ marginTop: 8 }}>
-          {LEARN.map((article) => (
-            <li key={article.href}>
-              <Link href={article.href}>
-                <strong>{article.label}</strong>
-                <span>{article.blurb}</span>
-              </Link>
-            </li>
+        <div className="cards-3">
+          {CLUSTERS.map((cluster) => (
+            <Link className="pcard" href={cluster.href} key={cluster.id}>
+              <div className="ico i-mint">{cluster.emoji}</div>
+              <h3>{cluster.label}</h3>
+              <p>{cluster.definition}</p>
+            </Link>
           ))}
-        </ul>
+        </div>
+        {entry ? (
+          <p className="learn-related">
+            New to the idea?{" "}
+            <Link href={entry.href}>How salary timers work</Link> explains the whole thing in one
+            read, before the detail.
+          </p>
+        ) : null}
       </div>
     </section>
   );

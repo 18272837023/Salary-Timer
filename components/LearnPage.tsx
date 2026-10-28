@@ -1,13 +1,17 @@
 import { Link } from "@/components/SmartLink";
 import { Faq, type FaqItem } from "@/components/sections";
-import type { LearnArticle } from "@/lib/site";
-import { getTool } from "@/lib/site";
+import { clusterNodes, getCluster, getTool, type LearnArticle } from "@/lib/site";
 
 /**
  * Shared shell for every `/learn/*` article.
  *
  * Distinct from ToolPage on purpose: no live timer in the hero — these are
  * informational pages that cross-link into tools, not the tools themselves.
+ *
+ * The "more in this topic" block is generated from cluster membership, so every
+ * article automatically links to its hub and to its siblings. That is what makes
+ * a cluster a cluster rather than a pile of pages that happen to mention each
+ * other.
  */
 export function LearnPage({
   article,
@@ -30,6 +34,11 @@ export function LearnPage({
     related = { href: tool.href, label: tool.label };
   }
 
+  const cluster = article.cluster ? getCluster(article.cluster) : null;
+  const siblings = article.cluster
+    ? clusterNodes(article.cluster).articles.filter((a) => a.href !== article.href)
+    : [];
+
   return (
     <main id="top">
       <section className="tool-hero">
@@ -39,6 +48,12 @@ export function LearnPage({
             <Link href="/">Home</Link>
             <span aria-hidden="true">/</span>
             <Link href="/learn">Learn</Link>
+            {cluster ? (
+              <>
+                <span aria-hidden="true">/</span>
+                <Link href={cluster.href}>{cluster.label}</Link>
+              </>
+            ) : null}
             <span aria-hidden="true">/</span>
             <span aria-current="page">{article.label}</span>
           </nav>
@@ -55,6 +70,30 @@ export function LearnPage({
       </section>
 
       <article className="prose">{children}</article>
+
+      {cluster && siblings.length > 0 ? (
+        <section className="section tight" id="in-this-topic">
+          <div className="wrap">
+            <div className="eyebrow">Same topic</div>
+            <h2 style={{ fontSize: "clamp(22px, 2.6vw, 28px)" }}>More on {cluster.label.toLowerCase()}</h2>
+            <p className="sec-lede">{cluster.definition}</p>
+
+            <div className="topic-nodes">
+              {siblings.map((a) => (
+                <Link className="tnode" href={a.href} key={a.href}>
+                  <span className="tnode-tag">Guide</span>
+                  <strong>{a.label}</strong>
+                  <span>{a.blurb}</span>
+                </Link>
+              ))}
+            </div>
+
+            <p className="topic-more">
+              The full topic, from the top: <Link href={cluster.href}>{cluster.label}</Link>.
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <Faq
         items={faq}
@@ -75,7 +114,7 @@ export function LearnPage({
               Open the salary timer
             </Link>
             <Link href="/learn" className="btn btn-ghost">
-              All Learn articles
+              All topics
             </Link>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { LEARN, TOOLS, absoluteUrl, pageUrl } from "@/lib/site";
+import { CLUSTERS, LEARN, TOOLS, absoluteUrl, pageUrl } from "@/lib/site";
 
 // Required by `output: "export"` — metadata routes are prerendered at build time.
 export const dynamic = "force-static";
@@ -30,6 +30,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     },
+    ...CLUSTERS.map((cluster) => ({
+      url: pageUrl(cluster.href),
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
     ...LEARN.map((article) => ({
       url: pageUrl(article.href),
       lastModified,

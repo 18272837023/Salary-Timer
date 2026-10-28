@@ -2,7 +2,9 @@ import type { FaqItem } from "@/components/sections";
 import {
   SITE_NAME,
   absoluteUrl,
+  clusterNodes,
   pageUrl,
+  type Cluster,
   type LearnArticle,
   type ToolRoute,
 } from "./site";
@@ -43,6 +45,57 @@ export function learnArticleSchema(article: LearnArticle) {
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
     publisher: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
   };
+}
+
+/** BreadcrumbList for a cluster hub: Home → Learn → Topic. */
+export function clusterBreadcrumbSchema(cluster: Cluster) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      { "@type": "ListItem", position: 2, name: "Learn", item: pageUrl("/learn") },
+      { "@type": "ListItem", position: 3, name: cluster.label, item: pageUrl(cluster.href) },
+    ],
+  };
+}
+
+/**
+ * A hub page is a `CollectionPage` whose `hasPart` is every node in the topic.
+ * That single statement is what lets a crawler see the cluster as one thing
+ * rather than a pile of unrelated URLs.
+ */
+export function clusterHubSchema(cluster: Cluster) {
+  const { tools, articles } = clusterNodes(cluster.id);
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: cluster.title,
+    description: cluster.description,
+    url: pageUrl(cluster.href),
+    inLanguage: "en",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
+    about: { "@type": "Thing", name: cluster.label, description: cluster.definition },
+    hasPart: [
+      ...tools.map((t) => ({
+        "@type": "WebApplication",
+        name: t.label,
+        url: pageUrl(t.href),
+        description: t.description,
+      })),
+      ...articles.map((a) => ({
+        "@type": "Article",
+        name: a.label,
+        url: pageUrl(a.href),
+        description: a.description,
+      })),
+    ],
+  };
+}
+
+/** Structured data bundle for a cluster hub page. */
+export function clusterSchemas(cluster: Cluster, faq: FaqItem[]) {
+  return [clusterHubSchema(cluster), clusterBreadcrumbSchema(cluster), faqSchema(faq)];
 }
 
 /** Structured data bundle for a Learn article page. */
