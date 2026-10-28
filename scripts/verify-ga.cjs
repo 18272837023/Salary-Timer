@@ -57,7 +57,10 @@ const getJSON = (p) => new Promise((res, rej) => {
 });
 
 (async () => {
-  await new Promise((r) => server.listen(PORT, r));
+  // BASE_URL 指向线上站点时跳过本地静态服务器，直接验证真实部署。
+  const REMOTE = process.env.BASE_URL || null;
+  const base = REMOTE || `http://127.0.0.1:${PORT}`;
+  if (!REMOTE) await new Promise((r) => server.listen(PORT, r));
   const chrome = spawn(CHROME, [
     "--headless=new", "--disable-gpu", `--remote-debugging-port=${CDP}`,
     "--window-size=1400,1000",
@@ -86,7 +89,7 @@ const getJSON = (p) => new Promise((res, rej) => {
     return r.result.value;
   };
 
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await send("Page.navigate", { url: base + "/" });
   await sleep(3000);
 
   const report = await evalJS(`(() => {
@@ -117,7 +120,7 @@ const getJSON = (p) => new Promise((res, rej) => {
   console.log(`  script src: ${r.scriptEl}`);
 
   // SPA 导航是否补发 page_view
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  await send("Page.navigate", { url: base + "/" });
   await sleep(2500);
   const before = await evalJS(`(window.dataLayer||[]).length`);
   const pathBefore = await evalJS(`location.pathname`);
