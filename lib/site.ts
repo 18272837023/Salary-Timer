@@ -23,6 +23,17 @@ export const SITE_DESCRIPTION =
 
 export const OG_IMAGE = "/og.png";
 
+/**
+ * GA4 measurement ID. Page-view analytics only — the timer's numbers live in
+ * localStorage and are never sent anywhere. Override with NEXT_PUBLIC_GA_ID
+ * to point a staging build at a different property, or set it to an empty
+ * string to switch analytics off entirely.
+ */
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_ID === undefined
+    ? "G-8T8JLTRSX9"
+    : process.env.NEXT_PUBLIC_GA_ID;
+
 export function absoluteUrl(path = "/"): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

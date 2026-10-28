@@ -33,7 +33,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "Is my salary data private?",
-    a: "Completely. Everything is calculated in your browser and saved to your own device's local storage. There's no account, no server storing your numbers, no analytics on what you earn. Privacy mode blurs the figures on screen when someone's looking over your shoulder.",
+    a: "Your pay figures never leave your device. Everything is calculated in your browser and saved to your own device's local storage — there's no account and no server holding your numbers. We do count page views with Google Analytics so we know which pages are worth keeping, but that records the page you visited, never what you earn. Privacy mode blurs the figures on screen when someone's looking over your shoulder.",
   },
   {
     q: "Do I need to install an app or create an account?",

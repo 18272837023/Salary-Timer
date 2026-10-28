@@ -79,4 +79,8 @@ jobs:
             echo "::error::Could not locate the settings chunk on the live site"
             exit 1
           fi
-          echo "Live bundle OK: overtime defaults to false, settings schema v3."
+          if ! printf '%s' "$html" | grep -q 'googletagmanager\.com/gtag/js?id=G-8T8JLTRSX9'; then
+            echo "::error::GA4 tag is missing from the live HTML"
+            exit 1
+          fi
+          echo "Live bundle OK: overtime defaults to false, settings schema v3, GA4 tag present."
