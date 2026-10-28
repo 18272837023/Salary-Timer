@@ -182,7 +182,7 @@ export default function HourlyRateCalculatorPage() {
           . Want the per-second version? Open{" "}
           <Link href="/salary-per-second">salary per second</Link>. For premium hours, use the{" "}
           <Link href="/overtime-pay-calculator">overtime pay calculator</Link>. Or go back to the{" "}
-          <Link href="/">salary timer homepage</Link>.
+          <Link href="/">free salary timer</Link>.
         </p>
       </section>
     </ToolPage>

@@ -126,7 +126,7 @@ export default function HourlyRateFromAnnualPage() {
         <h2>How this page connects to the rest of the site</h2>
         <p>
           Use the <Link href="/hourly-rate-calculator">hourly rate calculator</Link> when you want
-          the interactive conversion. Use the <Link href="/">salary timer homepage</Link> when you
+          the interactive conversion. Use the <Link href="/">free salary timer</Link> when you
           want that rate to drive a live counter. Use the{" "}
           <Link href="/salary-per-second">salary per second</Link> page when you want the same math
           sliced finer. Use the{" "}

@@ -24,6 +24,23 @@ export const SITE_DESCRIPTION =
 export const OG_IMAGE = "/og.png";
 
 /**
+ * Public profiles that describe the same entity. Fed to schema.org `sameAs` so
+ * the site and the repo are understood as one thing, not two.
+ */
+export const SAME_AS = ["https://github.com/18272837023/Salary-Timer"];
+
+/** Stable @id so WebSite / WebApplication can reference one Organization node. */
+export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+
+/**
+ * One-sentence entity definition. Used verbatim on the homepage, in the FAQ and
+ * in structured data — the whole point is that the machine never has to guess
+ * what this site is.
+ */
+export const ENTITY_DEFINITION =
+  "Salary Timer is a free web tool that shows your earnings ticking up in real time — per second, minute and hour — using your actual schedule, unpaid breaks and overtime rate.";
+
+/**
  * GA4 measurement ID. Page-view analytics only — the timer's numbers live in
  * localStorage and are never sent anywhere. Override with NEXT_PUBLIC_GA_ID
  * to point a staging build at a different property, or set it to an empty

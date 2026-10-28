@@ -13,7 +13,7 @@ import {
   Scenarios,
   ToolLinks,
 } from "@/components/sections";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, absoluteUrl } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, absoluteUrl, ENTITY_DEFINITION, ORGANIZATION_ID, SAME_AS } from "@/lib/site";
 
 export const metadata: Metadata = {
   // Absolute: do not append the layout “· Salary Timer” template on the homepage.
@@ -35,9 +35,13 @@ const appSchema = {
   applicationCategory: "FinanceApplication",
   operatingSystem: "Any — runs in the browser",
   browserRequirements: "Requires JavaScript",
-  description: SITE_DESCRIPTION,
+  description: ENTITY_DEFINITION,
   inLanguage: "en",
   isAccessibleForFree: true,
+  // Reference the Organization node by @id instead of leaving it null — one
+  // entity, described once, pointed at from every schema block.
+  publisher: { "@id": ORGANIZATION_ID },
+  sameAs: SAME_AS,
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   featureList: [
     "Live salary counter, updated every second",
@@ -87,6 +91,19 @@ export default function HomePage() {
       <Hero>
         <SalaryApp />
       </Hero>
+
+      {/* Entity definition, in the plainest possible words, above the fold of
+          the content: the one sentence a search engine or an AI answer should
+          be able to lift without reading anything else. */}
+      <section className="section tight" aria-label="What Salary Timer is">
+        <div className="wrap">
+          <p className="sec-lede" style={{ maxWidth: 780, margin: "0 auto", textAlign: "center" }}>
+            {ENTITY_DEFINITION} It runs entirely in your browser — no account, no install, and your
+            pay figures never leave your device.
+          </p>
+        </div>
+      </section>
+
       <PainPoints />
       <Features />
       <Personas />

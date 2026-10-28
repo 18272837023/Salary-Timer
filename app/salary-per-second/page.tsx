@@ -198,7 +198,7 @@ export default function SalaryPerSecondPage() {
           counter. For night shifts and rotas,{" "}
           <Link href="/shift-worker-salary-timer">shift worker salary timer</Link> handles the
           midnight crossover. Or start from the{" "}
-          <Link href="/">free salary timer</Link> on the homepage.
+          <Link href="/">live salary timer</Link> on the homepage.
         </p>
       </section>
     </ToolPage>

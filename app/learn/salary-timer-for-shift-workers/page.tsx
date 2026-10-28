@@ -83,7 +83,7 @@ export default function SalaryTimerForShiftWorkersLearnPage() {
           If software splits the night into “Tuesday evening” and “Wednesday morning” without
           stitching them, your live total and your rate both wobble. The{" "}
           <Link href="/shift-worker-salary-timer">shift worker salary timer</Link> is the entry
-          point that calls that out; the <Link href="/">homepage salary timer</Link> uses the same
+          point that calls that out; the <Link href="/">live salary timer</Link> uses the same
           underlying rules when you set an overnight start and end.
         </p>
       </section>
@@ -129,7 +129,7 @@ export default function SalaryTimerForShiftWorkersLearnPage() {
         <p>
           This article is a map, not the product. For the live counter, use the{" "}
           <Link href="/shift-worker-salary-timer">shift worker salary timer</Link> or the{" "}
-          <Link href="/">salary timer homepage</Link>. For base-rate checks across two rotas, use
+          <Link href="/">free salary timer</Link>. For base-rate checks across two rotas, use
           the <Link href="/hourly-rate-calculator">hourly rate calculator</Link>. For the general
           product idea, keep{" "}
           <Link href="/learn/how-salary-timers-work">how salary timers work</Link> nearby.

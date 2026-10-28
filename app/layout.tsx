@@ -4,7 +4,7 @@ import { Analytics } from "@/components/Analytics";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SettingsProvider, ToastProvider } from "@/lib/store";
-import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { OG_IMAGE, ORGANIZATION_ID, SAME_AS, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // Fonts are downloaded at build time and served from our own domain — no
@@ -72,10 +72,15 @@ const websiteSchema = {
   url: SITE_URL,
   description: SITE_DESCRIPTION,
   inLanguage: "en",
+  // The Organization is declared once here, with a stable @id, so every other
+  // schema block on the site can point at the same entity instead of restating
+  // it in slightly different words.
   publisher: {
     "@type": "Organization",
+    "@id": ORGANIZATION_ID,
     name: SITE_NAME,
     url: SITE_URL,
+    sameAs: SAME_AS,
   },
 };
 

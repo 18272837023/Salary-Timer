@@ -54,6 +54,11 @@ export default function LearnIndexPage() {
             Short guides on salary timers, converting pay to an hourly rate, unpaid breaks and
             shift schedules — written so you can make a better decision with the live tools.
           </p>
+          <p className="learn-related">
+            Every guide here explains one part of the maths behind the{" "}
+            <Link href="/">salary timer</Link> — what counts as paid time, how an hourly rate is
+            derived, and what changes when you work nights.
+          </p>
         </div>
       </section>
 

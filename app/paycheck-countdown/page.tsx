@@ -156,7 +156,7 @@ export default function PaycheckCountdownPage() {
           <Link href="/hourly-rate-calculator">hourly rate calculator</Link>. If your pay date
           moves with a rota rather than the calendar, the{" "}
           <Link href="/shift-worker-salary-timer">shift worker salary timer</Link> is the better
-          fit. You can also open the <Link href="/">salary timer homepage</Link> and start the clock
+          fit. You can also open the <Link href="/">free salary timer</Link> and start the clock
           there.
         </p>
       </section>

@@ -175,7 +175,7 @@ export default function ShiftWorkerPage() {
           <Link href="/hourly-rate-calculator">hourly rate calculator</Link> before deciding. For the
           written overview, see the{" "}
           <Link href="/learn/salary-timer-for-shift-workers">shift work guide</Link>, or start from
-          the <Link href="/">salary timer homepage</Link>.
+          the <Link href="/">live salary timer</Link>.
         </p>
       </section>
     </ToolPage>

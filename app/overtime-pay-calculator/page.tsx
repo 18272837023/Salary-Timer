@@ -154,7 +154,7 @@ export default function OvertimePayCalculatorPage() {
           it off, and the counter will stop at clock-out the way your pay does. If you want to see
           the cost of unpaid overtime explicitly, log it for a month and run the total through{" "}
           <Link href="/hourly-rate-calculator">hourly rate calculator</Link>, or the{" "}
-          <Link href="/">salary timer</Link> on the homepage.
+          <Link href="/">live salary timer</Link> on the homepage.
         </p>
       </section>
 

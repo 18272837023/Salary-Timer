@@ -84,7 +84,7 @@ export default function AreLunchBreaksPaidPage() {
           </li>
           <li>
             <strong>Today&apos;s live total</strong> — while you are on an unpaid break, accrued pay
-            should stop. That is what the <Link href="/">salary timer on the homepage</Link> does
+            should stop. That is what the <Link href="/">live salary timer</Link> does
             when you add a break in Set my pay.
           </li>
         </ul>
@@ -131,7 +131,7 @@ export default function AreLunchBreaksPaidPage() {
           </li>
         </ul>
         <p>
-          Set it once on the <Link href="/">Salary Timer homepage</Link>, then forget it until the
+          Set it once on the <Link href="/">Salary Timer</Link>, then forget it until the
           schedule changes. The live timer, the rate math, and these Learn pages are meant to stay
           consistent on that one point: unpaid time does not earn.
         </p>

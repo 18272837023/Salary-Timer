@@ -24,7 +24,7 @@ export function LearnPage({
 }) {
   let related: { href: string; label: string } | null = null;
   if (article.relatedToolHref === "/") {
-    related = { href: "/#timer", label: "Live salary timer" };
+    related = { href: "/#timer", label: "Salary Timer" };
   } else if (article.relatedToolHref) {
     const tool = getTool(article.relatedToolHref);
     related = { href: tool.href, label: tool.label };
@@ -68,7 +68,7 @@ export function LearnPage({
         <div className="wrap" style={{ textAlign: "center" }}>
           <p className="sec-lede" style={{ margin: "0 auto 18px" }}>
             These guides exist to keep the topic clear. The product is the{" "}
-            <Link href="/">live salary timer</Link> on the homepage.
+            <Link href="/">salary timer</Link> on the homepage.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/" className="btn btn-mint">

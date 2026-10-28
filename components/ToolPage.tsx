@@ -42,11 +42,11 @@ export function ToolPage({
           {relatedLearn ? (
             <p className="learn-related">
               New here? Read <Link href={relatedLearn.href}>{relatedLearn.label}</Link>, or open the{" "}
-              <Link href="/">free salary timer</Link> on the homepage.
+              <Link href="/">salary timer</Link> on the homepage.
             </p>
           ) : (
             <p className="learn-related">
-              Or start on the homepage with the <Link href="/">free salary timer</Link>.
+              Or start on the homepage with the <Link href="/">salary timer</Link>.
             </p>
           )}
         </div>
