@@ -58,37 +58,37 @@ export function PainPoints() {
     {
       icon: "📅",
       tone: "i-peach",
-      title: "Payday amnesia",
+      title: "Payday amnesia — one number, once a month",
       body: "Thirty days of effort arrive as one number in your bank app, already spoken for by rent. The work itself never feels like it added up to anything.",
     },
     {
       icon: "😴",
       tone: "i-butter",
-      title: "The 3pm slump",
+      title: "The 3pm slump — the clock moves, pay doesn't",
       body: "Three hours left and no way to feel progress. The clock moves, the counter doesn't — so the afternoon just feels like a long grey nothing.",
     },
     {
       icon: "💬",
       tone: "i-lilac",
-      title: "\u201cCan we grab 15 minutes?\u201d",
+      title: "\u201cCan we grab 15 minutes?\u201d — that half hour isn't free",
       body: "Meetings are free at the moment you accept them. You only find out what that half hour cost when the month is over and nothing moved.",
     },
     {
       icon: "⏳",
       tone: "i-mint",
-      title: "Overtime that vanishes",
+      title: "Overtime that vanishes — extra hours, no trace",
       body: "Four extra evenings, one slightly bigger payslip, zero sense of which hours produced it. Extra effort disappears into the average.",
     },
     {
       icon: "🎯",
       tone: "i-pink",
-      title: "Savings are abstract",
+      title: "Savings are abstract — hours are not",
       body: "\u201cSave $2,000\u201d is a number with no weight. \u201c74 hours of my life\u201d is something you can actually decide about.",
     },
     {
       icon: "🔍",
       tone: "i-butter",
-      title: "You don't know your real rate",
+      title: "You don't know your real rate — 2,080 is a fiction",
       body: "Salary ÷ 2,080 is not your hourly rate if you work 47 hours a week and answer Slack on Sundays. Most people are paid less per hour than they think.",
     },
   ];
@@ -100,9 +100,9 @@ export function PainPoints() {
         <h2>Why a salary timer helps</h2>
         <p className="sec-lede">
           You work 160 hours a month and feel about four of them. A{" "}
-          <Link href="/#timer">salary timer</Link> exists because money and time are the two things
-          we&apos;re worst at feeling. Here&apos;s what that costs you — and why watching a live
-          counter changes how a working day feels.
+          <Link href="/#timer">salary timer</Link> exists because a monthly salary hides the hourly
+          trade you make all day. Here&apos;s what that costs you — and why watching a live counter
+          changes how a working day feels.
         </p>
         <div className="cards-3">
           {items.map((item) => (
@@ -385,9 +385,9 @@ export function Scenarios() {
         <div className="eyebrow">In real life</div>
         <h2>When a salary timer changes a decision</h2>
         <p className="sec-lede">
-          Four situations where seeing the number changes what you decide. A{" "}
-          <Link href="/#timer">salary timer</Link> isn&apos;t really about money — it&apos;s about
-          seeing the trade you&apos;re making while you&apos;re still allowed to make it.
+          Four situations where seeing the number changes what you decide. Each one is a choice you
+          can only price while you still have the option to turn it down — and pricing it is what
+          the <Link href="/#timer">salary timer</Link> does.
         </p>
         <div className="cards-2">
           {cards.map((c) => (
