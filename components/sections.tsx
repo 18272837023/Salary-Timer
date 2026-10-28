@@ -97,15 +97,12 @@ export function PainPoints() {
     <section className="section" id="pain">
       <div className="wrap">
         <div className="eyebrow">The problem</div>
-        <h2>
-          You work 160 hours a month.
-          <br />
-          You feel about four of them.
-        </h2>
+        <h2>Why a salary timer helps</h2>
         <p className="sec-lede">
-          A <Link href="/#timer">salary timer</Link> exists because money and time are the two
-          things we&apos;re worst at feeling. Here&apos;s what that costs you — and why watching a
-          live counter changes how a working day feels.
+          You work 160 hours a month and feel about four of them. A{" "}
+          <Link href="/#timer">salary timer</Link> exists because money and time are the two things
+          we&apos;re worst at feeling. Here&apos;s what that costs you — and why watching a live
+          counter changes how a working day feels.
         </p>
         <div className="cards-3">
           {items.map((item) => (
@@ -287,7 +284,7 @@ export function Features() {
     <section className="section" id="features">
       <div className="wrap">
         <div className="eyebrow">What&apos;s inside</div>
-        <h2>A salary timer that knows how work actually works</h2>
+        <h2>What the salary timer handles</h2>
         <p className="sec-lede">
           Most salary calculators assume a tidy 9-to-5. Real jobs have{" "}
           <Link href="/learn/are-lunch-breaks-paid">unpaid lunch breaks</Link>, rotating shifts,
@@ -331,10 +328,10 @@ export function Personas() {
     >
       <div className="wrap">
         <div className="eyebrow">Who it&apos;s for</div>
-        <h2>Built for anyone whose time has a price</h2>
+        <h2>Who the salary timer is for</h2>
         <p className="sec-lede">
-          If you&apos;re paid for hours — any hours, in any arrangement — this was made for you.
-          Shift workers can jump to the{" "}
+          Built for anyone whose time has a price. If you&apos;re paid for hours — any hours, in any
+          arrangement — this was made for you. Shift workers can jump to the{" "}
           <Link href="/shift-worker-salary-timer">shift worker salary timer</Link>, or read the{" "}
           <Link href="/learn/salary-timer-for-shift-workers">shift work guide</Link> first.
         </p>
@@ -386,9 +383,10 @@ export function Scenarios() {
     <section className="section" id="scenarios">
       <div className="wrap">
         <div className="eyebrow">In real life</div>
-        <h2>Four moments where the number changes your mind</h2>
+        <h2>When a salary timer changes a decision</h2>
         <p className="sec-lede">
-          A <Link href="/#timer">salary timer</Link> isn&apos;t really about money. It&apos;s about
+          Four situations where seeing the number changes what you decide. A{" "}
+          <Link href="/#timer">salary timer</Link> isn&apos;t really about money — it&apos;s about
           seeing the trade you&apos;re making while you&apos;re still allowed to make it.
         </p>
         <div className="cards-2">
@@ -432,7 +430,10 @@ export function HowItWorks() {
     >
       <div className="wrap">
         <div className="eyebrow">How it works</div>
-        <h2>Twenty seconds to set up. Then it just runs.</h2>
+        <h2>How to set up the salary timer</h2>
+        <p className="sec-lede">
+          Twenty seconds to set up, then it just runs. Three steps, no account.
+        </p>
         <div className="steps" style={{ marginTop: 30 }}>
           {steps.map(([title, body], i) => (
             <div className="step" key={title}>
@@ -449,7 +450,7 @@ export function HowItWorks() {
 
 export function Faq({
   items = HOME_FAQ,
-  title = "Everything people ask before they start",
+  title = "Salary timer FAQ",
   lede = "Short answers, no small print.",
   eyebrow = "Questions",
   id = "faq",
@@ -482,10 +483,10 @@ export function CtaBand() {
     <section className="section tight">
       <div className="wrap">
         <div className="cta-band">
-          <h2>Your next hour is already worth something.</h2>
+          <h2>Start the free salary timer</h2>
           <p>
-            Set it up once and watch it. It takes twenty seconds, costs nothing, and you&apos;ll
-            never look at 4:45pm the same way.
+            Your next hour is already worth something. Set it up once and watch it — it takes
+            twenty seconds, costs nothing, and you&apos;ll never look at 4:45pm the same way.
           </p>
           <Link className="btn btn-mint" href="/#timer">
             Start my salary timer
@@ -506,7 +507,7 @@ export function LearnLinks() {
       <div className="wrap">
         <div className="eyebrow">Learn</div>
         <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>
-          Guides that make the salary timer clearer
+          Guides to how salary timers work
         </h2>
         <p className="sec-lede">
           Short reads on the math behind a live salary timer — then jump back to the free tool
@@ -540,7 +541,7 @@ export function ToolLinks({ current }: { current?: string }) {
     <section className="section tight">
       <div className="wrap">
         <div className="eyebrow">Keep going</div>
-        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>The rest of the toolbox</h2>
+        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>More free salary tools</h2>
         {relatedArticle ? (
           <p className="sec-lede" style={{ marginBottom: 8 }}>
             Prefer a walkthrough first? Read{" "}
