@@ -15,6 +15,7 @@ import {
   toHHMM,
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
+import { EMOJI_PALETTE, pickWishEmoji } from "@/lib/wish";
 import { SetupPanel } from "./SetupPanel";
 import { SettlementModal } from "./SettlementModal";
 
@@ -26,8 +27,6 @@ const STATUS_COPY: Record<string, { label: string; live: boolean }> = {
   done: { label: "Clocked out", live: false },
   dayoff: { label: "Day off", live: false },
 };
-
-const WISH_EMOJIS = ["🎁", "🎧", "🎫", "👟", "🏝️", "📱", "💻", "🚲", "⌚", "🍽️", "🎮", "📚"];
 
 function clampNumber(value: string, min: number, max: number): number | null {
   const n = Number.parseFloat(value);
@@ -52,6 +51,10 @@ export function SalaryApp() {
   const [slack, setSlack] = useState({ on: false, startedAt: 0, totalSec: 0 });
   const [wishName, setWishName] = useState("");
   const [wishPrice, setWishPrice] = useState("");
+  // What the second box means. The list renders hours, so people type hours;
+  // the form used to read the same digits as a price and quietly turn 10 into
+  // 0.3 h. The unit is now explicit and converted at the edge.
+  const [wishUnit, setWishUnit] = useState<"price" | "hours">("price");
   const [extraLabel, setExtraLabel] = useState("");
   const [extraAmount, setExtraAmount] = useState("");
 
@@ -147,11 +150,39 @@ export function SalaryApp() {
 
   const blur = privacy ? " blurred" : "";
 
+  // Live read-back of the wishlist form so the number the visitor types and the
+  // number that lands in the list are never a surprise.
+  const wishTyped = clampNumber(wishPrice, 0, 100_000_000);
+  let wishPreview: string;
+  if (wishTyped === null || wishTyped <= 0) {
+    wishPreview = wishUnit === "hours" ? "type hours, e.g. 10" : "type a price, e.g. 120";
+  } else if (derived.hourlyCents <= 0) {
+    wishPreview = "set your pay first";
+  } else if (wishUnit === "hours") {
+    wishPreview = `≈ ${formatCents(Math.round(wishTyped * derived.hourlyCents), settings.currency)}`;
+  } else {
+    wishPreview = `≈ ${((wishTyped * 100) / derived.hourlyCents).toFixed(1)} h of work`;
+  }
+
   function addWish() {
     const name = wishName.trim();
-    const price = clampNumber(wishPrice, 0.01, 100_000_000);
-    if (!name || price === null) {
-      show("Name and price, please");
+    const value = clampNumber(wishPrice, 0.01, 100_000_000);
+    if (!name || value === null) {
+      show("Name and a number, please");
+      return;
+    }
+    let priceCents: number;
+    if (wishUnit === "hours") {
+      if (derived.hourlyCents <= 0) {
+        show("Set your pay first — hours need an hourly rate");
+        return;
+      }
+      priceCents = Math.round(value * derived.hourlyCents);
+    } else {
+      priceCents = Math.round(value * 100);
+    }
+    if (priceCents <= 0) {
+      show("That works out to nothing — try a bigger number");
       return;
     }
     update({
@@ -160,14 +191,25 @@ export function SalaryApp() {
         {
           id: `w${Date.now()}`,
           name: name.slice(0, 40),
-          priceCents: Math.round(price * 100),
-          emoji: WISH_EMOJIS[Math.floor(Math.random() * WISH_EMOJIS.length)],
+          priceCents,
+          // Matched to the name, not drawn at random.
+          emoji: pickWishEmoji(name),
         },
       ],
     });
     setWishName("");
     setWishPrice("");
     show("Added to your wishlist");
+  }
+
+  function setWishEmoji(id: string, choice: string) {
+    update({
+      wishlist: settings.wishlist.map((w) => {
+        if (w.id !== id) return w;
+        if (choice === "auto") return { ...w, emoji: pickWishEmoji(w.name), emojiPicked: false };
+        return { ...w, emoji: choice, emojiPicked: true };
+      }),
+    });
   }
 
   function addExtra() {
@@ -382,7 +424,25 @@ export function SalaryApp() {
                       : 0;
                   return (
                     <li key={item.id}>
-                      <span className="em">{item.emoji}</span>
+                      <span className="em" title="Change emoji">
+                        {item.emoji}
+                        <select
+                          className="em-pick"
+                          value={item.emojiPicked ? item.emoji : "auto"}
+                          onChange={(e) => setWishEmoji(item.id, e.target.value)}
+                          aria-label={`Change the emoji for ${item.name}`}
+                        >
+                          <option value="auto">auto — {pickWishEmoji(item.name)}</option>
+                          {!EMOJI_PALETTE.includes(item.emoji) ? (
+                            <option value={item.emoji}>{item.emoji}</option>
+                          ) : null}
+                          {EMOJI_PALETTE.filter((e) => e !== item.emoji).map((e) => (
+                            <option key={e} value={e}>
+                              {e}
+                            </option>
+                          ))}
+                        </select>
+                      </span>
                       <span className="nm">{item.name}</span>
                       <span className="hr">{hours > 0 ? `${hours.toFixed(1)} h` : "—"}</span>
                       <span
@@ -418,6 +478,7 @@ export function SalaryApp() {
                 })
               )}
             </ul>
+            <div className="wish-em-hint">Tap an emoji to change it</div>
             <div className="mini-form">
               <input
                 placeholder="Concert ticket"
@@ -429,16 +490,43 @@ export function SalaryApp() {
               />
               <input
                 type="number"
-                placeholder="120"
+                placeholder={wishUnit === "hours" ? "10" : "120"}
                 inputMode="decimal"
+                min={0}
+                step="any"
                 value={wishPrice}
                 onChange={(e) => setWishPrice(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addWish()}
-                aria-label="Wishlist item price"
+                aria-label={
+                  wishUnit === "hours"
+                    ? "Wishlist item cost in hours of work"
+                    : "Wishlist item price"
+                }
               />
               <button type="button" onClick={addWish} aria-label="Add wishlist item">
                 +
               </button>
+            </div>
+            <div className="wish-unit-row">
+              <div className="wish-unit" role="group" aria-label="Second box is entered as">
+                <button
+                  type="button"
+                  className={wishUnit === "price" ? "on" : ""}
+                  aria-pressed={wishUnit === "price"}
+                  onClick={() => setWishUnit("price")}
+                >
+                  {sym} price
+                </button>
+                <button
+                  type="button"
+                  className={wishUnit === "hours" ? "on" : ""}
+                  aria-pressed={wishUnit === "hours"}
+                  onClick={() => setWishUnit("hours")}
+                >
+                  hours
+                </button>
+              </div>
+              <span className="wish-preview">{wishPreview}</span>
             </div>
           </div>
 

@@ -190,6 +190,15 @@ export function compute(
     }
   }
 
+  // Manual adjustment for today. People know their real overtime better than
+  // the schedule does — a shift that ran long, a late finish, or a day the
+  // clock was never started. The clock still wins once it has counted more than
+  // the typed value, so the number can never freeze below reality.
+  const manual = settings.otOverride;
+  if (settings.overtime && manual && manual.day === dateKey(now) && manual.min > overtimeMin) {
+    overtimeMin = manual.min;
+  }
+
   const earnedCents = Math.round(
     (paidElapsedMin / 60) * derived.hourlyCents +
       (overtimeMin / 60) * derived.hourlyCents * (settings.otMult || 1.5),

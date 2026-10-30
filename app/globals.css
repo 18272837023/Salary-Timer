@@ -255,6 +255,13 @@ h1 .hl{
 .wishlist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; max-height:190px; overflow:auto}
 .wishlist li{display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:700}
 .wishlist .em{font-size:18px}
+.wishlist .em{position:relative; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:9px; cursor:pointer; transition:background .15s ease}
+.wishlist .em:hover{background:var(--cream)}
+.wishlist .em:focus-within{background:var(--cream); outline:2px solid var(--mint)}
+/* Invisible native select on top of the glyph — a dropdown that can never be
+   clipped by the scrolling list, and works with a keyboard or on mobile. */
+.wishlist .em-pick{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:none; background:none; -webkit-appearance:none; appearance:none; font-size:18px}
+.wish-em-hint{font-size:10.5px; font-weight:700; color:var(--faint); margin-top:6px; letter-spacing:.01em}
 .wishlist .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .wishlist .hr{color:var(--faint); font-size:12.5px; font-variant-numeric:tabular-nums}
 .wishlist button{border:none; background:none; color:var(--faint); cursor:pointer; font-size:15px; padding:0 2px}
@@ -265,6 +272,14 @@ h1 .hl{
 .mini-form input:focus{border-color:var(--mint); background:#fff}
 .mini-form input[type=number]{max-width:88px}
 .mini-form button{border:2px solid var(--line-2); background:#fff; border-radius:12px; padding:0 12px; font-family:var(--display); font-weight:800; cursor:pointer; color:var(--ink-2)}
+
+/* unit switch for the wishlist's second box + live read-back */
+.wish-unit-row{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
+.wish-unit{display:inline-flex; border:2px solid var(--line); border-radius:99px; overflow:hidden; background:var(--cream)}
+.wish-unit button{border:none; background:none; cursor:pointer; font-family:var(--body); font-weight:800; font-size:11.5px; line-height:1; color:var(--faint); padding:5px 10px; transition:background .16s ease, color .16s ease}
+.wish-unit button.on{background:var(--ink); color:#fff}
+.wish-unit button:not(.on):hover{color:var(--ink-2)}
+.wish-preview{font-size:11.5px; font-weight:700; color:var(--faint); margin-left:auto; font-variant-numeric:tabular-nums}
 
 /* ---------- pay-setup panel (frosted glass modal) ---------- */
 .scrim{
@@ -313,6 +328,24 @@ h1 .hl{
 .field{margin-bottom:18px}
 .field > label{display:block; font-family:var(--display); font-weight:800; font-size:13.5px; margin-bottom:7px}
 .help{font-size:12px; color:var(--faint); font-weight:700; margin-top:5px}
+
+/* Overtime rate + hours read-out under the multiplier select */
+.ot-note{margin-top:6px; font-family:var(--body); font-weight:700; font-size:12px; color:var(--faint)}
+.ot-note b{color:var(--ink-2); font-weight:800; font-variant-numeric:tabular-nums}
+.ot-note b span{font-size:11px; font-weight:800; color:var(--faint); margin-left:1px}
+.ot-pay{margin-top:8px; padding:10px 12px; border:2px solid var(--line); border-radius:14px; background:var(--cream)}
+.ot-row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.ot-k{font-family:var(--display); font-weight:800; font-size:12.5px; color:var(--ink-2)}
+.ot-v-sm{display:inline-flex; align-items:baseline; gap:6px; font-family:var(--display); font-weight:800; font-size:14px; color:var(--ink); font-variant-numeric:tabular-nums}
+.ot-edit{border:none; background:none; padding:0 1px 1px; font:inherit; color:inherit; cursor:text; border-bottom:1.5px dashed var(--line-2); font-variant-numeric:tabular-nums}
+.ot-edit:hover{background:#fff; border-radius:4px 4px 0 0}
+.ot-input{border:none; border-bottom:1.5px solid var(--mint); background:#fff; padding:0 1px 1px; font:inherit; color:inherit; text-align:right; font-variant-numeric:tabular-nums; outline:none; border-radius:4px 4px 0 0}
+.ot-input-sm{width:3.6em; font-size:14px}
+.ot-edit-sm{font-size:14px}
+.ot-unit{font-size:11.5px; font-weight:800; color:var(--faint); margin-left:2px}
+.ot-badge{margin-left:6px; padding:1px 6px; border-radius:99px; background:var(--mint); color:#0b3b2e; font-family:var(--body); font-weight:800; font-size:10px; letter-spacing:.02em; vertical-align:middle}
+.ot-reset{border:none; background:none; padding:0; cursor:pointer; font-family:var(--body); font-weight:800; font-size:11px; color:var(--faint)}
+.ot-reset:hover{color:var(--ink-2)}
 input[type=number], input[type=time], input[type=date], select{
   width:100%; padding:11px 12px; border-radius:14px; border:2px solid var(--line);
   background:var(--cream); color:var(--ink); font-family:var(--body); font-weight:700; font-size:15px;

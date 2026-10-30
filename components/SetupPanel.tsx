@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CURRENCIES, centsToInput, formatCents, formatRate, parseAmountToCents, symbolFor } from "@/lib/money";
-import { compute, derive, formatHM } from "@/lib/schedule";
+import { compute, dateKey, derive, formatHM } from "@/lib/schedule";
 import { makeId } from "@/lib/defaults";
-import { useSettings, useToast } from "@/lib/store";
+import { useNow, useSettings, useToast } from "@/lib/store";
 import type { PayMode, Settings } from "@/lib/types";
 
 const MODES: { value: PayMode; label: string }[] = [
@@ -16,6 +16,20 @@ const MODES: { value: PayMode; label: string }[] = [
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Preset multipliers offered in the dropdown; anything else renders as custom. */
+const OT_PRESETS = [1.25, 1.5, 1.75, 2];
+
+function multLabel(mult: number): string {
+  return Number.isInteger(mult) ? String(mult) : String(Math.round(mult * 100) / 100);
+}
+
+/** US payroll names for the common multipliers — "1.5×" alone is ambiguous. */
+function otName(mult: number): string | null {
+  if (mult === 1.5) return "Time and a half";
+  if (mult === 2) return "Double time";
+  return null;
+}
 
 const AMOUNT_LABEL: Record<PayMode, string> = {
   annual: "Annual salary (gross)",
@@ -34,6 +48,9 @@ export function SetupPanel({
   const { show } = useToast();
   const [draft, setDraft] = useState<Settings>(settings);
   const [amountText, setAmountText] = useState(centsToInput(settings.amountCents));
+  // Manual overtime for today, entered in hours.
+  const [otHoursText, setOtHoursText] = useState<string | null>(null);
+  const [otHoursEditing, setOtHoursEditing] = useState(false);
   const amountRef = useRef<HTMLInputElement>(null);
   // Portal to <body> so sticky header (z-index 50) can't cover the dialog —
   // it's otherwise trapped under .app-shell's stacking context (z-index 1).
@@ -52,6 +69,8 @@ export function SetupPanel({
     if (!open) return;
     setDraft(settings);
     setAmountText(centsToInput(settings.amountCents));
+    setOtHoursText(null);
+    setOtHoursEditing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- seed on open, not on every settings tick
   }, [open]);
 
@@ -71,8 +90,47 @@ export function SetupPanel({
 
   const preview = useMemo(() => derive(draft), [draft]);
 
+  // Live "how much overtime have I done today" — the panel is a settings screen,
+  // but this is the one number people want to check while they are in here.
+  // Recomputing once a minute is enough: the value is displayed to the minute.
+  const now = useNow(open ? 1000 : 30000);
+  const minuteKey = Math.floor(now.getTime() / 60_000);
+  const overtimeMin = useMemo(
+    () => (draft.overtime ? compute(draft, new Date(), { demo: false }).overtimeMin : 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- minute granularity only
+    [draft, minuteKey],
+  );
+
   function patch(next: Partial<Settings>) {
     setDraft((prev) => ({ ...prev, ...next }));
+  }
+
+  /** Manual overtime is scoped to today only — yesterday's number is history. */
+  const todayKey = dateKey(new Date());
+  const manualOt =
+    draft.otOverride && draft.otOverride.day === todayKey ? draft.otOverride : undefined;
+
+  function commitOtHours() {
+    if (otHoursText === null) return;
+    const typed = Number.parseFloat(otHoursText.replace(/[^0-9.]/g, ""));
+    setOtHoursEditing(false);
+    if (!Number.isFinite(typed) || typed < 0) return;
+    const min = Math.min(24 * 60, Math.round(typed * 60));
+    // The clock is the floor: typing less than it already counted would look
+    // like the field is broken, so say why instead of silently ignoring it.
+    const clockMin = compute({ ...draft, otOverride: undefined }, new Date(), {
+      demo: false,
+    }).overtimeMin;
+    if (min <= clockMin) {
+      show(
+        clockMin > 0
+          ? `The clock already counts ${formatHM(clockMin)} today`
+          : "Enter how many overtime hours you did",
+      );
+      patch({ otOverride: undefined });
+      return;
+    }
+    patch({ otOverride: { day: todayKey, min } });
   }
 
   function toggleDay(day: number) {
@@ -336,7 +394,77 @@ export function SetupPanel({
                   <option value="1.5">1.5× overtime</option>
                   <option value="1.75">1.75× overtime</option>
                   <option value="2">2× overtime</option>
+                  {!OT_PRESETS.includes(draft.otMult) && (
+                    <option value={String(draft.otMult)}>{multLabel(draft.otMult)}× overtime</option>
+                  )}
                 </select>
+                <div className="ot-note">
+                  {otName(draft.otMult) ? `${otName(draft.otMult)} — ` : "Overtime rate — "}
+                  <b>
+                    {formatRate(preview.hourlyCents * draft.otMult, draft.currency)}
+                    <span>/hr</span>
+                  </b>
+                </div>
+                <div className="ot-pay">
+                  <div className="ot-row">
+                    <span className="ot-k">
+                      Overtime today
+                      {manualOt ? <span className="ot-badge">manual</span> : null}
+                    </span>
+                    <span className="ot-v-sm">
+                      {otHoursEditing ? (
+                        <>
+                          <input
+                            className="ot-input ot-input-sm"
+                            inputMode="decimal"
+                            autoFocus
+                            aria-label="Overtime hours today"
+                            value={otHoursText ?? ""}
+                            onChange={(e) => setOtHoursText(e.target.value)}
+                            onFocus={(e) => e.currentTarget.select()}
+                            onBlur={commitOtHours}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                commitOtHours();
+                              }
+                              if (e.key === "Escape") {
+                                setOtHoursText(null);
+                                setOtHoursEditing(false);
+                              }
+                            }}
+                          />
+                          <span className="ot-unit">h</span>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="ot-edit ot-edit-sm"
+                            title="Click to record today's overtime by hand"
+                            onClick={() => {
+                              setOtHoursText((overtimeMin / 60).toFixed(2));
+                              setOtHoursEditing(true);
+                            }}
+                          >
+                            {overtimeMin > 0 ? formatHM(overtimeMin) : "None yet"}
+                          </button>
+                          {manualOt ? (
+                            <button
+                              type="button"
+                              className="ot-reset"
+                              title="Back to the live clock"
+                              aria-label="Clear manual overtime"
+                              onClick={() => patch({ otOverride: undefined })}
+                            >
+                              ↺ auto
+                            </button>
+                          ) : null}
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>

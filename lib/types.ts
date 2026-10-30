@@ -43,6 +43,12 @@ export interface WishItem {
   name: string;
   priceCents: number;
   emoji: string;
+  /**
+   * True when the visitor chose the emoji by hand. Without it the emoji is
+   * re-derived from the name, which is how items saved under the old random
+   * assignment get repaired.
+   */
+  emojiPicked?: boolean;
 }
 
 export interface Settings {
@@ -61,6 +67,12 @@ export interface Settings {
   payday: number | "last";
   overtime: boolean;
   otMult: number;
+  /**
+   * Manual overtime for one specific day ("YYYY-MM-DD"), in minutes. Lets the
+   * visitor record overtime the clock could not see. The live counter still
+   * takes over once it has counted more than this.
+   */
+  otOverride?: { day: string; min: number };
   privacy: boolean;
   jarGoalCents: number;
   /** percent of earnings routed to the jar */

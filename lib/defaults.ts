@@ -1,4 +1,5 @@
 import type { BreakWindow, ExtraIncome, Settings, WishItem } from "./types";
+import { normalizeWishEmoji, pickWishEmoji } from "./wish";
 
 const KEY = "salarytimer.site.v2";
 const LEGACY_KEY = "salarytimer.site.v1";
@@ -134,14 +135,34 @@ export function normalize(raw: unknown): Settings | null {
   const wishlist: WishItem[] = Array.isArray(input.wishlist)
     ? (input.wishlist as Record<string, unknown>[])
         .filter((w) => w && typeof w === "object")
-        .map((w, i) => ({
-          id: typeof w.id === "string" ? w.id : makeId("w"),
-          name: typeof w.name === "string" ? w.name.slice(0, 60) : `Item ${i + 1}`,
-          priceCents: Math.max(0, Math.round(num(w.priceCents, 0))),
-          emoji: typeof w.emoji === "string" && w.emoji ? w.emoji : "🎁",
-        }))
+        .map((w, i) => {
+          const name = typeof w.name === "string" ? w.name.slice(0, 60) : `Item ${i + 1}`;
+          const picked =
+            w.emojiPicked === true && typeof w.emoji === "string" && w.emoji.trim().length > 0;
+          return {
+            id: typeof w.id === "string" ? w.id : makeId("w"),
+            name,
+            priceCents: Math.max(0, Math.round(num(w.priceCents, 0))),
+            // Hand-picked emojis win; anything else is derived from the name, so
+            // items saved under the old random assignment (a camera wearing 💻)
+            // repair themselves on load.
+            emoji: picked ? (w.emoji as string) : pickWishEmoji(name),
+            ...(picked ? { emojiPicked: true as const } : {}),
+          };
+        })
         .filter((w) => w.name.trim().length > 0)
-    : base.wishlist;
+    : normalizeWishEmoji(base.wishlist);
+
+  const rawOverride = input.otOverride;
+  const otOverride =
+    rawOverride && typeof rawOverride === "object"
+      ? (() => {
+          const o = rawOverride as Record<string, unknown>;
+          const day = typeof o.day === "string" ? o.day : "";
+          const min = Math.min(24 * 60, Math.max(0, Math.round(num(o.min, 0))));
+          return /^\d{4}-\d{2}-\d{2}$/.test(day) && min > 0 ? { day, min } : undefined;
+        })()
+      : undefined;
 
   return {
     mode: mode === "monthly" || mode === "hourly" || mode === "annual" ? mode : base.mode,
@@ -156,7 +177,8 @@ export function normalize(raw: unknown): Settings | null {
         ? "last"
         : Math.min(31, Math.max(1, Math.round(num(input.payday, 15)))),
     overtime: inheritedOvertime ? false : input.overtime === true,
-    otMult: Math.min(3, Math.max(1, num(input.otMult, 1.5))),
+    otMult: Math.min(5, Math.max(1, num(input.otMult, 1.5))),
+    ...(otOverride ? { otOverride } : {}),
     privacy: input.privacy === true,
     jarGoalCents: Math.max(0, Math.round(num(input.jarGoalCents, base.jarGoalCents))),
     jarRate: Math.min(100, Math.max(0, num(input.jarRate, 10))),
