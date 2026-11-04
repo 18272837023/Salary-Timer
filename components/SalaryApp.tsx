@@ -16,6 +16,8 @@ import {
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import { EMOJI_PALETTE, pickWishEmoji } from "@/lib/wish";
+import { track, trackOnce } from "@/lib/analytics";
+import { QuickStart } from "./QuickStart";
 import { SetupPanel } from "./SetupPanel";
 import { SettlementModal } from "./SettlementModal";
 
@@ -34,6 +36,18 @@ function clampNumber(value: string, min: number, max: number): number | null {
   return Math.min(max, Math.max(min, n));
 }
 
+/** 3725 → "1h 02m", 95 → "1m 35s" — how long until the next milestone. */
+function untilLabel(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${pad2(s % 60)}s`;
+  return `${Math.floor(s / 3600)}h ${pad2(Math.floor((s % 3600) / 60))}m`;
+}
+
+function pad2(n: number): string {
+  return (n < 10 ? "0" : "") + n;
+}
+
 export function SalaryApp() {
   const { settings, demo, hydrated, update } = useSettings();
   const { show } = useToast();
@@ -48,6 +62,7 @@ export function SalaryApp() {
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [settleOpen, setSettleOpen] = useState(false);
+  const [qsOpen, setQsOpen] = useState(false);
   const [slack, setSlack] = useState({ on: false, startedAt: 0, totalSec: 0 });
   const [wishName, setWishName] = useState("");
   const [wishPrice, setWishPrice] = useState("");
@@ -64,6 +79,41 @@ export function SalaryApp() {
   const closePanel = useCallback(() => setPanelOpen(false), []);
   const openPanel = useCallback(() => setPanelOpen(true), []);
   const closeSettle = useCallback(() => setSettleOpen(false), []);
+
+  // First visit: the demo has done its job once the number has visibly moved.
+  // Offer the three-question wizard at that point — long enough that the page
+  // isn't still loading, short enough that the tab is still open. Once per
+  // session; "Skip" is remembered for the rest of it.
+  const busyRef = useRef(false);
+  busyRef.current = panelOpen || settleOpen;
+
+  useEffect(() => {
+    if (!live || !demo) return;
+    let dismissed = false;
+    try {
+      dismissed = sessionStorage.getItem("st.qs.skip") === "1";
+    } catch {
+      dismissed = false;
+    }
+    if (dismissed) return;
+    const timer = setTimeout(() => {
+      // Never stack dialogs: if they opened the full panel or the settlement
+      // sheet while waiting, that is a better signal than ours.
+      if (busyRef.current) return;
+      setQsOpen(true);
+      trackOnce("quickstart_shown");
+    }, 12_000);
+    return () => clearTimeout(timer);
+  }, [live, demo]);
+
+  const closeQuickStart = useCallback(() => {
+    setQsOpen(false);
+    try {
+      sessionStorage.setItem("st.qs.skip", "1");
+    } catch {
+      /* private mode — the wizard simply may reappear next visit */
+    }
+  }, []);
 
   const dayKey = dateKey(now);
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
@@ -150,6 +200,44 @@ export function SalaryApp() {
 
   const blur = privacy ? " blurred" : "";
 
+  // A counter with no destination is just a number climbing. Milestones give it
+  // one. The step is picked so the next one is roughly 90 seconds away: fast
+  // enough that something happens while you watch, slow enough that the bar has
+  // time to fill. A $37/hr earner gets a dollar about every 96 seconds; a
+  // $10/hr earner gets a quarter about every 90.
+  const MILE_LADDER = [25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000];
+  const mileMinStep = derived.perSecondCents * 90;
+  const mileStepCents = MILE_LADDER.find((s) => s >= mileMinStep) ?? 100_000;
+  const mileNextCents = (Math.floor(snapshot.earnedCents / mileStepCents) + 1) * mileStepCents;
+  const mileRemainCents = Math.max(0, mileNextCents - snapshot.earnedCents);
+  const mileSeconds = derived.perSecondCents > 0 ? mileRemainCents / derived.perSecondCents : 0;
+  const mileProgress = Math.min(1, Math.max(0, 1 - mileRemainCents / mileStepCents));
+  const mileDigits: 0 | 2 = mileStepCents < 100 ? 2 : 0;
+  const mileIdx = Math.floor(snapshot.earnedCents / mileStepCents);
+
+  const mileRef = useRef(-1);
+  const popsRef = useRef(0);
+  const [pop, setPop] = useState(false);
+
+  useEffect(() => {
+    if (!live || !earning) return;
+    if (mileRef.current < 0) {
+      mileRef.current = mileIdx;
+      return;
+    }
+    if (mileIdx <= mileRef.current) return;
+    mileRef.current = mileIdx;
+    setPop(true);
+    // Capped on purpose: a fast counter would otherwise flood GA with dozens of
+    // hits per visit. How many arrived is the signal, not each one.
+    if (popsRef.current < 5) {
+      popsRef.current += 1;
+      track("milestone", { n: popsRef.current, step_cents: mileStepCents });
+    }
+    const timer = setTimeout(() => setPop(false), 900);
+    return () => clearTimeout(timer);
+  }, [mileIdx, live, earning, mileStepCents]);
+
   // Live read-back of the wishlist form so the number the visitor types and the
   // number that lands in the list are never a surprise.
   const wishTyped = clampNumber(wishPrice, 0, 100_000_000);
@@ -199,6 +287,7 @@ export function SalaryApp() {
     });
     setWishName("");
     setWishPrice("");
+    track("wish_add", { unit: wishUnit, items: settings.wishlist.length + 1 });
     show("Added to your wishlist");
   }
 
@@ -256,7 +345,10 @@ export function SalaryApp() {
             <button
               type="button"
               className="btn btn-ghost btn-sm"
-              onClick={() => setSettleOpen(true)}
+              onClick={() => {
+                track("settle_open");
+                setSettleOpen(true);
+              }}
             >
               📋 Today&apos;s settlement
             </button>
@@ -268,10 +360,10 @@ export function SalaryApp() {
 
         <div className={`demo-bar${demo ? " on" : ""}`}>
           <span>
-            👋 You&apos;re looking at a demo salary of <b>$78,000/yr</b>. The clock is running so you
-            can see how it feels.
+            👋 This is a demo salary of <b>$78,000/yr</b>. The clock is running so you can see how
+            it feels — <b>3 questions</b> and it becomes yours.
           </span>
-          <button type="button" className="btn btn-ink btn-sm" onClick={openPanel}>
+          <button type="button" className="btn btn-ink btn-sm" onClick={() => setQsOpen(true)}>
             Make it mine
           </button>
         </div>
@@ -279,11 +371,20 @@ export function SalaryApp() {
         <div className="grid-main">
           <div className={`tick-card${earning ? "" : " paused"}`}>
             <div className="tick-label">Earned today</div>
-            <div className={`ticker${blur}`}>
+            <div className={`ticker${blur}${pop ? " pop" : ""}`}>
               <span className="cur">{sym}</span>
               <span>{ticker.whole}</span>
               <span className="cents">{ticker.frac}</span>
             </div>
+            {live && earning && mileSeconds > 0 ? (
+              <div className="next-mile">
+                <span>Next {formatCents(mileNextCents, settings.currency, { digits: mileDigits })}</span>
+                <span className="bar" aria-hidden="true">
+                  <i style={{ width: `${(mileProgress * 100).toFixed(1)}%` }} />
+                </span>
+                <b>{untilLabel(mileSeconds)}</b>
+              </div>
+            ) : null}
             {pauseNote ? <div className="tick-pause">{pauseNote}</div> : null}
             <div className="tick-sub">
               <span>
@@ -364,7 +465,8 @@ export function SalaryApp() {
               <button
                 type="button"
                 className={`slack-btn${slack.on ? " on" : ""}`}
-                onClick={() =>
+                onClick={() => {
+                  track("slack_toggle", { on: !slack.on });
                   setSlack((prev) =>
                     prev.on
                       ? {
@@ -373,8 +475,8 @@ export function SalaryApp() {
                           totalSec: prev.totalSec + (now.getTime() - prev.startedAt) / 1000,
                         }
                       : { on: true, startedAt: now.getTime(), totalSec: prev.totalSec },
-                  )
-                }
+                  );
+                }}
               >
                 {slack.on ? "Back to work" : "☕ Away"}
               </button>
@@ -604,6 +706,7 @@ export function SalaryApp() {
       </div>
 
       <SetupPanel open={panelOpen} onClose={closePanel} />
+      <QuickStart open={qsOpen} onClose={closeQuickStart} />
       <SettlementModal
         open={settleOpen}
         onClose={closeSettle}
