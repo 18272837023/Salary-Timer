@@ -1,16 +1,12 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
 import { SalaryApp } from "@/components/SalaryApp";
 import { Faq, ToolLinks, type FaqItem } from "@/components/sections";
 import type { ToolRoute } from "@/lib/site";
 import { getLearn } from "@/lib/site";
 
-/**
- * Shared shell for every long-tail landing page.
- *
- * Each page gets a real H1, its own copy, the live tool, its own FAQ and a
- * breadcrumb — so they are genuinely distinct documents rather than doorway
- * pages pointing at the homepage.
- */
 export function ToolPage({
   tool,
   h1,
@@ -24,6 +20,7 @@ export function ToolPage({
   faq: FaqItem[];
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   const relatedLearn = tool.relatedLearnHref ? getLearn(tool.relatedLearnHref) : null;
 
   return (
@@ -32,8 +29,8 @@ export function ToolPage({
         <div className="blob m" />
         <div className="wrap">
           <nav className="crumbs" aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span aria-hidden="true">/</span>
+            <Link href="/">{t("tool.breadcrumbHome")}</Link>
+            <span aria-hidden="true">{t("tool.breadcrumbSlash")}</span>
             <span aria-current="page">{tool.label}</span>
           </nav>
 
@@ -41,12 +38,11 @@ export function ToolPage({
           <p className="lede">{lede}</p>
           {relatedLearn ? (
             <p className="learn-related">
-              New here? Read <Link href={relatedLearn.href}>{relatedLearn.label}</Link>, or open the{" "}
-              <Link href="/">salary timer</Link> on the homepage.
+              {t("tool.relatedNew")} <Link href={relatedLearn.href}>{relatedLearn.label}</Link>{t("tool.relatedOr")}
             </p>
           ) : (
             <p className="learn-related">
-              Or start on the homepage with the <Link href="/">salary timer</Link>.
+              {t("tool.relatedOrShort")}
             </p>
           )}
         </div>
@@ -60,13 +56,20 @@ export function ToolPage({
 
       <Faq
         items={faq}
-        eyebrow="Questions"
-        title={`${tool.label}: the short answers`}
-        lede="Everything people ask about this particular calculation."
+        eyebrow={t("faq.eyebrow")}
+        title={`${tool.label}: ${langShort(t("tools.faqTitle", { label: tool.label }))}`}
+        lede={t("tools.faqLede")}
         id="faq"
       />
 
       <ToolLinks current={tool.href} />
     </main>
   );
+}
+
+function langShort(s: string): string {
+  // The i18n value already contains the label interpolated; we just need the
+  // part after the colon. But since the title format is already fine as-is,
+  // we return the full string.
+  return s;
 }

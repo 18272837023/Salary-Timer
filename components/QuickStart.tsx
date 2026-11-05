@@ -2,26 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useI18n } from "@/lib/i18n";
 import { track } from "@/lib/analytics";
 import { SETTINGS_VERSION } from "@/lib/defaults";
 import { formatRate, symbolFor } from "@/lib/money";
 import { derive, toHHMM } from "@/lib/schedule";
 import { useSettings, useToast } from "@/lib/store";
 import type { BreakWindow, PayMode, Settings } from "@/lib/types";
-
-/**
- * Three-question onboarding.
- *
- * The full `SetupPanel` is the right screen for someone who wants to tune
- * breaks, overtime and paydays — and the wrong screen for a first-time visitor
- * who has just watched a demo number tick. Eight fields is a wall; three is a
- * conversation. So the demo bar opens this instead, and the panel stays one
- * click away for people who want the details.
- *
- * Every step shows the consequence of the input immediately (per second, per
- * hour, hours of your life), because a number that moves is the only reason
- * anyone stays on a page like this.
- */
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday … Sunday
 const GOALS = [500, 1000, 2500, 5000];
@@ -31,7 +18,6 @@ function daysFor(count: number): number[] {
   return DAY_ORDER.slice(0, Math.min(7, Math.max(1, count))).sort((a, b) => a - b);
 }
 
-/** 09:00 plus the paid hours, plus a 30-minute lunch once the shift is long enough. */
 function shiftFor(hours: number): { start: string; end: string; breaks: BreakWindow[] } {
   const paidMin = Math.round(hours * 60);
   const lunch = hours >= 6;
@@ -49,6 +35,7 @@ function hoursLabel(hours: number): string {
 }
 
 export function QuickStart({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, lang } = useI18n();
   const { settings, replace } = useSettings();
   const { show } = useToast();
 
@@ -63,9 +50,6 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
   useEffect(() => setMounted(true), []);
 
-  // Seed from whatever is already saved, so reopening the wizard edits rather
-  // than resets. Keyed on `open` only — a settings tick mid-edit must not wipe
-  // the draft the visitor is dragging.
   useEffect(() => {
     if (!open) return;
     setStep(0);
@@ -75,7 +59,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     setDays(settings.days.length || 5);
     setHours(8);
     setGoal(Math.max(100, Math.round(settings.jarGoalCents / 100)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed on open only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const onCloseRef = useRef(onClose);
@@ -113,6 +97,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
   const preview = useMemo(() => derive(draft), [draft]);
   const sym = symbolFor(settings.currency);
+  const locale = lang === "zh" ? "zh-CN" : "en-US";
 
   const goalCents = Math.round(goal * 100);
   const goalHours = preview.hourlyCents > 0 ? goalCents / preview.hourlyCents : 0;
@@ -122,7 +107,6 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       ? goalCents / ((weeklyPayCents * settings.jarRate) / 100)
       : 0;
 
-  /** Carry the value across when the unit changes, instead of leaving a stale number. */
   function switchMode(next: PayMode) {
     if (next === mode) return;
     const hoursPerYear = preview.annualHours > 0 ? preview.annualHours : 2_080;
@@ -136,7 +120,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
   function finish() {
     if (draft.amountCents <= 0) {
-      show("Add your pay first 🙂");
+      show(t("qs.addPayFirst"));
       setStep(0);
       return;
     }
@@ -145,11 +129,10 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       mode,
       days: days,
       hours: hours,
-      // Structure only — never the salary itself.
       annual_hours: Math.round(preview.annualHours),
     });
     onClose();
-    show("Saved — your clock is running");
+    show(t("qs.saved"));
   }
 
   if (!mounted) return null;
@@ -161,7 +144,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
         className={`qs${open ? " on" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Quick setup"
+        aria-label={t("qs.title")}
         aria-hidden={!open}
         inert={!open ? true : undefined}
       >
@@ -172,15 +155,15 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
             ))}
           </div>
           <button type="button" className="qs-skip" onClick={onClose}>
-            {step === 2 ? "Not now" : "Skip"}
+            {step === 2 ? t("qs.notNow") : t("qs.skip")}
           </button>
         </div>
 
         <div className="qs-body">
           {step === 0 ? (
             <>
-              <h3>What do you earn?</h3>
-              <p className="qs-sub">Gross, before tax. Nothing leaves your browser.</p>
+              <h3>{t("qs.step1.title")}</h3>
+              <p className="qs-sub">{t("qs.step1.sub")}</p>
 
               <div className="qs-seg">
                 <button
@@ -188,14 +171,14 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                   className={mode === "annual" ? "on" : ""}
                   onClick={() => switchMode("annual")}
                 >
-                  Per year
+                  {t("qs.step1.perYear")}
                 </button>
                 <button
                   type="button"
                   className={mode === "hourly" ? "on" : ""}
                   onClick={() => switchMode("hourly")}
                 >
-                  Per hour
+                  {t("qs.step1.perHour")}
                 </button>
               </div>
 
@@ -213,9 +196,9 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                     if (mode === "annual") setAnnual(next);
                     else setHourly(next);
                   }}
-                  aria-label={mode === "annual" ? "Annual salary" : "Hourly rate"}
+                  aria-label={mode === "annual" ? t("qs.annualLabel") : t("qs.hourlyLabel")}
                 />
-                <span className="unit">{mode === "annual" ? "/ year" : "/ hour"}</span>
+                <span className="unit">{mode === "annual" ? t("qs.step1.yearUnit") : t("qs.step1.hourUnit")}</span>
               </div>
 
               <input
@@ -230,21 +213,18 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                   if (mode === "annual") setAnnual(v);
                   else setHourly(v);
                 }}
-                aria-label="Drag to adjust"
+                aria-label={t("qs.dragAdjust")}
               />
             </>
           ) : null}
 
           {step === 1 ? (
             <>
-              <h3>How many hours is that?</h3>
-              <p className="qs-sub">
-                A $78,000 salary is $37.50/hr on 2,080 hours — and $48.75/hr on 1,600. The hours
-                are the part everyone forgets.
-              </p>
+              <h3>{t("qs.step2.title")}</h3>
+              <p className="qs-sub">{t("qs.step2.sub")}</p>
 
               <div className="qs-field">
-                <div className="qs-k">Days a week</div>
+                <div className="qs-k">{t("qs.step2.daysWeek")}</div>
                 <div className="qs-days">
                   {DAY_OPTIONS.map((d) => (
                     <button
@@ -261,7 +241,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
               <div className="qs-field">
                 <div className="qs-k">
-                  Paid hours a day <b>{hoursLabel(hours)}</b>
+                  {t("qs.step2.hoursDay")} <b>{hoursLabel(hours)}</b>
                 </div>
                 <input
                   className="qs-range"
@@ -271,23 +251,23 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                   step={0.5}
                   value={hours}
                   onChange={(e) => setHours(Number.parseFloat(e.target.value))}
-                  aria-label="Paid hours a day"
+                  aria-label={t("qs.step2.hoursDay")}
                 />
               </div>
 
               <div className="qs-fact">
-                That is <b>{Math.round(preview.annualHours).toLocaleString("en-US")}</b> paid hours
-                a year — and <b>{formatRate(preview.hourlyCents, settings.currency)}</b> an hour.
+                {t("qs.step2.fact", {
+                  hours: Math.round(preview.annualHours).toLocaleString(locale),
+                  rate: formatRate(preview.hourlyCents, settings.currency),
+                })}
               </div>
             </>
           ) : null}
 
           {step === 2 ? (
             <>
-              <h3>What are you saving for?</h3>
-              <p className="qs-sub">
-                We will put {settings.jarRate}% of everything you earn toward it.
-              </p>
+              <h3>{t("qs.step3.title")}</h3>
+              <p className="qs-sub">{t("qs.step3.sub", { rate: settings.jarRate })}</p>
 
               <div className="qs-goals">
                 {GOALS.map((g) => (
@@ -298,7 +278,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                     onClick={() => setGoal(g)}
                   >
                     {sym}
-                    {g.toLocaleString("en-US")}
+                    {g.toLocaleString(locale)}
                   </button>
                 ))}
               </div>
@@ -315,27 +295,26 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                     const v = Number.parseFloat(e.target.value);
                     setGoal(Number.isFinite(v) ? Math.max(0, v) : 0);
                   }}
-                  aria-label="Savings goal"
+                  aria-label={t("qs.savingsGoal")}
                 />
-                <span className="unit">goal</span>
+                <span className="unit">{t("qs.step3.goalUnit")}</span>
               </div>
 
               <div className="qs-fact">
                 {goalHours > 0 ? (
                   <>
-                    That is <b>{goalHours.toFixed(1)} hours</b> of your working life
+                    {t("qs.step3.factHours", { hours: goalHours.toFixed(1) })}
                     {weeksToGoal > 0 ? (
                       <>
                         {" "}
-                        — about <b>{Math.ceil(weeksToGoal)} weeks</b> at {settings.jarRate}% of
-                        your pay.
+                        {t("qs.step3.factWeeks", { weeks: Math.ceil(weeksToGoal), rate: settings.jarRate })}
                       </>
                     ) : (
                       "."
                     )}
                   </>
                 ) : (
-                  "Add your pay first to see this in hours."
+                  t("qs.step3.addPay")
                 )}
               </div>
             </>
@@ -343,15 +322,15 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
           <div className="qs-preview">
             <div>
-              <div className="k">You earn</div>
+              <div className="k">{t("qs.preview.earn")}</div>
               <div className="v">
                 {formatRate(preview.perSecondCents, settings.currency, 4)}
-                <span className="u">/ sec</span>
+                <span className="u">{t("qs.preview.sec")}</span>
               </div>
             </div>
             <div className="qs-preview-r">
               {formatRate(preview.hourlyCents, settings.currency)}
-              <span className="u">/ hr</span>
+              <span className="u">{t("qs.preview.hr")}</span>
             </div>
           </div>
         </div>
@@ -362,7 +341,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
             className="btn btn-ghost btn-sm"
             onClick={() => (step === 0 ? onClose() : setStep(step - 1))}
           >
-            {step === 0 ? "Cancel" : "Back"}
+            {step === 0 ? t("qs.cancel") : t("qs.back")}
           </button>
           <button
             type="button"
@@ -375,7 +354,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
               finish();
             }}
           >
-            {step < 2 ? "Next" : "Start my clock"}
+            {step < 2 ? t("qs.next") : t("qs.startClock")}
           </button>
         </div>
       </div>

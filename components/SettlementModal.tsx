@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useI18n } from "@/lib/i18n";
 import { formatCents } from "@/lib/money";
 import { formatHM } from "@/lib/schedule";
 import type { Settings, Snapshot } from "@/lib/types";
@@ -19,8 +20,7 @@ export function SettlementModal({
   settings: Settings;
   paydayDays: number;
 }) {
-  // Portal to <body> so sticky header (z-index 50) can't cover the dialog —
-  // it's otherwise trapped under .app-shell's stacking context (z-index 1).
+  const { t, lang } = useI18n();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -35,18 +35,21 @@ export function SettlementModal({
 
   const { derived } = snapshot;
   const rows: [string, string][] = [
-    ["Shift", `${settings.start} – ${settings.end}`],
-    ["Paid hours in shift", formatHM(derived.paidMin)],
-    ["Unpaid breaks", formatHM(derived.breakMin)],
-    ["Paid time so far", formatHM(snapshot.paidElapsedMin)],
+    [t("settle.shift"), `${settings.start} – ${settings.end}`],
+    [t("settle.paidHours"), formatHM(derived.paidMin)],
+    [t("settle.unpaidBreaks"), formatHM(derived.breakMin)],
+    [t("settle.paidSoFar"), formatHM(snapshot.paidElapsedMin)],
   ];
   if (snapshot.overtimeMin > 0) {
-    rows.push([`Overtime (${settings.otMult}×)`, formatHM(snapshot.overtimeMin)]);
+    rows.push([t("settle.overtime", { mult: settings.otMult }), formatHM(snapshot.overtimeMin)]);
   }
-  rows.push(["Hourly rate", formatCents(derived.hourlyCents, settings.currency)]);
-  rows.push(["Next payday", `${paydayDays} day${paydayDays === 1 ? "" : "s"}`]);
+  rows.push([t("settle.hourlyRate"), formatCents(derived.hourlyCents, settings.currency)]);
+  rows.push([
+    t("settle.nextPayday"),
+    paydayDays === 1 ? t("settle.paydayDay", { n: paydayDays }) : t("settle.paydayDays", { n: paydayDays }),
+  ]);
 
-  const dateLabel = new Date().toLocaleDateString("en-US", {
+  const dateLabel = new Date().toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -59,14 +62,14 @@ export function SettlementModal({
       className={`modal${open ? " on" : ""}`}
       role="dialog"
       aria-modal="true"
-      aria-label="Today's settlement"
+      aria-label={t("settle.label")}
       aria-hidden={!open}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div className="sheet">
-        <h3>📋 Today&apos;s settlement</h3>
+        <h3>{t("settle.title")}</h3>
         <div className="sub">{dateLabel}</div>
         {rows.map(([label, value]) => (
           <div className="line" key={label}>
@@ -75,7 +78,7 @@ export function SettlementModal({
           </div>
         ))}
         <div className="total">
-          <span>Today</span>
+          <span>{t("settle.today")}</span>
           <span className={settings.privacy ? "blurred" : undefined}>
             {formatCents(snapshot.earnedCents, settings.currency)}
           </span>
@@ -86,7 +89,7 @@ export function SettlementModal({
           style={{ width: "100%", marginTop: 10 }}
           onClick={onClose}
         >
-          Done
+          {t("settle.done")}
         </button>
       </div>
     </div>,

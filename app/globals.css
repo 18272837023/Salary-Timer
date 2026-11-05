@@ -767,3 +767,17 @@ ol.checks li::before{
 .qs-preview .u{font-size:12px; font-weight:800; color:var(--mint-deep); opacity:.75; margin-left:3px}
 .qs-preview-r{font-family:var(--display); font-weight:800; font-size:15px; color:var(--mint-deep); font-variant-numeric:tabular-nums; white-space:nowrap}
 .qs-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 22px 20px}
+
+/* ---------- language toggle ---------- */
+.lang-toggle{
+  border:2px solid var(--line); background:var(--cream); color:var(--ink-2);
+  padding:5px 12px; border-radius:10px; font-family:var(--display);
+  font-weight:800; font-size:12.5px; cursor:pointer; transition:.15s;
+  white-space:nowrap;
+}
+.lang-toggle:hover{border-color:var(--mint); color:var(--mint-deep)}
+.nav-right-mobile{display:none; gap:8px; align-items:center}
+@media(max-width:680px){
+  .nav-links .lang-toggle{display:none}
+  .nav-right-mobile{display:flex}
+}

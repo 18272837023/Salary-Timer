@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 import { formatCents, formatRate, splitCents, symbolFor } from "@/lib/money";
 import {
   breaksToday,
@@ -21,15 +22,6 @@ import { QuickStart } from "./QuickStart";
 import { SetupPanel } from "./SetupPanel";
 import { SettlementModal } from "./SettlementModal";
 
-const STATUS_COPY: Record<string, { label: string; live: boolean }> = {
-  working: { label: "On the clock", live: true },
-  break: { label: "On an unpaid break", live: false },
-  overtime: { label: "Overtime", live: true },
-  before: { label: "Shift hasn't started", live: false },
-  done: { label: "Clocked out", live: false },
-  dayoff: { label: "Day off", live: false },
-};
-
 function clampNumber(value: string, min: number, max: number): number | null {
   const n = Number.parseFloat(value);
   if (!Number.isFinite(n)) return null;
@@ -49,13 +41,11 @@ function pad2(n: number): string {
 }
 
 export function SalaryApp() {
+  const { t } = useI18n();
   const { settings, demo, hydrated, update } = useSettings();
   const { show } = useToast();
   const now = useNow(100);
 
-  // Time-dependent numbers are only rendered after mount so the server HTML and
-  // the first client render agree exactly (no hydration mismatch, no flash of
-  // wrong data — crawlers get the static marketing copy, which is what matters).
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const live = mounted && hydrated;
@@ -66,24 +56,14 @@ export function SalaryApp() {
   const [slack, setSlack] = useState({ on: false, startedAt: 0, totalSec: 0 });
   const [wishName, setWishName] = useState("");
   const [wishPrice, setWishPrice] = useState("");
-  // What the second box means. The list renders hours, so people type hours;
-  // the form used to read the same digits as a price and quietly turn 10 into
-  // 0.3 h. The unit is now explicit and converted at the edge.
   const [wishUnit, setWishUnit] = useState<"price" | "hours">("price");
   const [extraLabel, setExtraLabel] = useState("");
   const [extraAmount, setExtraAmount] = useState("");
 
-  // Stable callbacks — SetupPanel's scroll-lock effect must not re-fire every
-  // clock tick (a new inline lambda would steal body overflow and leave the
-  // page stuck non-scrollable after close).
   const closePanel = useCallback(() => setPanelOpen(false), []);
   const openPanel = useCallback(() => setPanelOpen(true), []);
   const closeSettle = useCallback(() => setSettleOpen(false), []);
 
-  // First visit: the demo has done its job once the number has visibly moved.
-  // Offer the three-question wizard at that point — long enough that the page
-  // isn't still loading, short enough that the tab is still open. Once per
-  // session; "Skip" is remembered for the rest of it.
   const busyRef = useRef(false);
   busyRef.current = panelOpen || settleOpen;
 
@@ -97,8 +77,6 @@ export function SalaryApp() {
     }
     if (dismissed) return;
     const timer = setTimeout(() => {
-      // Never stack dialogs: if they opened the full panel or the settlement
-      // sheet while waiting, that is a better signal than ours.
       if (busyRef.current) return;
       setQsOpen(true);
       trackOnce("quickstart_shown");
@@ -111,25 +89,21 @@ export function SalaryApp() {
     try {
       sessionStorage.setItem("st.qs.skip", "1");
     } catch {
-      /* private mode — the wizard simply may reappear next visit */
+      /* private mode */
     }
   }, []);
 
   const dayKey = dateKey(now);
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
 
-  // Anchor for the demo clock so it advances from the moment the page loaded.
   const demoStartRef = useRef(Date.now());
 
-  // Compute on every tick (cheap) — avoid memoizing against Date identity so a
-  // settings save can never leave a stale frozen frame on screen.
   const snapshot = compute(settings, live ? now : new Date(2026, 0, 1, 9, 0, 0), {
     demo,
     demoStartMs: live ? demoStartRef.current : undefined,
   });
 
   const bases = useMemo(
-    // Cheap once a day, expensive 10× a second — keyed on the calendar day only.
     () => periodBases(settings, new Date()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [settings, dayKey],
@@ -154,44 +128,58 @@ export function SalaryApp() {
   const slackSeconds =
     slack.totalSec + (slack.on ? Math.max(0, (now.getTime() - slack.startedAt) / 1000) : 0);
 
-  const status = demo ? { label: "Previewing a shift", live: true } : STATUS_COPY[snapshot.status];
-  const earning = Boolean(status.live);
+  // Status labels via i18n
+  const STATUS_MAP: Record<string, { key: string; live: boolean }> = {
+    working: { key: "status.working", live: true },
+    break: { key: "status.break", live: false },
+    overtime: { key: "status.overtime", live: true },
+    before: { key: "status.before", live: false },
+    done: { key: "status.done", live: false },
+    dayoff: { key: "status.dayoff", live: false },
+  };
+  const statusInfo = demo
+    ? { label: t("status.preview"), live: true }
+    : (() => {
+        const s = STATUS_MAP[snapshot.status];
+        return s ? { label: t(s.key), live: s.live } : { label: t("status.working"), live: true };
+      })();
+  const earning = Boolean(statusInfo.live);
 
-  let cdLabel = "Next shift";
+  // Countdown labels
+  let cdLabel = t("cd.nextShift");
   let cdValue = "—";
   if (snapshot.status === "working" || snapshot.status === "break") {
-    cdLabel = "Clock out in";
+    cdLabel = t("cd.clockOutIn");
     cdValue = formatClock((snapshot.shiftEndMin - snapshot.shiftMin) * 60);
   } else if (snapshot.status === "overtime") {
-    cdLabel = "Overtime for";
+    cdLabel = t("cd.overtimeFor");
     cdValue = formatClock(snapshot.overtimeMin * 60);
   } else if (snapshot.status === "before") {
-    cdLabel = "Shift starts in";
+    cdLabel = t("cd.shiftStartsIn");
     cdValue = formatClock((derived.startMin - snapshot.nowMin) * 60);
   } else if (snapshot.status === "done") {
-    cdLabel = "Shift complete";
+    cdLabel = t("cd.shiftComplete");
     cdValue = formatHM(derived.paidMin);
   } else {
-    cdLabel = "Next shift";
+    cdLabel = t("cd.nextShift");
     cdValue = nextShiftLabel(settings, now);
   }
 
-  // Visible reason the big number isn't climbing — otherwise a lunch break after
-  // "Start the clock" looks exactly like the timer died.
+  // Pause notes
   let pauseNote: string | null = null;
   if (live && !demo && snapshot.status === "break") {
     const active = breaksToday(settings).find(
       (b) => snapshot.shiftMin >= b.start && snapshot.shiftMin < b.end,
     );
     pauseNote = active
-      ? `Unpaid break — counting resumes at ${toHHMM(active.end % (24 * 60))}`
-      : "Unpaid break — pay paused";
+      ? `${t("pause.breakResume")} ${toHHMM(active.end % (24 * 60))}`
+      : t("pause.break");
   } else if (live && !demo && snapshot.status === "before") {
-    pauseNote = `Shift starts at ${settings.start}`;
+    pauseNote = `${t("pause.before")} ${settings.start}`;
   } else if (live && !demo && snapshot.status === "done") {
-    pauseNote = "Clocked out — see you next shift";
+    pauseNote = t("pause.done");
   } else if (live && !demo && snapshot.status === "dayoff") {
-    pauseNote = "Day off — nothing to count today";
+    pauseNote = t("pause.dayoff");
   }
 
   const ticker = live ? splitCents(snapshot.earnedCents) : { whole: "0", frac: ".00" };
@@ -200,11 +188,7 @@ export function SalaryApp() {
 
   const blur = privacy ? " blurred" : "";
 
-  // A counter with no destination is just a number climbing. Milestones give it
-  // one. The step is picked so the next one is roughly 90 seconds away: fast
-  // enough that something happens while you watch, slow enough that the bar has
-  // time to fill. A $37/hr earner gets a dollar about every 96 seconds; a
-  // $10/hr earner gets a quarter about every 90.
+  // Milestone
   const MILE_LADDER = [25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000];
   const mileMinStep = derived.perSecondCents * 90;
   const mileStepCents = MILE_LADDER.find((s) => s >= mileMinStep) ?? 100_000;
@@ -228,8 +212,6 @@ export function SalaryApp() {
     if (mileIdx <= mileRef.current) return;
     mileRef.current = mileIdx;
     setPop(true);
-    // Capped on purpose: a fast counter would otherwise flood GA with dozens of
-    // hits per visit. How many arrived is the signal, not each one.
     if (popsRef.current < 5) {
       popsRef.current += 1;
       track("milestone", { n: popsRef.current, step_cents: mileStepCents });
@@ -238,31 +220,30 @@ export function SalaryApp() {
     return () => clearTimeout(timer);
   }, [mileIdx, live, earning, mileStepCents]);
 
-  // Live read-back of the wishlist form so the number the visitor types and the
-  // number that lands in the list are never a surprise.
+  // Wishlist form preview
   const wishTyped = clampNumber(wishPrice, 0, 100_000_000);
   let wishPreview: string;
   if (wishTyped === null || wishTyped <= 0) {
-    wishPreview = wishUnit === "hours" ? "type hours, e.g. 10" : "type a price, e.g. 120";
+    wishPreview = wishUnit === "hours" ? t("wish.preview.typeHours") : t("wish.preview.typePrice");
   } else if (derived.hourlyCents <= 0) {
-    wishPreview = "set your pay first";
+    wishPreview = t("wish.preview.setPay");
   } else if (wishUnit === "hours") {
     wishPreview = `≈ ${formatCents(Math.round(wishTyped * derived.hourlyCents), settings.currency)}`;
   } else {
-    wishPreview = `≈ ${((wishTyped * 100) / derived.hourlyCents).toFixed(1)} h of work`;
+    wishPreview = `≈ ${((wishTyped * 100) / derived.hourlyCents).toFixed(1)} ${t("wish.preview.hoursOfWork")}`;
   }
 
   function addWish() {
     const name = wishName.trim();
     const value = clampNumber(wishPrice, 0.01, 100_000_000);
     if (!name || value === null) {
-      show("Name and a number, please");
+      show(t("wish.nameNumber"));
       return;
     }
     let priceCents: number;
     if (wishUnit === "hours") {
       if (derived.hourlyCents <= 0) {
-        show("Set your pay first — hours need an hourly rate");
+        show(t("wish.setPayFirst"));
         return;
       }
       priceCents = Math.round(value * derived.hourlyCents);
@@ -270,7 +251,7 @@ export function SalaryApp() {
       priceCents = Math.round(value * 100);
     }
     if (priceCents <= 0) {
-      show("That works out to nothing — try a bigger number");
+      show(t("wish.nothing"));
       return;
     }
     update({
@@ -280,7 +261,6 @@ export function SalaryApp() {
           id: `w${Date.now()}`,
           name: name.slice(0, 40),
           priceCents,
-          // Matched to the name, not drawn at random.
           emoji: pickWishEmoji(name),
         },
       ],
@@ -288,7 +268,7 @@ export function SalaryApp() {
     setWishName("");
     setWishPrice("");
     track("wish_add", { unit: wishUnit, items: settings.wishlist.length + 1 });
-    show("Added to your wishlist");
+    show(t("toast.addedWish"));
   }
 
   function setWishEmoji(id: string, choice: string) {
@@ -304,7 +284,7 @@ export function SalaryApp() {
   function addExtra() {
     const amount = clampNumber(extraAmount, -1_000_000, 1_000_000);
     if (amount === null || amount === 0) {
-      show("Enter an amount");
+      show(t("month.enterAmount"));
       return;
     }
     update({
@@ -320,16 +300,16 @@ export function SalaryApp() {
     });
     setExtraLabel("");
     setExtraAmount("");
-    show("Extra income added");
+    show(t("toast.extraAdded"));
   }
 
   return (
     <div className="app-shell" id="timer">
       <div className="app">
         <div className="app-top">
-          <div className={`status${status.live ? "" : " idle"}`}>
+          <div className={`status${statusInfo.live ? "" : " idle"}`}>
             <span className="dot" />
-            <span>{live ? status.label : "On the clock"}</span>
+            <span>{live ? statusInfo.label : t("status.working")}</span>
           </div>
           <div className="app-actions">
             <button
@@ -337,10 +317,10 @@ export function SalaryApp() {
               className="btn btn-ghost btn-sm"
               onClick={() => {
                 update({ privacy: !privacy });
-                show(privacy ? "Numbers visible 👀" : "Numbers hidden 🙈");
+                show(privacy ? t("toast.numbersVisible") : t("toast.numbersHidden"));
               }}
             >
-              {privacy ? "👀 Show numbers" : "🙈 Hide numbers"}
+              {privacy ? t("action.showNumbers") : t("action.hideNumbers")}
             </button>
             <button
               type="button"
@@ -350,27 +330,26 @@ export function SalaryApp() {
                 setSettleOpen(true);
               }}
             >
-              📋 Today&apos;s settlement
+              {t("action.settle")}
             </button>
             <button type="button" className="btn btn-ink btn-sm" onClick={openPanel}>
-              ⚙️ Set my pay
+              {t("action.setPay")}
             </button>
           </div>
         </div>
 
         <div className={`demo-bar${demo ? " on" : ""}`}>
           <span>
-            👋 This is a demo salary of <b>$78,000/yr</b>. The clock is running so you can see how
-            it feels — <b>3 questions</b> and it becomes yours.
+            {t("demo.text")}
           </span>
           <button type="button" className="btn btn-ink btn-sm" onClick={() => setQsOpen(true)}>
-            Make it mine
+            {t("demo.btn")}
           </button>
         </div>
 
         <div className="grid-main">
           <div className={`tick-card${earning ? "" : " paused"}`}>
-            <div className="tick-label">Earned today</div>
+            <div className="tick-label">{t("tick.earnedToday")}</div>
             <div className={`ticker${blur}${pop ? " pop" : ""}`}>
               <span className="cur">{sym}</span>
               <span>{ticker.whole}</span>
@@ -378,7 +357,7 @@ export function SalaryApp() {
             </div>
             {live && earning && mileSeconds > 0 ? (
               <div className="next-mile">
-                <span>Next {formatCents(mileNextCents, settings.currency, { digits: mileDigits })}</span>
+                <span>{t("tick.nextMilestone")} {formatCents(mileNextCents, settings.currency, { digits: mileDigits })}</span>
                 <span className="bar" aria-hidden="true">
                   <i style={{ width: `${(mileProgress * 100).toFixed(1)}%` }} />
                 </span>
@@ -388,35 +367,35 @@ export function SalaryApp() {
             {pauseNote ? <div className="tick-pause">{pauseNote}</div> : null}
             <div className="tick-sub">
               <span>
-                at <b className={privacy ? "blurred" : undefined}>{formatRate(derived.hourlyCents, settings.currency)}/hr</b>
+                {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(derived.hourlyCents, settings.currency)}/hr</b>
               </span>
               <span className="sep" />
               <span>
                 <b className={privacy ? "blurred" : undefined}>
                   {live ? formatHM(snapshot.paidElapsedMin) : "0h 00m"}
                 </b>{" "}
-                paid today
+                {t("tick.paidToday")}
               </span>
               <span className="sep" />
               <span>
                 <b className={privacy ? "blurred" : undefined}>
                   {live ? formatCents(monthTotalCents, settings.currency) : formatCents(0, settings.currency)}
                 </b>{" "}
-                this month
+                {t("tick.thisMonth")}
               </span>
             </div>
 
             <div className="chip-row">
               <div className="chip">
-                <div className="k">Per minute</div>
+                <div className="k">{t("tick.perMinute")}</div>
                 <div className={`v${blur}`}>{formatRate(derived.perMinuteCents, settings.currency)}</div>
               </div>
               <div className="chip">
-                <div className="k">Per hour</div>
+                <div className="k">{t("tick.perHour")}</div>
                 <div className={`v${blur}`}>{formatRate(derived.hourlyCents, settings.currency)}</div>
               </div>
               <div className="chip">
-                <div className="k">Per second</div>
+                <div className="k">{t("tick.perSecond")}</div>
                 <div className={`v${blur}`}>{formatRate(derived.perSecondCents, settings.currency, 4)}</div>
               </div>
             </div>
@@ -440,7 +419,7 @@ export function SalaryApp() {
                   <div className={`ring-pct${blur}`}>
                     {Math.round((live ? snapshot.progress : 0) * 100)}%
                   </div>
-                  <div className="ring-cap">of shift</div>
+                  <div className="ring-cap">{t("tick.ofShift")}</div>
                 </div>
               </div>
               <div className="cd">
@@ -452,14 +431,14 @@ export function SalaryApp() {
             <div className="slack-card">
               <div>
                 <div className="k">
-                  {slack.on ? "Slacking for" : slackSeconds > 5 ? "Slacked today" : "Slack mode"}
+                  {slack.on ? t("slack.slackingFor") : slackSeconds > 5 ? t("slack.slackedToday") : t("slack.mode")}
                 </div>
                 <div className="v">
                   {slack.on
-                    ? `${formatClock(slackSeconds)} · clock paused`
+                    ? `${formatClock(slackSeconds)} · ${t("slack.clockPaused")}`
                     : slackSeconds > 5
-                      ? `${formatClock(slackSeconds)} · no pay, no guilt`
-                      : "Tap when you wander off"}
+                      ? `${formatClock(slackSeconds)} · ${t("slack.noPay")}`
+                      : t("slack.tap")}
                 </div>
               </div>
               <button
@@ -478,7 +457,7 @@ export function SalaryApp() {
                   );
                 }}
               >
-                {slack.on ? "Back to work" : "☕ Away"}
+                {slack.on ? t("slack.backToWork") : t("slack.away")}
               </button>
             </div>
           </div>
@@ -486,36 +465,36 @@ export function SalaryApp() {
 
         <div className="grid-3">
           <div className="mod">
-            <h3>🏺 Savings jar</h3>
-            <div className="hint">Saving {settings.jarRate}% of everything you earn</div>
+            <h3>{t("jar.title")}</h3>
+            <div className="hint">{t("jar.hint", { rate: settings.jarRate })}</div>
             <div className={`big${blur}`}>{formatCents(live ? jarCents : 0, settings.currency, { digits: 0 })}</div>
             <div className="jar">
               <i style={{ width: `${live ? jarPct.toFixed(1) : 0}%` }} />
             </div>
             <div className="rowline">
-              <span>Goal</span>
+              <span>{t("jar.goal")}</span>
               <b className={privacy ? "blurred" : undefined}>
                 {formatCents(settings.jarGoalCents, settings.currency, { digits: 0 })}
               </b>
             </div>
             <div className="rowline">
-              <span>Left to go</span>
+              <span>{t("jar.leftToGo")}</span>
               <b className={privacy ? "blurred" : undefined}>
                 {formatCents(Math.max(0, settings.jarGoalCents - (live ? jarCents : 0)), settings.currency, { digits: 0 })}
               </b>
             </div>
             <div className="jar-note">
-              {jarPct >= 100 ? "Goal reached 🎉" : `${Math.round(live ? jarPct : 0)}% there — keep going 🐷`}
+              {jarPct >= 100 ? t("jar.goalReached") : t("jar.progress", { pct: Math.round(live ? jarPct : 0) })}
             </div>
           </div>
 
           <div className="mod">
-            <h3>🎁 Wishlist</h3>
-            <div className="hint">Every price, in hours of your life</div>
+            <h3>{t("wish.title")}</h3>
+            <div className="hint">{t("wish.hint")}</div>
             <ul className="wishlist">
               {settings.wishlist.length === 0 ? (
                 <li style={{ color: "var(--faint)", fontWeight: 700, fontSize: 13 }}>
-                  Nothing yet — add something you are saving for.
+                  {t("wish.empty")}
                 </li>
               ) : (
                 settings.wishlist.map((item) => {
@@ -526,15 +505,15 @@ export function SalaryApp() {
                       : 0;
                   return (
                     <li key={item.id}>
-                      <span className="em" title="Change emoji">
+                      <span className="em" title={t("wish.emojiChange")}>
                         {item.emoji}
                         <select
                           className="em-pick"
                           value={item.emojiPicked ? item.emoji : "auto"}
                           onChange={(e) => setWishEmoji(item.id, e.target.value)}
-                          aria-label={`Change the emoji for ${item.name}`}
+                          aria-label={`${t("wish.emojiChange")} ${item.name}`}
                         >
-                          <option value="auto">auto — {pickWishEmoji(item.name)}</option>
+                          <option value="auto">{t("wish.emojiAuto")} — {pickWishEmoji(item.name)}</option>
                           {!EMOJI_PALETTE.includes(item.emoji) ? (
                             <option value={item.emoji}>{item.emoji}</option>
                           ) : null}
@@ -568,7 +547,7 @@ export function SalaryApp() {
                       </span>
                       <button
                         type="button"
-                        aria-label={`Remove ${item.name}`}
+                        aria-label={`${t("wish.emojiChange")} ${item.name}`}
                         onClick={() =>
                           update({ wishlist: settings.wishlist.filter((w) => w.id !== item.id) })
                         }
@@ -580,15 +559,15 @@ export function SalaryApp() {
                 })
               )}
             </ul>
-            <div className="wish-em-hint">Tap an emoji to change it</div>
+            <div className="wish-em-hint">{t("wish.emojiHint")}</div>
             <div className="mini-form">
               <input
-                placeholder="Concert ticket"
+                placeholder={t("wish.placeholder")}
                 maxLength={24}
                 value={wishName}
                 onChange={(e) => setWishName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addWish()}
-                aria-label="Wishlist item name"
+                aria-label={t("wish.title")}
               />
               <input
                 type="number"
@@ -601,23 +580,23 @@ export function SalaryApp() {
                 onKeyDown={(e) => e.key === "Enter" && addWish()}
                 aria-label={
                   wishUnit === "hours"
-                    ? "Wishlist item cost in hours of work"
-                    : "Wishlist item price"
+                    ? t("wish.unit.hours")
+                    : t("wish.unit.price", { sym })
                 }
               />
-              <button type="button" onClick={addWish} aria-label="Add wishlist item">
+              <button type="button" onClick={addWish} aria-label={t("wish.title")}>
                 +
               </button>
             </div>
             <div className="wish-unit-row">
-              <div className="wish-unit" role="group" aria-label="Second box is entered as">
+              <div className="wish-unit" role="group" aria-label={t("wish.unit.hours")}>
                 <button
                   type="button"
                   className={wishUnit === "price" ? "on" : ""}
                   aria-pressed={wishUnit === "price"}
                   onClick={() => setWishUnit("price")}
                 >
-                  {sym} price
+                  {t("wish.unit.price", { sym })}
                 </button>
                 <button
                   type="button"
@@ -625,7 +604,7 @@ export function SalaryApp() {
                   aria-pressed={wishUnit === "hours"}
                   onClick={() => setWishUnit("hours")}
                 >
-                  hours
+                  {t("wish.unit.hours")}
                 </button>
               </div>
               <span className="wish-preview">{wishPreview}</span>
@@ -633,22 +612,22 @@ export function SalaryApp() {
           </div>
 
           <div className="mod">
-            <h3>💸 This month, honestly</h3>
-            <div className="hint">Base pay plus extras, minus unpaid days</div>
+            <h3>{t("month.title")}</h3>
+            <div className="hint">{t("month.hint")}</div>
             <div className="rowline">
-              <span>Base earned</span>
+              <span>{t("month.baseEarned")}</span>
               <b className={privacy ? "blurred" : undefined}>
                 {formatCents(live ? monthBaseCents : 0, settings.currency)}
               </b>
             </div>
             <div className="rowline">
-              <span>Extras (bonus, tips, OT)</span>
+              <span>{t("month.extras")}</span>
               <b className={privacy ? "blurred" : undefined}>
                 +{formatCents(extrasCents, settings.currency)}
               </b>
             </div>
             <div className="rowline">
-              <span>Unpaid days off</span>
+              <span>{t("month.unpaidDays")}</span>
               <b className={privacy ? "blurred" : undefined}>
                 −{formatCents(unpaidCents, settings.currency)}
               </b>
@@ -657,7 +636,7 @@ export function SalaryApp() {
               className="rowline"
               style={{ borderTop: "2px dashed var(--line)", marginTop: 4, paddingTop: 9 }}
             >
-              <span>Total</span>
+              <span>{t("month.total")}</span>
               <b
                 className={privacy ? "blurred" : undefined}
                 style={{ fontSize: 19 }}
@@ -667,11 +646,11 @@ export function SalaryApp() {
             </div>
             <div className="mini-form">
               <input
-                placeholder="Bonus / tips"
+                placeholder={t("month.extraPlaceholder")}
                 maxLength={18}
                 value={extraLabel}
                 onChange={(e) => setExtraLabel(e.target.value)}
-                aria-label="Extra income label"
+                aria-label={t("month.extraPlaceholder")}
               />
               <input
                 type="number"
@@ -680,14 +659,14 @@ export function SalaryApp() {
                 value={extraAmount}
                 onChange={(e) => setExtraAmount(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addExtra()}
-                aria-label="Extra income amount"
+                aria-label={t("month.extraPlaceholder")}
               />
-              <button type="button" onClick={addExtra} aria-label="Add extra income">
+              <button type="button" onClick={addExtra} aria-label={t("month.extraPlaceholder")}>
                 +
               </button>
             </div>
             <div className="rowline" style={{ marginTop: 8 }}>
-              <span>Unpaid days this month</span>
+              <span>{t("month.unpaidThisMonth")}</span>
               <input
                 type="number"
                 min={0}
@@ -697,7 +676,7 @@ export function SalaryApp() {
                   const v = clampNumber(e.target.value, 0, 31);
                   update({ unpaidDays: v === null ? 0 : Math.round(v) });
                 }}
-                aria-label="Unpaid days this month"
+                aria-label={t("month.unpaidThisMonth")}
                 style={{ width: 64, padding: "6px 8px", fontSize: 13, textAlign: "center" }}
               />
             </div>

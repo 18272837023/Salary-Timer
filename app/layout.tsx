@@ -3,6 +3,7 @@ import { Baloo_2, Nunito } from "next/font/google";
 import { Analytics } from "@/components/Analytics";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { I18nProvider } from "@/lib/i18n";
 import { SettingsProvider, ToastProvider } from "@/lib/store";
 import { OG_IMAGE, ORGANIZATION_ID, SAME_AS, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -93,13 +94,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           // Structured data is generated from our own constants — no user input.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
-        <SettingsProvider>
-          <ToastProvider>
-            <SiteHeader />
-            {children}
-            <SiteFooter />
-          </ToastProvider>
-        </SettingsProvider>
+        <I18nProvider>
+          <SettingsProvider>
+            <ToastProvider>
+              <SiteHeader />
+              {children}
+              <SiteFooter />
+            </ToastProvider>
+          </SettingsProvider>
+        </I18nProvider>
         <Analytics />
       </body>
     </html>

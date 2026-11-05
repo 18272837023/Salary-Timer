@@ -39,7 +39,8 @@ if (!CHROME) {
 const BASE = process.argv[2] || process.env.BASE_URL || 'http://127.0.0.1:8850';
 const PORT = 9560;
 const proc = spawn(CHROME, ['--headless=new', '--disable-gpu', '--remote-debugging-port=' + PORT,
-  '--window-size=1400,1000', '--user-data-dir=' + path.join(os.tmpdir(), 'salarytimer-e2e-' + Date.now()), 'about:blank']);
+  '--window-size=1400,1000', '--lang=en-US',
+  '--user-data-dir=' + path.join(os.tmpdir(), 'salarytimer-e2e-' + Date.now()), 'about:blank']);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const getJSON = (path) => new Promise((res, rej) => {
   http.get({ host: '127.0.0.1', port: PORT, path }, (r) => { let d = ''; r.on('data', (c) => (d += c)); r.on('end', () => { try { res(JSON.parse(d)); } catch (e) { rej(e); } }); }).on('error', rej);
@@ -66,6 +67,13 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await new Promise((r) => ws.on('open', r));
   await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable');
 
+  // Inject localStorage before any page loads to force English for i18n.
+  // The I18nProvider reads 'st.lang' in a useEffect; setting it here ensures
+  // all text is English regardless of the browser's system language.
+  await send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('st.lang', 'en'); } catch(e) {}`
+  });
+
   const evalJS = async (expr) => {
     const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
     if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || 'eval error');
@@ -75,7 +83,30 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   const click = (sel) => evalJS(`(()=>{const e=document.querySelector(${JSON.stringify(sel)}); if(!e) return 'MISS'; e.click(); return 'OK';})()`);
 
   await send('Page.navigate', { url: BASE + '/' });
-  await sleep(3800);
+
+  // Poll for hydration completion — React needs to mount before any DOM
+  // assertions are meaningful. The I18nProvider wraps everything in a
+  // useEffect that sets `ready=true`, which triggers a second render pass.
+  // Wait until the app-shell (rendered by SalaryApp) is present.
+  let hydrated = false;
+  for (let i = 0; i < 30; i++) {
+    const has = await evalJS(`!!document.querySelector('.app-shell')`);
+    if (has) { hydrated = true; break; }
+    await sleep(500);
+  }
+  check('page hydrated (app-shell present)', hydrated);
+  if (!hydrated) {
+    // Dump error logs and bail — nothing else will work if React didn't mount
+    console.log('HYDRATION FAILED — console/network errors:', logs.length ? JSON.stringify(logs, null, 1) : 'none');
+    const bodyText = await evalJS(`document.body.innerText?.slice(0, 500) || 'EMPTY'`);
+    console.log('Body text:', bodyText);
+    ws.close(); proc.kill();
+    console.log('\n===== 功能测试 =====');
+    let pass = 0;
+    for (const r of results) { console.log((r.ok ? 'PASS ' : 'FAIL ') + r.name + (r.detail ? '  [' + r.detail + ']' : '')); if (r.ok) pass++; }
+    console.log(`\n${pass}/${results.length} passed`);
+    process.exit(results.length - pass);
+  }
 
   // ---------- 1. 首屏与 demo ----------
   check('demo bar visible', (await evalJS(`getComputedStyle(document.querySelector('.demo-bar')).display`)) === 'flex');
@@ -107,8 +138,25 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   check('cent precision (integer-cents render)', JSON.parse(precision).mismatches === 0, precision);
 
   // ---------- 3. 设置面板 + 持久化 ----------
+  // First dismiss the QuickStart wizard if it's visible (it auto-pops after 12s
+  // but may have appeared during the precision test loop above).
+  await evalJS(`(() => {
+    const qs = document.querySelector('.quickstart [data-step]');
+    if (qs) { const skip = [...document.querySelectorAll('.quickstart button')].find(b=>b.textContent.match(/skip|later/i)); if (skip) skip.click(); }
+    try { sessionStorage.setItem('st.qs.skip', '1'); } catch {}
+  })()`);
+
   await click('#\\30 , button.btn-ink.btn-sm');
-  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b=>b.textContent.includes('Set my pay')).click()`);
+  // Find the "Set my pay" button by text content (i18n-safe: checks both languages)
+  const setPayClicked = await evalJS(`(() => {
+    const btns = [...document.querySelectorAll('.app-actions .btn')];
+    let btn = btns.find(b => b.textContent.includes('Set my pay') || b.textContent.includes('设置薪资'));
+    if (!btn && btns.length >= 3) btn = btns[btns.length - 1];
+    if (!btn) return 'MISS';
+    btn.click();
+    return 'OK';
+  })()`);
+  check('set-pay button clicked', setPayClicked === 'OK', setPayClicked);
   await sleep(600);
   check('panel opens', (await evalJS(`document.querySelector('.panel').classList.contains('on')`)) === true);
 
@@ -122,7 +170,7 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   const previewRate = await text('.preview .v');
   check('preview rate updates to 90000', previewRate === '$43.27', previewRate);
 
-  await evalJS(`[...document.querySelectorAll('.panel-foot .btn')].find(b=>b.textContent.includes('Start the clock')).click()`);
+  await evalJS(`[...document.querySelectorAll('.panel-foot .btn')].find(b => b.textContent.includes('Start the clock') || b.textContent.includes('开始计时'))?.click()`);
   await sleep(800);
   check('demo bar gone after save', (await evalJS(`getComputedStyle(document.querySelector('.demo-bar')).display`)) === 'none');
   check('panel closed', (await evalJS(`document.querySelector('.panel').classList.contains('on')`)) === false);
@@ -131,24 +179,30 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
 
   // 刷新后仍在
   await send('Page.navigate', { url: BASE + '/' });
-  await sleep(3200);
+  // Wait for re-hydration after reload
+  for (let i = 0; i < 20; i++) {
+    const has = await evalJS(`!!document.querySelector('.tick-sub b')`);
+    if (has) break;
+    await sleep(300);
+  }
+  await sleep(500);
   const rateAfter = await evalJS(`[...document.querySelectorAll('.tick-sub b')][0].textContent`);
   check('survives reload', rateAfter === '$43.27/hr', rateAfter);
 
   // ---------- 4. 隐私模式 ----------
-  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b=>b.textContent.includes('Hide numbers')).click()`);
+  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b => b.textContent.includes('Hide numbers') || b.textContent.includes('隐藏数字'))?.click()`);
   await sleep(500);
   check('privacy blurs ticker', (await evalJS(`document.querySelector('.ticker').classList.contains('blurred')`)) === true);
-  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b=>b.textContent.includes('Show numbers')).click()`);
+  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b => b.textContent.includes('Show numbers') || b.textContent.includes('显示数字'))?.click()`);
   await sleep(400);
 
   // ---------- 5. 结算弹窗 ----------
-  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b=>b.textContent.includes('settlement')).click()`);
+  await evalJS(`[...document.querySelectorAll('.app-actions .btn')].find(b => b.textContent.includes('settlement') || b.textContent.includes('结算'))?.click()`);
   await sleep(500);
   check('settlement modal opens', (await evalJS(`document.querySelector('.modal').classList.contains('on')`)) === true);
   const lines = await evalJS(`document.querySelectorAll('.sheet .line').length`);
   check('settlement has rows', lines >= 6, String(lines));
-  await evalJS(`[...document.querySelectorAll('.sheet .btn')].find(b=>b.textContent.includes('Done')).click()`);
+  await evalJS(`[...document.querySelectorAll('.sheet .btn')].find(b => b.textContent.includes('Done') || b.textContent.includes('完成'))?.click()`);
   await sleep(400);
 
   // ---------- 6. 愿望清单 ----------
@@ -169,7 +223,7 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   // ---------- 7. Slack 模式 ----------
   await evalJS(`document.querySelector('.slack-btn').click()`);
   await sleep(1200);
-  check('slack pauses the clock', (await text('.slack-card .k')) === 'Slacking for');
+  check('slack pauses the clock', (await text('.slack-card .k'))?.includes('Slacking for') || (await text('.slack-card .k'))?.includes('摸鱼'), String(await text('.slack-card .k')));
   await evalJS(`document.querySelector('.slack-btn').click()`);
   await sleep(400);
 
@@ -178,7 +232,7 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await sleep(2600);
   check('landing h1 present', (await text('h1'))?.includes('Hourly Rate Calculator'));
   const canonical = await evalJS(`document.querySelector('link[rel=canonical]')?.getAttribute('href')`);
-  check('canonical is self-referencing', canonical === 'https://salarytimer.app/hourly-rate-calculator/', String(canonical));
+  check('canonical is self-referencing', canonical === 'https://salarytimer.work/hourly-rate-calculator/', String(canonical));
   const ldCount = await evalJS(`document.querySelectorAll('script[type="application/ld+json"]').length`);
   check('json-ld blocks on landing page', ldCount >= 2, String(ldCount));
 

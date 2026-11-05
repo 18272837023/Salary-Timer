@@ -7,7 +7,7 @@
  */
 
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://salarytimer.app"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://salarytimer.work"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "Salary Timer";

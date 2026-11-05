@@ -1,16 +1,20 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
 import { LEARN, TOOLS } from "@/lib/site";
 
-const YEAR = 2026;
-
 export function SiteFooter() {
+  const { t } = useI18n();
+  const YEAR = 2026;
+
   return (
     <footer>
       <div className="wrap">
         <div className="foot-grid">
           <div>
             <Link className="brand" href="/" style={{ marginBottom: 10 }}>
-              <span className="mark">$</span> Salary Timer
+              <span className="mark">$</span> {t("nav.brand")}
             </Link>
             <p
               style={{
@@ -21,13 +25,12 @@ export function SiteFooter() {
                 marginTop: 8,
               }}
             >
-              A free live counter for your working hours. Built for people who&apos;d rather see the
-              number than wait for the payslip.
+              {t("footer.tagline")}
             </p>
           </div>
 
           <div>
-            <h5>Free tools</h5>
+            <h5>{t("footer.tools")}</h5>
             <ul>
               {TOOLS.map((tool) => (
                 <li key={tool.href}>
@@ -38,7 +41,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h5>Learn</h5>
+            <h5>{t("footer.learn")}</h5>
             <ul>
               {LEARN.map((article) => (
                 <li key={article.href}>
@@ -49,24 +52,24 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h5>About</h5>
+            <h5>{t("footer.about")}</h5>
             <ul>
               <li>
-                <Link href="/#how">How a salary timer works</Link>
+                <Link href="/#how">{t("footer.howWorks")}</Link>
               </li>
               <li>
-                <Link href="/#faq">Is my salary data private?</Link>
+                <Link href="/#faq">{t("footer.private")}</Link>
               </li>
               <li>
-                <Link href="/#faq">Salary timer FAQ</Link>
+                <Link href="/#faq">{t("footer.faq")}</Link>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="foot-bottom">
-          <span>© {YEAR} Salary Timer. Estimates only — not financial or tax advice.</span>
-          <span>Made with 🪙 for people who count the hours.</span>
+          <span>{t("footer.copyright", { year: YEAR })}</span>
+          <span>{t("footer.madeWith")}</span>
         </div>
       </div>
     </footer>

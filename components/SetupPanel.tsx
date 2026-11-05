@@ -2,20 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useI18n } from "@/lib/i18n";
 import { CURRENCIES, centsToInput, formatCents, formatRate, parseAmountToCents, symbolFor } from "@/lib/money";
 import { compute, dateKey, derive, formatHM } from "@/lib/schedule";
 import { makeId } from "@/lib/defaults";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import type { PayMode, Settings } from "@/lib/types";
 
-const MODES: { value: PayMode; label: string }[] = [
-  { value: "annual", label: "Yearly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "hourly", label: "Hourly" },
-];
-
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /** Preset multipliers offered in the dropdown; anything else renders as custom. */
 const OT_PRESETS = [1.25, 1.5, 1.75, 2];
@@ -24,19 +18,6 @@ function multLabel(mult: number): string {
   return Number.isInteger(mult) ? String(mult) : String(Math.round(mult * 100) / 100);
 }
 
-/** US payroll names for the common multipliers — "1.5×" alone is ambiguous. */
-function otName(mult: number): string | null {
-  if (mult === 1.5) return "Time and a half";
-  if (mult === 2) return "Double time";
-  return null;
-}
-
-const AMOUNT_LABEL: Record<PayMode, string> = {
-  annual: "Annual salary (gross)",
-  monthly: "Monthly salary (gross)",
-  hourly: "Hourly rate",
-};
-
 export function SetupPanel({
   open,
   onClose,
@@ -44,34 +25,27 @@ export function SetupPanel({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t, lang } = useI18n();
   const { settings, replace, demo } = useSettings();
   const { show } = useToast();
   const [draft, setDraft] = useState<Settings>(settings);
   const [amountText, setAmountText] = useState(centsToInput(settings.amountCents));
-  // Manual overtime for today, entered in hours.
   const [otHoursText, setOtHoursText] = useState<string | null>(null);
   const [otHoursEditing, setOtHoursEditing] = useState(false);
   const amountRef = useRef<HTMLInputElement>(null);
-  // Portal to <body> so sticky header (z-index 50) can't cover the dialog —
-  // it's otherwise trapped under .app-shell's stacking context (z-index 1).
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Keep a stable close handle so the scroll-lock effect doesn't re-run every
-  // parent render (SalaryApp re-renders ~10×/sec for the live clock).
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  // Re-seed the form each time the panel opens, so a cancelled edit never leaks.
-  // Intentionally keyed on `open` only — mid-edit settings updates from elsewhere
-  // shouldn't wipe the draft the visitor is typing.
   useEffect(() => {
     if (!open) return;
     setDraft(settings);
     setAmountText(centsToInput(settings.amountCents));
     setOtHoursText(null);
     setOtHoursEditing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed on open, not on every settings tick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -90,22 +64,31 @@ export function SetupPanel({
 
   const preview = useMemo(() => derive(draft), [draft]);
 
-  // Live "how much overtime have I done today" — the panel is a settings screen,
-  // but this is the one number people want to check while they are in here.
-  // Recomputing once a minute is enough: the value is displayed to the minute.
   const now = useNow(open ? 1000 : 30000);
   const minuteKey = Math.floor(now.getTime() / 60_000);
   const overtimeMin = useMemo(
     () => (draft.overtime ? compute(draft, new Date(), { demo: false }).overtimeMin : 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- minute granularity only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [draft, minuteKey],
   );
+
+  const locale = lang === "zh" ? "zh-CN" : "en-US";
+
+  const modeLabel: Record<PayMode, string> = {
+    annual: t("panel.yearly"),
+    monthly: t("panel.monthly"),
+    hourly: t("panel.hourly"),
+  };
+  const amountLabel: Record<PayMode, string> = {
+    annual: t("panel.annualLabel"),
+    monthly: t("panel.monthlyLabel"),
+    hourly: t("panel.hourlyLabel"),
+  };
 
   function patch(next: Partial<Settings>) {
     setDraft((prev) => ({ ...prev, ...next }));
   }
 
-  /** Manual overtime is scoped to today only — yesterday's number is history. */
   const todayKey = dateKey(new Date());
   const manualOt =
     draft.otOverride && draft.otOverride.day === todayKey ? draft.otOverride : undefined;
@@ -116,16 +99,14 @@ export function SetupPanel({
     setOtHoursEditing(false);
     if (!Number.isFinite(typed) || typed < 0) return;
     const min = Math.min(24 * 60, Math.round(typed * 60));
-    // The clock is the floor: typing less than it already counted would look
-    // like the field is broken, so say why instead of silently ignoring it.
     const clockMin = compute({ ...draft, otOverride: undefined }, new Date(), {
       demo: false,
     }).overtimeMin;
     if (min <= clockMin) {
       show(
         clockMin > 0
-          ? `The clock already counts ${formatHM(clockMin)} today`
-          : "Enter how many overtime hours you did",
+          ? t("panel.clockAlready", { time: formatHM(clockMin) })
+          : t("panel.enterOt"),
       );
       patch({ otOverride: undefined });
       return;
@@ -144,36 +125,36 @@ export function SetupPanel({
   function save() {
     const cents = parseAmountToCents(amountText);
     if (cents === null || cents <= 0) {
-      show("Add your pay first 🙂");
+      show(t("panel.addPayFirst"));
       amountRef.current?.focus();
       return;
     }
     if (draft.days.length === 0) {
-      show("Pick at least one working day");
+      show(t("panel.pickDay"));
       return;
     }
     const next: Settings = { ...draft, amountCents: cents, onboarded: true };
     replace(next);
     onClose();
 
-    // Tell the truth about whether the counter will climb right now — saving
-    // onto an unpaid break used to promise "the clock is running" while the
-    // big number sat still, which felt like a bug.
     const snap = compute(next, new Date(), { demo: false });
     if (snap.status === "working" || snap.status === "overtime") {
-      show(demo ? "Saved — the clock is running" : "Settings updated — clock running");
+      show(demo ? t("panel.savedRunning") : t("panel.savedUpdated"));
     } else if (snap.status === "break") {
-      show("Saved — paused for unpaid break");
+      show(t("panel.savedBreak"));
     } else if (snap.status === "before") {
-      show(`Saved — shift starts at ${next.start}`);
+      show(t("panel.savedBefore", { time: next.start }));
     } else if (snap.status === "done") {
-      show("Saved — shift complete for today");
+      show(t("panel.savedDone"));
     } else {
-      show("Saved — today is a day off");
+      show(t("panel.savedDayoff"));
     }
   }
 
   if (!mounted) return null;
+
+  // Overtime name mapping
+  const otNameKey = draft.otMult === 1.5 ? "panel.timeHalf" : draft.otMult === 2 ? "panel.doubleTime" : null;
 
   return createPortal(
     <>
@@ -186,36 +167,36 @@ export function SetupPanel({
         className={`panel${open ? " on" : ""}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Pay setup"
+        aria-label={t("panel.title")}
         aria-hidden={!open}
         inert={!open ? true : undefined}
       >
         <div className="panel-head">
-          <h3>⚙️ Your pay setup</h3>
+          <h3>{t("panel.title")}</h3>
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
-            Close
+            {t("panel.close")}
           </button>
         </div>
 
         <div className="panel-body">
           <div className="field">
-            <label>How are you paid?</label>
+            <label>{t("panel.howPaid")}</label>
             <div className="seg">
-              {MODES.map((m) => (
+              {(["annual", "monthly", "hourly"] as PayMode[]).map((m) => (
                 <button
-                  key={m.value}
+                  key={m}
                   type="button"
-                  className={draft.mode === m.value ? "on" : undefined}
-                  onClick={() => patch({ mode: m.value })}
+                  className={draft.mode === m ? "on" : undefined}
+                  onClick={() => patch({ mode: m })}
                 >
-                  {m.label}
+                  {modeLabel[m]}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="field">
-            <label htmlFor="amountInput">{AMOUNT_LABEL[draft.mode]}</label>
+            <label htmlFor="amountInput">{amountLabel[draft.mode]}</label>
             <div className="row2" style={{ gridTemplateColumns: "1.5fr 1fr" }}>
               <input
                 ref={amountRef}
@@ -229,15 +210,12 @@ export function SetupPanel({
                 onChange={(e) => {
                   const next = e.target.value;
                   setAmountText(next);
-                  // Keep the live hourly-rate preview in sync while typing —
-                  // otherwise the "your real hourly rate" box lags a keystroke
-                  // behind and shows the old salary.
                   const cents = parseAmountToCents(next);
                   if (cents !== null) patch({ amountCents: cents });
                 }}
               />
               <select
-                aria-label="Currency"
+                aria-label={t("panel.currency")}
                 value={draft.currency}
                 onChange={(e) => patch({ currency: e.target.value as Settings["currency"] })}
               >
@@ -251,13 +229,13 @@ export function SetupPanel({
           </div>
 
           <div className="field">
-            <label>Working days</label>
+            <label>{t("panel.workingDays")}</label>
             <div className="days">
               {DAY_LABELS.map((label, i) => (
                 <button
-                  key={DAY_NAMES[i]}
+                  key={i}
                   type="button"
-                  aria-label={DAY_NAMES[i]}
+                  aria-label={t(`day.${i}`)}
                   aria-pressed={draft.days.includes(i)}
                   className={draft.days.includes(i) ? "on" : undefined}
                   onClick={() => toggleDay(i)}
@@ -266,13 +244,13 @@ export function SetupPanel({
                 </button>
               ))}
             </div>
-            <div className="help">Tap the days you actually work — not the ones in your contract.</div>
+            <div className="help">{t("panel.daysHelp")}</div>
           </div>
 
           <div className="field">
             <div className="row2">
               <div>
-                <label htmlFor="startInput">Shift starts</label>
+                <label htmlFor="startInput">{t("panel.shiftStarts")}</label>
                 <input
                   id="startInput"
                   type="time"
@@ -281,7 +259,7 @@ export function SetupPanel({
                 />
               </div>
               <div>
-                <label htmlFor="endInput">Shift ends</label>
+                <label htmlFor="endInput">{t("panel.shiftEnds")}</label>
                 <input
                   id="endInput"
                   type="time"
@@ -293,13 +271,13 @@ export function SetupPanel({
           </div>
 
           <div className="field">
-            <label>Unpaid breaks</label>
+            <label>{t("panel.unpaidBreaks")}</label>
             <div className="break-list">
               {draft.breaks.map((b, i) => (
                 <div className="break-item" key={b.id}>
                   <input
                     type="time"
-                    aria-label={`Break ${i + 1} start`}
+                    aria-label={`${t("panel.unpaidBreaks")} ${i + 1}`}
                     value={b.start}
                     onChange={(e) =>
                       patch({
@@ -312,7 +290,7 @@ export function SetupPanel({
                   <span style={{ color: "var(--faint)", fontWeight: 800 }}>→</span>
                   <input
                     type="time"
-                    aria-label={`Break ${i + 1} end`}
+                    aria-label={`${t("panel.unpaidBreaks")} ${i + 1}`}
                     value={b.end}
                     onChange={(e) =>
                       patch({
@@ -325,7 +303,7 @@ export function SetupPanel({
                   <button
                     type="button"
                     className="x"
-                    aria-label={`Remove break ${i + 1}`}
+                    aria-label={`${t("panel.unpaidBreaks")} ${i + 1}`}
                     onClick={() => patch({ breaks: draft.breaks.filter((x) => x.id !== b.id) })}
                   >
                     ×
@@ -340,12 +318,12 @@ export function SetupPanel({
                 patch({ breaks: [...draft.breaks, { id: makeId("b"), start: "15:00", end: "15:15" }] })
               }
             >
-              + Add a break
+              {t("panel.addBreak")}
             </button>
           </div>
 
           <div className="field">
-            <label htmlFor="paydaySelect">Payday</label>
+            <label htmlFor="paydaySelect">{t("panel.payday")}</label>
             <select
               id="paydaySelect"
               value={String(draft.payday)}
@@ -355,22 +333,22 @@ export function SetupPanel({
             >
               {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={d}>
-                  Day {d} of the month
+                  {t("panel.dayOfMonth", { d })}
                 </option>
               ))}
-              <option value="last">Last day of the month</option>
+              <option value="last">{t("panel.lastDay")}</option>
             </select>
-            <div className="help">Used for the payday countdown.</div>
+            <div className="help">{t("panel.paydayHelp")}</div>
           </div>
 
           <div className="field">
             <div className="switch-row" style={{ paddingTop: 0 }}>
               <div>
                 <div style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 14 }}>
-                  Overtime after clock-out
+                  {t("panel.overtime")}
                 </div>
                 <div className="help" style={{ marginTop: 1 }}>
-                  Keep counting at a higher rate
+                  {t("panel.overtimeHelp")}
                 </div>
               </div>
               <label className="switch">
@@ -378,7 +356,7 @@ export function SetupPanel({
                   type="checkbox"
                   checked={draft.overtime}
                   onChange={(e) => patch({ overtime: e.target.checked })}
-                  aria-label="Overtime after clock-out"
+                  aria-label={t("panel.overtime")}
                 />
                 <span className="track" />
               </label>
@@ -386,20 +364,20 @@ export function SetupPanel({
             {draft.overtime && (
               <div style={{ marginTop: 4 }}>
                 <select
-                  aria-label="Overtime multiplier"
+                  aria-label={t("panel.otMult")}
                   value={String(draft.otMult)}
                   onChange={(e) => patch({ otMult: Number(e.target.value) })}
                 >
-                  <option value="1.25">1.25× overtime</option>
-                  <option value="1.5">1.5× overtime</option>
-                  <option value="1.75">1.75× overtime</option>
-                  <option value="2">2× overtime</option>
+                  <option value="1.25">1.25× {t("panel.overtime")}</option>
+                  <option value="1.5">1.5× {t("panel.overtime")}</option>
+                  <option value="1.75">1.75× {t("panel.overtime")}</option>
+                  <option value="2">2× {t("panel.overtime")}</option>
                   {!OT_PRESETS.includes(draft.otMult) && (
-                    <option value={String(draft.otMult)}>{multLabel(draft.otMult)}× overtime</option>
+                    <option value={String(draft.otMult)}>{multLabel(draft.otMult)}× {t("panel.overtime")}</option>
                   )}
                 </select>
                 <div className="ot-note">
-                  {otName(draft.otMult) ? `${otName(draft.otMult)} — ` : "Overtime rate — "}
+                  {otNameKey ? `${t(otNameKey)} — ` : `${t("panel.otRate")} `}
                   <b>
                     {formatRate(preview.hourlyCents * draft.otMult, draft.currency)}
                     <span>/hr</span>
@@ -408,8 +386,8 @@ export function SetupPanel({
                 <div className="ot-pay">
                   <div className="ot-row">
                     <span className="ot-k">
-                      Overtime today
-                      {manualOt ? <span className="ot-badge">manual</span> : null}
+                      {t("panel.otToday")}
+                      {manualOt ? <span className="ot-badge">{t("panel.otManual")}</span> : null}
                     </span>
                     <span className="ot-v-sm">
                       {otHoursEditing ? (
@@ -418,7 +396,7 @@ export function SetupPanel({
                             className="ot-input ot-input-sm"
                             inputMode="decimal"
                             autoFocus
-                            aria-label="Overtime hours today"
+                            aria-label={t("panel.otToday")}
                             value={otHoursText ?? ""}
                             onChange={(e) => setOtHoursText(e.target.value)}
                             onFocus={(e) => e.currentTarget.select()}
@@ -441,23 +419,23 @@ export function SetupPanel({
                           <button
                             type="button"
                             className="ot-edit ot-edit-sm"
-                            title="Click to record today's overtime by hand"
+                            title={t("panel.otClickHint")}
                             onClick={() => {
                               setOtHoursText((overtimeMin / 60).toFixed(2));
                               setOtHoursEditing(true);
                             }}
                           >
-                            {overtimeMin > 0 ? formatHM(overtimeMin) : "None yet"}
+                            {overtimeMin > 0 ? formatHM(overtimeMin) : t("panel.otNone")}
                           </button>
                           {manualOt ? (
                             <button
                               type="button"
                               className="ot-reset"
-                              title="Back to the live clock"
-                              aria-label="Clear manual overtime"
+                              title={t("panel.otReset")}
+                              aria-label={t("panel.otClearManual")}
                               onClick={() => patch({ otOverride: undefined })}
                             >
-                              ↺ auto
+                              {t("panel.otReset")}
                             </button>
                           ) : null}
                         </>
@@ -473,10 +451,10 @@ export function SetupPanel({
             <div className="switch-row" style={{ paddingTop: 0 }}>
               <div>
                 <div style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 14 }}>
-                  Privacy mode
+                  {t("panel.privacyMode")}
                 </div>
                 <div className="help" style={{ marginTop: 1 }}>
-                  Blur every number on screen
+                  {t("panel.privacyHelp")}
                 </div>
               </div>
               <label className="switch">
@@ -484,7 +462,7 @@ export function SetupPanel({
                   type="checkbox"
                   checked={draft.privacy}
                   onChange={(e) => patch({ privacy: e.target.checked })}
-                  aria-label="Privacy mode"
+                  aria-label={t("panel.privacyMode")}
                 />
                 <span className="track" />
               </label>
@@ -492,14 +470,14 @@ export function SetupPanel({
           </div>
 
           <div className="field">
-            <label>Savings jar</label>
+            <label>{t("panel.jar")}</label>
             <div className="row2">
               <input
                 type="number"
                 min={0}
                 step={50}
-                placeholder="Goal"
-                aria-label="Savings goal"
+                placeholder={t("panel.jarGoal")}
+                aria-label={t("panel.jarGoal")}
                 value={centsToInput(draft.jarGoalCents)}
                 onChange={(e) => {
                   const cents = parseAmountToCents(e.target.value);
@@ -507,34 +485,34 @@ export function SetupPanel({
                 }}
               />
               <select
-                aria-label="Savings rate"
+                aria-label={t("panel.jar")}
                 value={String(draft.jarRate)}
                 onChange={(e) => patch({ jarRate: Number(e.target.value) })}
               >
                 {[5, 10, 15, 20, 30].map((r) => (
                   <option key={r} value={r}>
-                    Save {r}%
+                    {t("panel.saveRate", { r })}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="help">The jar fills from your earnings at this rate.</div>
+            <div className="help">{t("panel.jarHelp")}</div>
           </div>
 
           <div className="preview">
-            <div className="k">Your real hourly rate</div>
+            <div className="k">{t("panel.preview")}</div>
             <div className="v">{formatRate(preview.hourlyCents, draft.currency)}</div>
             <div className="s">
-              {formatCents(preview.dailyCents, draft.currency)} per day ·{" "}
-              {Math.round(preview.annualHours).toLocaleString("en-US")} paid hours a year ·{" "}
-              {preview.dayCount} days a week · {formatHM(preview.paidMin)} paid per shift
+              {formatCents(preview.dailyCents, draft.currency)} {t("panel.previewPerDay")} ·{" "}
+              {Math.round(preview.annualHours).toLocaleString(locale)} {t("panel.previewHoursYear")} ·{" "}
+              {preview.dayCount} {t("panel.previewDaysWeek")} · {formatHM(preview.paidMin)} {t("panel.previewPaidShift")}
             </div>
           </div>
         </div>
 
         <div className="panel-foot">
           <button type="button" className="btn btn-mint" style={{ width: "100%" }} onClick={save}>
-            Start the clock
+            {t("panel.startClock")}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EntityLede } from "@/components/EntityLede";
 import { Hero } from "@/components/Hero";
 import { SalaryApp } from "@/components/SalaryApp";
 import {
@@ -97,10 +98,7 @@ export default function HomePage() {
           be able to lift without reading anything else. */}
       <section className="section tight" aria-label="What Salary Timer is">
         <div className="wrap">
-          <p className="sec-lede" style={{ maxWidth: 780, margin: "0 auto", textAlign: "center" }}>
-            {ENTITY_DEFINITION} It runs entirely in your browser — no account, no install, and your
-            pay figures never leave your device.
-          </p>
+          <EntityLede />
         </div>
       </section>
 

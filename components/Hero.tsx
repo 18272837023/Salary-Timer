@@ -1,4 +1,9 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n";
+
 export function Hero({ children }: { children?: React.ReactNode }) {
+  const { t } = useI18n();
   return (
     <section className="hero">
       <div className="blob m" />
@@ -7,14 +12,13 @@ export function Hero({ children }: { children?: React.ReactNode }) {
         <div className="hero-inner">
           <div className="hero-copy">
             <h1>
-              The <span className="hl">salary timer</span>
+              {t("hero.h1.line1")}
+              <span className="hl">{t("hero.h1.hl")}</span>
               <br />
-              for every second you work.
+              {t("hero.h1.line2")}
             </h1>
             <p className="lede">
-              This free salary timer turns your pay into a live counter — per second, per minute,
-              per hour. Type it in once, then watch the number climb through meetings, coffee
-              breaks and that last impossible hour before clock-out.
+              {t("hero.lede")}
             </p>
           </div>
 
@@ -22,22 +26,22 @@ export function Hero({ children }: { children?: React.ReactNode }) {
             <div className="sticker">
               <span>🪙</span>
               <div>
-                <b>Every second counts</b>
-                <small>literally — down to the cent</small>
+                <b>{t("hero.sticker1.title")}</b>
+                <small>{t("hero.sticker1.sub")}</small>
               </div>
             </div>
             <div className="sticker">
               <span>☕</span>
               <div>
-                <b>Breaks are unpaid</b>
-                <small>so the timer pauses for them</small>
+                <b>{t("hero.sticker2.title")}</b>
+                <small>{t("hero.sticker2.sub")}</small>
               </div>
             </div>
             <div className="sticker">
               <span>🎯</span>
               <div>
-                <b>Save for something real</b>
-                <small>priced in hours, not dollars</small>
+                <b>{t("hero.sticker3.title")}</b>
+                <small>{t("hero.sticker3.sub")}</small>
               </div>
             </div>
           </div>
