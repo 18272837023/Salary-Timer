@@ -89,6 +89,12 @@ const en: Dict = {
   "tick.perSecond": "Per second",
   "tick.ofShift": "of shift",
   "tick.nextMilestone": "Next",
+  "tick.clockOutIn": "Clock out in",
+  "tick.untilPayday": "Payday in",
+  "tick.daysLeft": "{n} days",
+  "tick.dayLeft": "{n} day",
+  "tick.paydayToday": "Payday today!",
+  "tick.shiftDone": "Shift done",
 
   // Countdown labels
   "cd.nextShift": "Next shift",
@@ -140,6 +146,12 @@ const en: Dict = {
   "wish.nothing": "That works out to nothing — try a bigger number",
   "wish.emojiChange": "Change emoji",
   "wish.emojiAuto": "auto",
+  "wish.preset.coffee": "Morning coffee",
+  "wish.preset.lunch": "Lunch",
+  "wish.preset.rent": "Monthly rent",
+  "wish.preset.phone": "Phone bill",
+  "wish.preset.gym": "Gym membership",
+  "wish.preset.trip": "Weekend trip",
 
   // This month
   "month.title": "💸 This month, honestly",
@@ -468,6 +480,12 @@ const zh: Dict = {
   "tick.perSecond": "每秒",
   "tick.ofShift": "班次进度",
   "tick.nextMilestone": "下一个",
+  "tick.clockOutIn": "距下班",
+  "tick.untilPayday": "距发薪日",
+  "tick.daysLeft": "{n} 天",
+  "tick.dayLeft": "{n} 天",
+  "tick.paydayToday": "今天发薪日！",
+  "tick.shiftDone": "今日已完成",
 
   // Countdown labels
   "cd.nextShift": "下次上班",
@@ -519,6 +537,12 @@ const zh: Dict = {
   "wish.nothing": "算下来是零——试试更大的数字",
   "wish.emojiChange": "更换 emoji",
   "wish.emojiAuto": "自动",
+  "wish.preset.coffee": "晨间咖啡",
+  "wish.preset.lunch": "午餐",
+  "wish.preset.rent": "每月房租",
+  "wish.preset.phone": "话费",
+  "wish.preset.gym": "健身会员",
+  "wish.preset.trip": "周末旅行",
 
   // This month
   "month.title": "💸 本月真实收入",

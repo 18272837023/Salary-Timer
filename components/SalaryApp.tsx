@@ -365,6 +365,25 @@ export function SalaryApp() {
               </div>
             ) : null}
             {pauseNote ? <div className="tick-pause">{pauseNote}</div> : null}
+
+            {/* Clock-out countdown — gives users a reason to keep the tab open */}
+            {live && (snapshot.status === "working" || snapshot.status === "break") && (() => {
+              const remainSec = Math.max(0, (snapshot.shiftEndMin - snapshot.shiftMin) * 60);
+              return (
+                <div className="clockout-bar">
+                  <span className="clockout-label">{t("tick.clockOutIn")}</span>
+                  <span className="clockout-value">{untilLabel(remainSec)}</span>
+                  <span className="clockout-time">{settings.end}</span>
+                </div>
+              );
+            })()}
+            {live && snapshot.status === "done" && (
+              <div className="clockout-bar done">
+                <span className="clockout-label">{t("tick.shiftDone")}</span>
+                <span className="clockout-value">{settings.end}</span>
+              </div>
+            )}
+
             <div className="tick-sub">
               <span>
                 {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(derived.hourlyCents, settings.currency)}/hr</b>
@@ -383,6 +402,23 @@ export function SalaryApp() {
                 </b>{" "}
                 {t("tick.thisMonth")}
               </span>
+              {(() => {
+                const pd = daysUntilPayday(settings, now);
+                if (pd === 0) return (
+                  <>
+                    <span className="sep" />
+                    <span className="payday-today">{t("tick.paydayToday")}</span>
+                  </>
+                );
+                return (
+                  <>
+                    <span className="sep" />
+                    <span>
+                      {t("tick.untilPayday")} <b>{t(pd === 1 ? "tick.dayLeft" : "tick.daysLeft", { n: pd })}</b>
+                    </span>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="chip-row">
@@ -524,7 +560,11 @@ export function SalaryApp() {
                           ))}
                         </select>
                       </span>
-                      <span className="nm">{item.name}</span>
+                      <span className="nm">
+                        {item.name.startsWith("preset.")
+                          ? t(`wish.${item.name}`)
+                          : item.name}
+                      </span>
                       <span className="hr">{hours > 0 ? `${hours.toFixed(1)} h` : "—"}</span>
                       <span
                         style={{

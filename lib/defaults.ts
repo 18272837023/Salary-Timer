@@ -36,9 +36,9 @@ export function defaultSettings(): Settings {
     extras: [],
     unpaidDays: 0,
     wishlist: [
-      { id: "w1", name: "Noise-cancelling headphones", priceCents: 18_000, emoji: "🎧" },
-      { id: "w2", name: "Concert ticket", priceCents: 12_000, emoji: "🎫" },
-      { id: "w3", name: "Weekend away", priceCents: 52_000, emoji: "🏝️" },
+      { id: "w1", name: "preset.coffee", priceCents: 500, emoji: "☕" },
+      { id: "w2", name: "preset.lunch", priceCents: 1500, emoji: "🍱" },
+      { id: "w3", name: "preset.trip", priceCents: 80_000, emoji: "🏝️" },
     ],
     onboarded: false,
     v: SETTINGS_VERSION,
