@@ -13,14 +13,33 @@ export type PayMode = "annual" | "monthly" | "daily" | "hourly";
 export type CurrencyCode =
   | "USD"
   | "EUR"
+  | "CNY"
   | "GBP"
-  | "CAD"
-  | "AUD"
   | "JPY"
-  | "INR"
-  | "SGD"
+  | "KRW"
+  | "AED"
+  | "AUD"
   | "BRL"
-  | "MXN";
+  | "CAD"
+  | "CHF"
+  | "HKD"
+  | "IDR"
+  | "INR"
+  | "MXN"
+  | "MYR"
+  | "NOK"
+  | "NZD"
+  | "PHP"
+  | "PLN"
+  | "RUB"
+  | "SAR"
+  | "SEK"
+  | "SGD"
+  | "THB"
+  | "TRY"
+  | "TWD"
+  | "VND"
+  | "ZAR";
 
 export interface BreakWindow {
   id: string;

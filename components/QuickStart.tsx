@@ -5,10 +5,10 @@ import { createPortal } from "react-dom";
 import { useI18n } from "@/lib/i18n";
 import { track } from "@/lib/analytics";
 import { SETTINGS_VERSION } from "@/lib/defaults";
-import { formatRate, symbolFor } from "@/lib/money";
+import { CURRENCIES, currencyName, formatRate, symbolFor } from "@/lib/money";
 import { derive, toHHMM } from "@/lib/schedule";
 import { useSettings, useToast } from "@/lib/store";
-import type { BreakWindow, PayMode, Settings } from "@/lib/types";
+import type { BreakWindow, CurrencyCode, PayMode, Settings } from "@/lib/types";
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday … Sunday
 const GOALS = [500, 1000, 2500, 5000];
@@ -48,6 +48,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<QuickPayMode>("annual");
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [amount, setAmount] = useState(78_000);
   const [days, setDays] = useState(5);
   const [hours, setHours] = useState(8);
@@ -61,6 +62,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     const saved = derive(settings);
     // Keep existing hourly accounts compatible: show equivalent pay per working day.
     setMode(settings.mode === "hourly" ? "daily" : settings.mode);
+    setCurrency(settings.currency);
     setAmount(settings.mode === "hourly" ? Math.round(saved.dailyCents) / 100 : settings.amountCents / 100);
     setDays(settings.days.length || 5);
     setHours(saved.paidMin / 60);
@@ -90,6 +92,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     return {
       ...settings,
       mode,
+      currency,
       amountCents: Math.max(0, Math.round(amount * 100)),
       start: shift.start,
       end: shift.end,
@@ -99,10 +102,10 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       onboarded: true,
       v: SETTINGS_VERSION,
     };
-  }, [settings, mode, amount, days, hours, goal]);
+  }, [settings, mode, currency, amount, days, hours, goal]);
 
   const preview = useMemo(() => derive(draft), [draft]);
-  const sym = symbolFor(settings.currency);
+  const sym = symbolFor(currency);
   const locale = lang === "zh" ? "zh-CN" : "en-US";
 
   const goalCents = Math.round(goal * 100);
@@ -135,6 +138,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     replace(draft);
     track("setup_complete", {
       mode,
+      currency,
       days: days,
       hours: hours,
       annual_hours: Math.round(preview.annualHours),
@@ -187,6 +191,21 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                 ))}
               </div>
 
+              <div className="qs-cur-row">
+                <label htmlFor="qsCurrency">{t("panel.currency")}</label>
+                <select
+                  id="qsCurrency"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+                >
+                  {CURRENCIES.map((code) => (
+                    <option key={code} value={code}>
+                      {code} · {currencyName(code, locale)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="qs-amount">
                 <span className="cur">{sym}</span>
                 <input
@@ -214,6 +233,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                 onChange={(e) => setAmount(Number.parseFloat(e.target.value))}
                 aria-label={t("qs.dragAdjust")}
               />
+
               <p className="qs-pay-hint">{t("qs.step1.conversionHint")}</p>
             </>
           ) : null}
@@ -258,7 +278,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
               <div className="qs-fact">
                 {t("qs.step2.fact", {
                   hours: Math.round(preview.annualHours).toLocaleString(locale),
-                  rate: formatRate(preview.hourlyCents, settings.currency),
+                  rate: formatRate(preview.hourlyCents, currency),
                 })}
               </div>
             </>
@@ -324,12 +344,12 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
             <div>
               <div className="k">{t("qs.preview.earn")}</div>
               <div className="v">
-                {formatRate(preview.perSecondCents, settings.currency, 4)}
+                {formatRate(preview.perSecondCents, currency, 4)}
                 <span className="u">{t("qs.preview.sec")}</span>
               </div>
             </div>
             <div className="qs-preview-r">
-              {formatRate(preview.hourlyCents, settings.currency)}
+              {formatRate(preview.hourlyCents, currency)}
               <span className="u">{t("qs.preview.hr")}</span>
             </div>
           </div>

@@ -764,6 +764,9 @@ ol.checks li::before{
 
 .qs-seg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; background:var(--cream); border:2px solid var(--line); padding:5px; border-radius:16px; margin-bottom:12px}
 .qs-pay-hint{font-size:12px; font-weight:700; color:var(--muted); line-height:1.45; margin:4px 0 0}
+.qs-cur-row{display:flex; align-items:center; gap:10px; margin:0 0 10px}
+.qs-cur-row label{font-size:12.5px; font-weight:800; color:var(--muted); white-space:nowrap}
+.qs-cur-row select{flex:1; min-width:0; padding:8px 30px 8px 12px; font-size:13.5px; border-radius:12px; background-position:right 10px center; background-size:14px}
 .qs-seg button{border:none; background:transparent; padding:9px 4px; border-radius:11px; font-family:var(--display); font-weight:800; font-size:13.5px; color:var(--muted); cursor:pointer; transition:.15s}
 .qs-seg button.on{background:#fff; color:var(--ink); box-shadow:0 2px 0 var(--line-2)}
 

@@ -186,6 +186,23 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await click('.qs.on .qs-seg button:nth-child(3)');
   await sleep(120);
   check('year/day roundtrip preserves 800/day', await evalJS(`Number(document.querySelector('.qs.on .qs-amount input').value)`) === 800);
+
+  // ---------- 2c. 货币选择 ----------
+  const curOptions = await evalJS(`[...document.querySelectorAll('.qs.on .qs-cur-row select option')].map(o => o.textContent.trim())`);
+  check('wizard offers 20+ currencies', curOptions.length >= 20, String(curOptions.length));
+  check('currency label is code + name, not a bare symbol',
+    curOptions.slice(0, 3).every((label) => /^[A-Z]{3} · .+/.test(label)), JSON.stringify(curOptions.slice(0, 3)));
+  const pickCurrency = (code) => evalJS(`(() => {
+    const el = document.querySelector('.qs.on .qs-cur-row select');
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, ${JSON.stringify(code)});
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await pickCurrency('CNY');
+  await sleep(200);
+  check('CNY switches the preview symbol to ¥', (await text('.qs.on .qs-preview-r'))?.includes('¥100.00'), String(await text('.qs.on .qs-preview-r')));
+  await pickCurrency('USD');
+  await sleep(150);
+
   await click('.qs.on .qs-skip');
   await sleep(150);
 
@@ -339,6 +356,18 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await click('.app-actions .btn-ink');
   await sleep(200);
   check('daily salary remains editable in settings', (await text('.seg-pay button.on'))?.includes('日薪'));
+
+  // 零小数货币：日元不该出现 ".00"
+  await evalJS(`(() => {
+    const el = document.querySelector('#currencyInput');
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'JPY');
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(200);
+  await evalJS(`document.querySelector('.panel-foot .btn-mint')?.click()`);
+  await sleep(600);
+  check('JPY saved as the active currency', await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2')).currency === 'JPY'`));
+  check('JPY ticker has no decimal part', await evalJS(`document.querySelectorAll('.ticker .cents').length === 0`));
 
   console.log('\n===== 功能测试 =====');
   let pass = 0;

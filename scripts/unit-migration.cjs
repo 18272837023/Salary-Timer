@@ -130,5 +130,25 @@ check("未知收入模式回退到默认年薪", () => {
   assert.strictEqual(D.normalize({ mode: "garbage", amountCents: 500 }).mode, "annual");
 });
 
+console.log("\n=== I. 货币持久化与非法代码回退 ===");
+reset();
+D.saveSettings({ ...D.defaultSettings(), currency: "CNY", amountCents: 12_000_000, onboarded: true });
+check("人民币选择刷新后仍然保留", () => {
+  const saved = D.loadSettings();
+  assert.strictEqual(saved.currency, "CNY");
+  assert.strictEqual(saved.amountCents, 12_000_000);
+});
+check("新增的日元 / 韩元代码被接受", () => {
+  assert.strictEqual(D.normalize({ currency: "JPY" }).currency, "JPY");
+  assert.strictEqual(D.normalize({ currency: "KRW" }).currency, "KRW");
+});
+check("未知货币代码回退到美元", () => {
+  assert.strictEqual(D.normalize({ currency: "XYZ" }).currency, "USD");
+  assert.strictEqual(D.normalize({ currency: 42 }).currency, "USD");
+});
+check("旧载荷没有 currency 字段时用默认美元", () => {
+  assert.strictEqual(D.normalize({ amountCents: 100 }).currency, "USD");
+});
+
 console.log(`\n结果: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

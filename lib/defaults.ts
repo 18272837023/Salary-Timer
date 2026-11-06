@@ -1,4 +1,5 @@
 import type { BreakWindow, ExtraIncome, Settings, WishItem } from "./types";
+import { isCurrencyCode } from "./money";
 import { normalizeWishEmoji, pickWishEmoji } from "./wish";
 
 const KEY = "salarytimer.site.v2";
@@ -167,7 +168,7 @@ export function normalize(raw: unknown): Settings | null {
   return {
     mode: mode === "monthly" || mode === "daily" || mode === "hourly" || mode === "annual" ? mode : base.mode,
     amountCents: Math.max(0, Math.round(num(input.amountCents, base.amountCents))),
-    currency: (typeof currency === "string" ? currency : base.currency) as Settings["currency"],
+    currency: isCurrencyCode(currency) ? currency : base.currency,
     start: typeof input.start === "string" ? input.start : base.start,
     end: typeof input.end === "string" ? input.end : base.end,
     days: days.length ? days : base.days,

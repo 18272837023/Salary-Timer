@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "@/lib/i18n";
-import { CURRENCIES, centsToInput, formatCents, formatRate, parseAmountToCents, symbolFor } from "@/lib/money";
+import { CURRENCIES, centsToInput, currencyName, formatCents, formatRate, parseAmountToCents } from "@/lib/money";
 import { compute, dateKey, derive, formatHM } from "@/lib/schedule";
 import { makeId } from "@/lib/defaults";
 import { useNow, useSettings, useToast } from "@/lib/store";
@@ -29,7 +29,7 @@ export function SetupPanel({
   const { settings, replace, demo } = useSettings();
   const { show } = useToast();
   const [draft, setDraft] = useState<Settings>(settings);
-  const [amountText, setAmountText] = useState(centsToInput(settings.amountCents));
+  const [amountText, setAmountText] = useState(centsToInput(settings.amountCents, settings.currency));
   const [otHoursText, setOtHoursText] = useState<string | null>(null);
   const [otHoursEditing, setOtHoursEditing] = useState(false);
   const amountRef = useRef<HTMLInputElement>(null);
@@ -42,7 +42,7 @@ export function SetupPanel({
   useEffect(() => {
     if (!open) return;
     setDraft(settings);
-    setAmountText(centsToInput(settings.amountCents));
+    setAmountText(centsToInput(settings.amountCents, settings.currency));
     setOtHoursText(null);
     setOtHoursEditing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +106,18 @@ export function SetupPanel({
           : mode === "daily" ? current.dailyCents : current.hourlyCents,
     ));
     patch({ mode, amountCents: nextCents });
-    setAmountText(centsToInput(nextCents));
+    setAmountText(centsToInput(nextCents, draft.currency));
+  }
+
+  /**
+   * Currency is a label, not a conversion: there are no exchange rates in a
+   * static offline app, so the typed number is kept and only the symbol
+   * changes. The help text under the picker says so explicitly.
+   */
+  function changeCurrency(code: Settings["currency"]) {
+    patch({ currency: code });
+    const cents = parseAmountToCents(amountText);
+    setAmountText(cents === null ? amountText : centsToInput(cents, code));
   }
 
   const todayKey = dateKey(new Date());
@@ -217,35 +228,39 @@ export function SetupPanel({
 
           <div className="field">
             <label htmlFor="amountInput">{amountLabel[draft.mode]}</label>
-            <div className="row2" style={{ gridTemplateColumns: "1.5fr 1fr" }}>
-              <input
-                ref={amountRef}
-                id="amountInput"
-                type="number"
-                min={0}
-                step="any"
-                inputMode="decimal"
-                placeholder="78000"
-                value={amountText}
-                onChange={(e) => {
-                  const next = e.target.value;
-                  setAmountText(next);
-                  const cents = parseAmountToCents(next);
-                  if (cents !== null) patch({ amountCents: cents });
-                }}
-              />
-              <select
-                aria-label={t("panel.currency")}
-                value={draft.currency}
-                onChange={(e) => patch({ currency: e.target.value as Settings["currency"] })}
-              >
-                {CURRENCIES.map((code) => (
-                  <option key={code} value={code}>
-                    {code} {symbolFor(code)}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <input
+              ref={amountRef}
+              id="amountInput"
+              type="number"
+              min={0}
+              step="any"
+              inputMode="decimal"
+              placeholder="78000"
+              value={amountText}
+              onChange={(e) => {
+                const next = e.target.value;
+                setAmountText(next);
+                const cents = parseAmountToCents(next);
+                if (cents !== null) patch({ amountCents: cents });
+              }}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="currencyInput">{t("panel.currency")}</label>
+            <select
+              id="currencyInput"
+              className="currency-select"
+              value={draft.currency}
+              onChange={(e) => changeCurrency(e.target.value as Settings["currency"])}
+            >
+              {CURRENCIES.map((code) => (
+                <option key={code} value={code}>
+                  {code} · {currencyName(code, locale)}
+                </option>
+              ))}
+            </select>
+            <div className="help">{t("panel.currencyHelp")}</div>
           </div>
 
           <div className="field">
@@ -498,7 +513,7 @@ export function SetupPanel({
                 step={50}
                 placeholder={t("panel.jarGoal")}
                 aria-label={t("panel.jarGoal")}
-                value={centsToInput(draft.jarGoalCents)}
+                value={centsToInput(draft.jarGoalCents, draft.currency)}
                 onChange={(e) => {
                   const cents = parseAmountToCents(e.target.value);
                   patch({ jarGoalCents: cents ?? 0 });

@@ -182,7 +182,7 @@ export function SalaryApp() {
     pauseNote = t("pause.dayoff");
   }
 
-  const ticker = live ? splitCents(snapshot.earnedCents) : { whole: "0", frac: ".00" };
+  const ticker = splitCents(live ? snapshot.earnedCents : 0, settings.currency);
   const privacy = settings.privacy;
   const ringC = 2 * Math.PI * 62;
 
@@ -353,7 +353,7 @@ export function SalaryApp() {
             <div className={`ticker${blur}${pop ? " pop" : ""}`}>
               <span className="cur">{sym}</span>
               <span>{ticker.whole}</span>
-              <span className="cents">{ticker.frac}</span>
+              {ticker.frac ? <span className="cents">{ticker.frac}</span> : null}
             </div>
             {live && earning && mileSeconds > 0 ? (
               <div className="next-mile">
