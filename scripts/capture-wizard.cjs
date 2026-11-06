@@ -164,17 +164,28 @@ watchdog.unref?.();
     await send('Page.navigate', { url: `${BASE}/zh/` });
     await sleep(1500);
     await evalJS(`sessionStorage.setItem('st.qs.skip', '1')`);
+    // `.panel` is portal-rendered only after React mounts, so its existence is
+    // a real hydration signal. Clicking the server-rendered button earlier than
+    // that silently does nothing (this is exactly what happened against the
+    // deployed site, where hydration is slower than on localhost).
     let ready = false;
-    for (let i = 0; i < 50; i++) {
-      ready = await evalJS(`!!document.querySelector('.app-actions .btn-ink')`);
+    for (let i = 0; i < 60; i++) {
+      ready = await evalJS(`!!document.querySelector('#currencyInput')`);
       if (ready) break;
-      await sleep(200);
+      await sleep(250);
     }
-    if (!ready) bail('app shell never hydrated');
-    await evalJS(`document.querySelector('.app-actions .btn-ink').click()`);
+    if (!ready) bail('settings panel never mounted');
+    for (let i = 0; i < 6; i++) {
+      await evalJS(`document.querySelector('.app-actions .btn-ink')?.click()`);
+      await sleep(300);
+      if (await evalJS(`document.querySelector('.panel')?.classList.contains('on') === true`)) break;
+    }
     for (let i = 0; i < 40; i++) {
       if (await evalJS(`document.querySelector('.panel')?.classList.contains('on') === true`)) break;
       await sleep(150);
+    }
+    if (!(await evalJS(`document.querySelector('.panel')?.classList.contains('on') === true`))) {
+      bail('settings panel did not open');
     }
     await sleep(400);
     const codes = await evalJS(`[...document.querySelectorAll('#currencyInput option')].map(o => o.textContent.trim())`);
@@ -191,12 +202,20 @@ watchdog.unref?.();
     // The panel edits a draft — commit it, then read the live ticker.
     await evalJS(`document.querySelector('.panel-foot .btn-mint')?.click()`);
     await sleep(900);
-    console.log('  ticker after JPY:', JSON.stringify(await evalJS(`document.querySelector('.ticker')?.textContent`)));
+    const tickerAfter = await evalJS(`document.querySelector('.ticker')?.textContent`);
+    console.log('  ticker after JPY:', JSON.stringify(tickerAfter));
     console.log('  hourly after JPY:', JSON.stringify(await evalJS(`document.querySelector('.tick-sub b')?.textContent`)));
+    if (!String(tickerAfter || '').startsWith('¥')) bail('JPY did not reach the live ticker');
     await shot('货币选择-日元-桌面.png');
 
+    // Reopen the panel for the narrow-screen shot.
+    await evalJS(`document.querySelector('.app-actions .btn-ink')?.click()`);
+    for (let i = 0; i < 30; i++) {
+      if (await evalJS(`document.querySelector('.panel')?.classList.contains('on') === true`)) break;
+      await sleep(150);
+    }
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
-    await sleep(400);
+    await sleep(500);
     await shot('货币选择-手机.png');
     ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
     console.log('done');
