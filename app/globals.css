@@ -387,6 +387,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 
 .seg{display:grid; grid-template-columns:repeat(3,1fr); gap:5px; background:var(--cream); border:2px solid var(--line); padding:5px; border-radius:16px}
+.seg-pay{grid-template-columns:repeat(4,minmax(0,1fr))}
 .seg button{border:none; background:transparent; padding:9px 4px; border-radius:11px; font-family:var(--display); font-weight:800; font-size:13.5px; color:var(--muted); cursor:pointer; transition:.15s}
 .seg button.on{background:#fff; color:var(--ink); box-shadow:0 2px 0 var(--line-2)}
 .days{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
@@ -761,7 +762,8 @@ ol.checks li::before{
 .qs-body h3{font-size:23px; margin-bottom:5px}
 .qs-sub{font-size:13.5px; color:var(--muted); font-weight:700; margin-bottom:16px}
 
-.qs-seg{display:grid; grid-template-columns:1fr 1fr; gap:5px; background:var(--cream); border:2px solid var(--line); padding:5px; border-radius:16px; margin-bottom:12px}
+.qs-seg{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; background:var(--cream); border:2px solid var(--line); padding:5px; border-radius:16px; margin-bottom:12px}
+.qs-pay-hint{font-size:12px; font-weight:700; color:var(--muted); line-height:1.45; margin:4px 0 0}
 .qs-seg button{border:none; background:transparent; padding:9px 4px; border-radius:11px; font-family:var(--display); font-weight:800; font-size:13.5px; color:var(--muted); cursor:pointer; transition:.15s}
 .qs-seg button.on{background:#fff; color:var(--ink); box-shadow:0 2px 0 var(--line-2)}
 

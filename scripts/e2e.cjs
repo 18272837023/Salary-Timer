@@ -38,7 +38,7 @@ if (!CHROME) {
 
 const BASE = process.argv[2] || process.env.BASE_URL || 'http://127.0.0.1:8850';
 const PORT = 9560;
-const proc = spawn(CHROME, ['--headless=new', '--disable-gpu', '--remote-debugging-port=' + PORT,
+const proc = spawn(CHROME, ['--headless=new', '--disable-gpu', '--no-sandbox', '--remote-debugging-port=' + PORT,
   '--window-size=1400,1000', '--lang=en-US',
   '--user-data-dir=' + path.join(os.tmpdir(), 'salarytimer-e2e-' + Date.now()), 'about:blank']);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -50,13 +50,34 @@ const results = [];
 const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
 
 (async () => {
-  let list = null;
-  for (let i = 0; i < 40; i++) { try { list = await getJSON('/json/list'); if (list && list.length) break; } catch (e) {} await sleep(300); }
-  const target = list.find((t) => t.type === 'page');
+  let target = null;
+  for (let i = 0; i < 40; i++) {
+    try {
+      const list = await getJSON('/json/list');
+      target = list.find((t) => t.type === 'page');
+      if (target) break;
+    } catch (e) { /* wait for Chrome startup */ }
+    await sleep(300);
+  }
+  if (!target) throw new Error('Chrome did not expose a page target');
   const WebSocket = require('ws');
   const ws = new WebSocket(target.webSocketDebuggerUrl, { perMessageDeflate: false });
   let id = 0; const pending = new Map(); const logs = [];
-  const send = (m, p) => new Promise((res, rej) => { const i = ++id; pending.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method: m, params: p || {} })); });
+  let connected = false;
+  ws.on('open', () => { connected = true; });
+  ws.on('close', () => {
+    connected = false;
+    for (const [, p] of pending) p.rej(new Error('Chrome DevTools connection closed'));
+    pending.clear();
+  });
+  const send = (m, p) => new Promise((res, rej) => {
+    if (!connected) return rej(new Error('Chrome DevTools is not connected'));
+    const i = ++id;
+    pending.set(i, { res, rej });
+    ws.send(JSON.stringify({ id: i, method: m, params: p || {} }), (err) => {
+      if (err && pending.has(i)) { pending.delete(i); rej(err); }
+    });
+  });
   ws.on('message', (raw) => {
     const m = JSON.parse(raw);
     if (m.id && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.error ? p.rej(new Error(JSON.stringify(m.error))) : p.res(m.result); }
@@ -64,7 +85,11 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
     if (m.method === 'Runtime.exceptionThrown') logs.push('EXC: ' + (m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text).slice(0, 300));
     if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error') logs.push('NET: ' + m.params.entry.text.slice(0, 200) + ' @ ' + (m.params.entry.url || ''));
   });
-  await new Promise((r) => ws.on('open', r));
+  await new Promise((resolve, reject) => {
+    ws.once('open', resolve);
+    ws.once('error', reject);
+    ws.once('close', () => reject(new Error('Chrome DevTools closed before opening')));
+  });
   await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable');
 
   // Inject localStorage before any page loads to force English for i18n.
@@ -136,6 +161,33 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
     return JSON.stringify({ total, mismatches });
   })()`);
   check('cent precision (integer-cents render)', JSON.parse(precision).mismatches === 0, precision);
+
+  // ---------- 2b. QuickStart pay periods ----------
+  await click('.demo-bar.on button');
+  await sleep(300);
+  const payOptions = await evalJS(`[...document.querySelectorAll('.qs.on .qs-seg button')].map(b => b.textContent.trim())`);
+  check('quick setup offers year / month / day', JSON.stringify(payOptions) === JSON.stringify(['Per year', 'Per month', 'Per day']), JSON.stringify(payOptions));
+  await click('.qs.on .qs-seg button:nth-child(2)');
+  await sleep(120);
+  check('annual to monthly equivalent', await evalJS(`Number(document.querySelector('.qs.on .qs-amount input').value)`) === 6500);
+  await click('.qs.on .qs-seg button:nth-child(3)');
+  await sleep(120);
+  check('monthly to working-day equivalent', await evalJS(`Number(document.querySelector('.qs.on .qs-amount input').value)`) === 300);
+  await evalJS(`(() => {
+    const el = document.querySelector('.qs.on .qs-amount input');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, '800');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await sleep(180);
+  check('daily pay preview shows hourly rate', (await text('.qs.on .qs-preview-r'))?.includes('$100.00'));
+  await click('.qs.on .qs-seg button:nth-child(1)');
+  await sleep(120);
+  check('800/day converts to 208000/year', await evalJS(`Number(document.querySelector('.qs.on .qs-amount input').value)`) === 208000);
+  await click('.qs.on .qs-seg button:nth-child(3)');
+  await sleep(120);
+  check('year/day roundtrip preserves 800/day', await evalJS(`Number(document.querySelector('.qs.on .qs-amount input').value)`) === 800);
+  await click('.qs.on .qs-skip');
+  await sleep(150);
 
   // ---------- 3. 设置面板 + 持久化 ----------
   // First dismiss the QuickStart wizard if it's visible (it auto-pops after 12s
@@ -236,6 +288,58 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   const ldCount = await evalJS(`document.querySelectorAll('script[type="application/ld+json"]').length`);
   check('json-ld blocks on landing page', ldCount >= 2, String(ldCount));
 
+  // ---------- 9. Chinese wizard, screenshot, mobile layout and persistence ----------
+  await send('Page.navigate', { url: BASE + '/zh/' });
+  await sleep(900);
+  await evalJS(`localStorage.removeItem('salarytimer.site.v2'); sessionStorage.removeItem('st.qs.skip')`);
+  await send('Page.reload');
+  let demoReady = false;
+  for (let i = 0; i < 40; i++) {
+    demoReady = await evalJS(`!!document.querySelector('.demo-bar.on button')`);
+    if (demoReady) break;
+    await sleep(200);
+  }
+  check('Chinese demo ready', demoReady);
+  await sleep(500);
+  await click('.demo-bar.on button');
+  await sleep(300);
+  const zhPayOptions = await evalJS(`[...document.querySelectorAll('.qs.on .qs-seg button')].map(b => b.textContent.trim())`);
+  check('Chinese options: 按年 / 按月 / 按天', JSON.stringify(zhPayOptions) === JSON.stringify(['按年', '按月', '按天']), JSON.stringify(zhPayOptions));
+  const outDir = path.join(__dirname, '..', 'outputs');
+  fsx.mkdirSync(outDir, { recursive: true });
+  const screenshot = async (name) => {
+    const { data } = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+    fsx.writeFileSync(path.join(outDir, name), Buffer.from(data, 'base64'));
+  };
+  await screenshot('收入弹窗-年-月-天-桌面.png');
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+  await sleep(300);
+  check('390px wizard fits screen', await evalJS(`document.documentElement.scrollWidth <= window.innerWidth`));
+  await screenshot('收入弹窗-年-月-天-手机.png');
+  await click('.qs.on .qs-seg button:nth-child(3)');
+  await sleep(100);
+  await evalJS(`(() => {
+    const el = document.querySelector('.qs.on .qs-amount input');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, '800');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await sleep(150);
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(120);
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(120);
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(300);
+  const savedDaily = await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2') || 'null')`);
+  check('daily salary saved as integer cents', savedDaily?.mode === 'daily' && savedDaily?.amountCents === 80000,
+    `${savedDaily?.mode} ${savedDaily?.amountCents}`);
+  await send('Page.reload');
+  await sleep(600);
+  check('daily salary survives reload', await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2')).mode === 'daily'`));
+  await click('.app-actions .btn-ink');
+  await sleep(200);
+  check('daily salary remains editable in settings', (await text('.seg-pay button.on'))?.includes('日薪'));
+
   console.log('\n===== 功能测试 =====');
   let pass = 0;
   for (const r of results) {
@@ -245,4 +349,8 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   console.log(`\n${pass}/${results.length} passed`);
   console.log('CONSOLE/NETWORK ERRORS:', logs.length ? JSON.stringify(logs, null, 1) : 'none');
   ws.close(); proc.kill(); process.exit(results.length - pass);
-})();
+})().catch((error) => {
+  console.error('E2E failed:', error);
+  proc.kill();
+  process.exit(1);
+});

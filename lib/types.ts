@@ -8,7 +8,7 @@
  * exactly the bug that made the first prototype display the wrong cent digit.
  */
 
-export type PayMode = "annual" | "monthly" | "hourly";
+export type PayMode = "annual" | "monthly" | "daily" | "hourly";
 
 export type CurrencyCode =
   | "USD"
@@ -53,7 +53,7 @@ export interface WishItem {
 
 export interface Settings {
   mode: PayMode;
-  /** annual / monthly salary or hourly rate, in integer cents */
+  /** annual / monthly salary, pay per working day, or hourly rate, in integer cents */
   amountCents: number;
   currency: CurrencyCode;
   /** "HH:MM" */

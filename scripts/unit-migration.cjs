@@ -118,5 +118,17 @@ check("非对象载荷返回 null", () => {
   assert.strictEqual(D.loadSettings(), null);
 });
 
+console.log("\n=== H. 按天模式持久化及非法模式回退 ===");
+reset();
+D.saveSettings({ ...D.defaultSettings(), mode: "daily", amountCents: 80_000, onboarded: true });
+check("日薪模式及金额刷新后仍然保留", () => {
+  const saved = D.loadSettings();
+  assert.strictEqual(saved.mode, "daily");
+  assert.strictEqual(saved.amountCents, 80_000);
+});
+check("未知收入模式回退到默认年薪", () => {
+  assert.strictEqual(D.normalize({ mode: "garbage", amountCents: 500 }).mode, "annual");
+});
+
 console.log(`\n结果: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

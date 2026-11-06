@@ -77,16 +77,36 @@ export function SetupPanel({
   const modeLabel: Record<PayMode, string> = {
     annual: t("panel.yearly"),
     monthly: t("panel.monthly"),
+    daily: t("panel.daily"),
     hourly: t("panel.hourly"),
   };
   const amountLabel: Record<PayMode, string> = {
     annual: t("panel.annualLabel"),
     monthly: t("panel.monthlyLabel"),
+    daily: t("panel.dailyLabel"),
     hourly: t("panel.hourlyLabel"),
   };
 
   function patch(next: Partial<Settings>) {
     setDraft((prev) => ({ ...prev, ...next }));
+  }
+
+  function changePayMode(mode: PayMode) {
+    if (mode === draft.mode) return;
+    const cents = parseAmountToCents(amountText);
+    if (cents === null) {
+      patch({ mode });
+      return;
+    }
+    const current = derive({ ...draft, amountCents: cents });
+    const annualCents = current.hourlyCents * current.annualHours;
+    const nextCents = Math.max(0, Math.round(
+      mode === "annual" ? annualCents
+        : mode === "monthly" ? annualCents / 12
+          : mode === "daily" ? current.dailyCents : current.hourlyCents,
+    ));
+    patch({ mode, amountCents: nextCents });
+    setAmountText(centsToInput(nextCents));
   }
 
   const todayKey = dateKey(new Date());
@@ -181,13 +201,13 @@ export function SetupPanel({
         <div className="panel-body">
           <div className="field">
             <label>{t("panel.howPaid")}</label>
-            <div className="seg">
-              {(["annual", "monthly", "hourly"] as PayMode[]).map((m) => (
+            <div className="seg seg-pay">
+              {(["annual", "monthly", "daily", "hourly"] as PayMode[]).map((m) => (
                 <button
                   key={m}
                   type="button"
                   className={draft.mode === m ? "on" : undefined}
-                  onClick={() => patch({ mode: m })}
+                  onClick={() => changePayMode(m)}
                 >
                   {modeLabel[m]}
                 </button>

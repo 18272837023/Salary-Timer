@@ -160,5 +160,29 @@ console.log("\n=== 7. 金额单调性：整天内 earned 只增不减，到点�
   });
 }
 
+console.log("\n=== 8. 日薪换算与旧收入模式兼容 ===");
+{
+  const daily = S({ mode: "daily", amountCents: 80_000 });
+  const rate = derive(daily);
+  check("日薪 800.00、计薪 8 小时 → 时薪 100.00", () => {
+    assert.strictEqual(rate.paidMin, 480);
+    assert.strictEqual(rate.hourlyCents, 10_000);
+    assert.strictEqual(rate.dailyCents, 80_000);
+    assert.strictEqual(compute(daily, at(17, 30)).earnedCents, 80_000);
+  });
+  check("午休不计薪，日薪仍按实际 8 小时均摊", () => {
+    assert.strictEqual(compute(daily, at(12, 45)).earnedCents, 35_000);
+  });
+  check("日薪开启 1.5 倍加班后按时薪计算", () => {
+    const extra = S({ mode: "daily", amountCents: 80_000, overtime: true });
+    assert.strictEqual(compute(extra, at(18, 30)).earnedCents, 95_000);
+  });
+  check("年薪/月薪/时薪原有换算保持一致", () => {
+    assert.strictEqual(derive(S({ mode: "annual", amountCents: 5_200_000 })).hourlyCents, 2500);
+    assert.strictEqual(derive(S({ mode: "monthly", amountCents: 520_000 })).hourlyCents, 3000);
+    assert.strictEqual(derive(S({ mode: "hourly", amountCents: 3500 })).hourlyCents, 3500);
+  });
+}
+
 console.log(`\n结果: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

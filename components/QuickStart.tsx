@@ -13,6 +13,12 @@ import type { BreakWindow, PayMode, Settings } from "@/lib/types";
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday … Sunday
 const GOALS = [500, 1000, 2500, 5000];
 const DAY_OPTIONS = [3, 4, 5, 6];
+type QuickPayMode = Exclude<PayMode, "hourly">;
+const PAY_OPTIONS: Record<QuickPayMode, { label: string; unit: string; max: number; step: number }> = {
+  annual: { label: "qs.step1.perYear", unit: "qs.step1.yearUnit", max: 250_000, step: 500 },
+  monthly: { label: "qs.step1.perMonth", unit: "qs.step1.monthUnit", max: 30_000, step: 100 },
+  daily: { label: "qs.step1.perDay", unit: "qs.step1.dayUnit", max: 2_000, step: 10 },
+};
 
 function daysFor(count: number): number[] {
   return DAY_ORDER.slice(0, Math.min(7, Math.max(1, count))).sort((a, b) => a - b);
@@ -41,9 +47,8 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
-  const [mode, setMode] = useState<PayMode>("annual");
-  const [annual, setAnnual] = useState(78_000);
-  const [hourly, setHourly] = useState(32);
+  const [mode, setMode] = useState<QuickPayMode>("annual");
+  const [amount, setAmount] = useState(78_000);
   const [days, setDays] = useState(5);
   const [hours, setHours] = useState(8);
   const [goal, setGoal] = useState(2_000);
@@ -53,11 +58,12 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
   useEffect(() => {
     if (!open) return;
     setStep(0);
-    setMode(settings.mode === "hourly" ? "hourly" : "annual");
-    setAnnual(settings.mode === "hourly" ? Math.round((settings.amountCents / 100) * 2000) : Math.round(settings.amountCents / 100));
-    setHourly(settings.mode === "hourly" ? Math.round(settings.amountCents / 100) : 32);
+    const saved = derive(settings);
+    // Keep existing hourly accounts compatible: show equivalent pay per working day.
+    setMode(settings.mode === "hourly" ? "daily" : settings.mode);
+    setAmount(settings.mode === "hourly" ? Math.round(saved.dailyCents) / 100 : settings.amountCents / 100);
     setDays(settings.days.length || 5);
-    setHours(8);
+    setHours(saved.paidMin / 60);
     setGoal(Math.max(100, Math.round(settings.jarGoalCents / 100)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -84,7 +90,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     return {
       ...settings,
       mode,
-      amountCents: Math.max(0, Math.round((mode === "annual" ? annual : hourly) * 100)),
+      amountCents: Math.max(0, Math.round(amount * 100)),
       start: shift.start,
       end: shift.end,
       days: daysFor(days),
@@ -93,7 +99,7 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       onboarded: true,
       v: SETTINGS_VERSION,
     };
-  }, [settings, mode, annual, hourly, days, hours, goal]);
+  }, [settings, mode, amount, days, hours, goal]);
 
   const preview = useMemo(() => derive(draft), [draft]);
   const sym = symbolFor(settings.currency);
@@ -107,14 +113,16 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       ? goalCents / ((weeklyPayCents * settings.jarRate) / 100)
       : 0;
 
-  function switchMode(next: PayMode) {
+  function switchMode(next: QuickPayMode) {
     if (next === mode) return;
-    const hoursPerYear = preview.annualHours > 0 ? preview.annualHours : 2_080;
-    if (next === "hourly") {
-      setHourly(Math.max(1, Math.round((annual / hoursPerYear) * 100) / 100));
-    } else {
-      setAnnual(Math.max(1, Math.round((hourly * hoursPerYear) / 500) * 500));
-    }
+    // Use the chosen workweek (52 weeks/year), never a fixed 30-day month.
+    const annualCents = preview.hourlyCents * preview.annualHours;
+    const nextCents = next === "annual"
+      ? annualCents
+      : next === "monthly"
+        ? annualCents / 12
+        : preview.dailyCents;
+    setAmount(Math.round(nextCents) / 100);
     setMode(next);
   }
 
@@ -165,21 +173,18 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
               <h3>{t("qs.step1.title")}</h3>
               <p className="qs-sub">{t("qs.step1.sub")}</p>
 
-              <div className="qs-seg">
-                <button
-                  type="button"
-                  className={mode === "annual" ? "on" : ""}
-                  onClick={() => switchMode("annual")}
-                >
-                  {t("qs.step1.perYear")}
-                </button>
-                <button
-                  type="button"
-                  className={mode === "hourly" ? "on" : ""}
-                  onClick={() => switchMode("hourly")}
-                >
-                  {t("qs.step1.perHour")}
-                </button>
+              <div className="qs-seg" role="group" aria-label={t("panel.howPaid")}>
+                {(["annual", "monthly", "daily"] as QuickPayMode[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={mode === option ? "on" : ""}
+                    aria-pressed={mode === option}
+                    onClick={() => switchMode(option)}
+                  >
+                    {t(PAY_OPTIONS[option].label)}
+                  </button>
+                ))}
               </div>
 
               <div className="qs-amount">
@@ -189,32 +194,27 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
                   inputMode="decimal"
                   min={0}
                   step="any"
-                  value={mode === "annual" ? annual : hourly}
+                  value={amount}
                   onChange={(e) => {
                     const v = Number.parseFloat(e.target.value);
-                    const next = Number.isFinite(v) ? Math.max(0, v) : 0;
-                    if (mode === "annual") setAnnual(next);
-                    else setHourly(next);
+                    setAmount(Number.isFinite(v) ? Math.max(0, v) : 0);
                   }}
-                  aria-label={mode === "annual" ? t("qs.annualLabel") : t("qs.hourlyLabel")}
+                  aria-label={t(`qs.${mode}Label`)}
                 />
-                <span className="unit">{mode === "annual" ? t("qs.step1.yearUnit") : t("qs.step1.hourUnit")}</span>
+                <span className="unit">{t(PAY_OPTIONS[mode].unit)}</span>
               </div>
 
               <input
                 className="qs-range"
                 type="range"
-                min={mode === "annual" ? 20_000 : 8}
-                max={mode === "annual" ? 250_000 : 150}
-                step={mode === "annual" ? 500 : 1}
-                value={mode === "annual" ? annual : hourly}
-                onChange={(e) => {
-                  const v = Number.parseFloat(e.target.value);
-                  if (mode === "annual") setAnnual(v);
-                  else setHourly(v);
-                }}
+                min={0}
+                max={Math.max(PAY_OPTIONS[mode].max, amount)}
+                step={PAY_OPTIONS[mode].step}
+                value={amount}
+                onChange={(e) => setAmount(Number.parseFloat(e.target.value))}
                 aria-label={t("qs.dragAdjust")}
               />
+              <p className="qs-pay-hint">{t("qs.step1.conversionHint")}</p>
             </>
           ) : null}
 

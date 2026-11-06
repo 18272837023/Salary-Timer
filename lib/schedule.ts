@@ -72,6 +72,9 @@ export function derive(settings: Settings): Derived {
   let hourlyCents: number;
   if (settings.mode === "hourly") {
     hourlyCents = settings.amountCents;
+  } else if (settings.mode === "daily") {
+    // A day means a paid shift, not 24 calendar hours.
+    hourlyCents = (settings.amountCents * 60) / paidMin;
   } else if (settings.mode === "monthly") {
     hourlyCents = annualHours > 0 ? (settings.amountCents * 12) / annualHours : 0;
   } else {
@@ -88,7 +91,7 @@ export function derive(settings: Settings): Derived {
     weeklyHours,
     annualHours,
     hourlyCents,
-    dailyCents: (hourlyCents * paidMin) / 60,
+    dailyCents: settings.mode === "daily" ? settings.amountCents : (hourlyCents * paidMin) / 60,
     perMinuteCents: hourlyCents / 60,
     perSecondCents: hourlyCents / 3600,
   };
