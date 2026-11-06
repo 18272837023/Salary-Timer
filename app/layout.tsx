@@ -87,8 +87,18 @@ const websiteSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${baloo.variable} ${nunito.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${baloo.variable} ${nunito.variable}`}>
       <body>
+        {/* RootLayout cannot see the pathname under `output: "export"`, so set
+            the document language synchronously before hydration. The I18nProvider
+            keeps it in sync from then on. Without this, /zh would ship an
+            <html lang="en"> in its raw HTML and only correct it after React boots. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(location.pathname==='/zh'||location.pathname.indexOf('/zh/')===0)document.documentElement.lang='zh-CN'",
+          }}
+        />
         <script
           type="application/ld+json"
           // Structured data is generated from our own constants — no user input.

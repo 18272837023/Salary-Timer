@@ -1,12 +1,13 @@
 "use client";
 
-import { LangToggle, useI18n } from "@/lib/i18n";
+import { LangDropdown, useHref, useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
 import { useEffect, useState } from "react";
 import { NAV_LINKS, TOOLS } from "@/lib/site";
 
 export function SiteHeader() {
   const { t } = useI18n();
+  const href = useHref();
   const [stuck, setStuck] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -29,22 +30,22 @@ export function SiteHeader() {
   return (
     <header className={stuck ? "stuck" : undefined}>
       <div className="wrap nav">
-        <Link className="brand" href="/">
+        <Link className="brand" href={href("/")}>
           <span className="mark">$</span> {t("nav.brand")}
         </Link>
 
         <nav className="nav-links" aria-label="Primary">
           {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.href} href={href(link.href)}>
               {navLabels[link.href] ?? link.label}
             </Link>
           ))}
           <Link href={TOOLS[0].href}>{t("nav.calculators")}</Link>
-          <LangToggle />
+          <LangDropdown />
         </nav>
 
         <div className="nav-right-mobile">
-          <LangToggle />
+          <LangDropdown />
           <button
             type="button"
             className="nav-burger"
@@ -60,7 +61,11 @@ export function SiteHeader() {
       {menuOpen && (
         <div className="nav-sheet">
           {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
+            <Link
+              key={link.href}
+              href={href(link.href)}
+              onClick={() => setMenuOpen(false)}
+            >
               {navLabels[link.href] ?? link.label}
             </Link>
           ))}

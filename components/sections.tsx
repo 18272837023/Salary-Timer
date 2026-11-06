@@ -1,115 +1,55 @@
+"use client";
+
 import { Link } from "@/components/SmartLink";
+import { useHref, useI18n } from "@/lib/i18n";
 import { CLUSTERS, TOOLS, entryArticle, getLearn } from "@/lib/site";
 
-export interface FaqItem {
-  q: string;
-  a: string;
-}
+import { HOME_FAQ, type FaqItem } from "@/lib/home-faq";
 
-export const HOME_FAQ: FaqItem[] = [
-  {
-    q: "What exactly is a salary timer?",
-    a: "A salary timer is a live counter that converts your working time into money as it passes. Instead of calculating what you earned at the end of a month, it shows the number moving in real time — so you can see the value of an hour, a meeting, or an extra shift while it's happening.",
-  },
-  {
-    q: "How does it calculate my salary per second?",
-    a: "It takes your pay, converts it to an hourly rate using your real schedule (paid hours per day × working days × 52), then divides by 3,600. That per-second figure is added only while you're inside a paid window of your shift — never during breaks, before you start, or after you clock out (unless you've turned on overtime).",
-  },
-  {
-    q: "How do I work out my hourly rate from an annual salary?",
-    a: "The common shortcut is salary ÷ 2,080, which assumes 40 hours a week, 52 weeks a year. It's wrong for almost everyone. This site does the honest version: your actual paid hours per day, minus unpaid breaks, times the number of days you actually work, times 52. Work a 4-day week and your hourly rate jumps; work 50-hour weeks and it drops.",
-  },
-  {
-    q: "Does it count my lunch break as paid time?",
-    a: "No — and that's deliberate. Any break you add is treated as unpaid, and the counter freezes while you're on it. If your lunch is genuinely paid, just don't add it as a break and the timer will keep running through it.",
-  },
-  {
-    q: "Can I use it if I'm paid hourly instead of a salary?",
-    a: "Yes, and it's the most accurate mode. Switch the pay type to hourly and the timer uses your rate directly — no annual-hours estimation involved. It's ideal for retail, hospitality, warehouse, agency and gig work.",
-  },
-  {
-    q: "Does it handle overtime and shift work?",
-    a: "Yes. Turn on overtime and the timer keeps counting after your shift ends at 1.25×, 1.5× or 2×, whichever matches your contract. Shifts that cross midnight are supported, so night shifts work correctly. Rotating patterns are handled by changing your working days.",
-  },
-  {
-    q: "Is my salary data private?",
-    a: "Your pay figures never leave your device. Everything is calculated in your browser and saved to your own device's local storage — there's no account and no server holding your numbers. We do count page views with Google Analytics so we know which pages are worth keeping, but that records the page you visited, never what you earn. Privacy mode blurs the figures on screen when someone's looking over your shoulder.",
-  },
-  {
-    q: "Do I need to install an app or create an account?",
-    a: "No. It's a website — open it, use it, close the tab. Your settings stay saved on that device for next time. It works on phones, tablets and desktops, and it keeps working offline once loaded.",
-  },
-  {
-    q: "Is a salary timer accurate enough to rely on?",
-    a: "For tracking and motivation, yes. It's a gross-pay estimate: it doesn't model tax, pension contributions, deductions or pay-period rounding, so treat it as \"what I earned before deductions\" rather than \"what will hit my bank\". Many people find the pre-tax number more motivating anyway.",
-  },
-  {
-    q: "Can freelancers use it for billing?",
-    a: "Yes — set an hourly rate and use the timer as a live session tracker. It won't produce invoices, but it will show you what a task is really worth, including the unpaid admin around it. Many freelancers use it to sanity-check quotes before sending them.",
-  },
-  {
-    q: "Why does watching money tick up actually help?",
-    a: "Because abstract rewards don't motivate behaviour; visible ones do. A salary arrives once a month, far from the effort that produced it. A counter that moves every second shortens that gap — which is why people report leaving on time more often, saying no to unpaid extras, and negotiating harder after a week of watching.",
-  },
-];
+// Re-exported so the existing `import type { FaqItem } from "@/components/sections"`
+// in the landing pages keeps working.
+export { HOME_FAQ, HOME_FAQ_ZH } from "@/lib/home-faq";
+export type { FaqItem } from "@/lib/home-faq";
 
 export function PainPoints() {
+  const { t, lang } = useI18n();
+  const href = useHref();
   const items = [
-    {
-      icon: "📅",
-      tone: "i-peach",
-      title: "Payday amnesia — one number, once a month",
-      body: "Thirty days of effort arrive as one number in your bank app, already spoken for by rent. The work itself never feels like it added up to anything.",
-    },
-    {
-      icon: "😴",
-      tone: "i-butter",
-      title: "The 3pm slump — the clock moves, pay doesn't",
-      body: "Three hours left and no way to feel progress. The clock moves, the counter doesn't — so the afternoon just feels like a long grey nothing.",
-    },
-    {
-      icon: "💬",
-      tone: "i-lilac",
-      title: "\u201cCan we grab 15 minutes?\u201d — that half hour isn't free",
-      body: "Meetings are free at the moment you accept them. You only find out what that half hour cost when the month is over and nothing moved.",
-    },
-    {
-      icon: "⏳",
-      tone: "i-mint",
-      title: "Overtime that vanishes — extra hours, no trace",
-      body: "Four extra evenings, one slightly bigger payslip, zero sense of which hours produced it. Extra effort disappears into the average.",
-    },
-    {
-      icon: "🎯",
-      tone: "i-pink",
-      title: "Savings are abstract — hours are not",
-      body: "\u201cSave $2,000\u201d is a number with no weight. \u201c74 hours of my life\u201d is something you can actually decide about.",
-    },
-    {
-      icon: "🔍",
-      tone: "i-butter",
-      title: "You don't know your real rate — 2,080 is a fiction",
-      body: "Salary ÷ 2,080 is not your hourly rate if you work 47 hours a week and answer Slack on Sundays. Most people are paid less per hour than they think.",
-    },
+    { icon: "📅", tone: "i-peach", n: 1 },
+    { icon: "😴", tone: "i-butter", n: 2 },
+    { icon: "💬", tone: "i-lilac", n: 3 },
+    { icon: "⏳", tone: "i-mint", n: 4 },
+    { icon: "🎯", tone: "i-pink", n: 5 },
+    { icon: "🔍", tone: "i-butter", n: 6 },
   ];
 
   return (
     <section className="section" id="pain">
       <div className="wrap">
-        <div className="eyebrow">The problem</div>
-        <h2>Why a salary timer helps</h2>
+        <div className="eyebrow">{t("pain.eyebrow")}</div>
+        <h2>{t("pain.h2")}</h2>
         <p className="sec-lede">
-          You work 160 hours a month and feel about four of them. A{" "}
-          <Link href="/#timer">salary timer</Link> exists because a monthly salary hides the hourly
-          trade you make all day. Here&apos;s what that costs you — and why watching a live counter
-          changes how a working day feels.
+          {lang === "zh" ? (
+            <>
+              你每月工作 160 小时，却只感受到其中 4 个。
+              <Link href={href("/#timer")}>薪资计时器</Link>
+              之所以存在，是因为月薪制让你看不到日常时间与金钱的交换。以下是这种看不见的代价——以及为什么看着数字跳动会改变一天的感受。
+            </>
+          ) : (
+            <>
+              You work 160 hours a month and feel about four of them. A{" "}
+              <Link href={href("/#timer")}>salary timer</Link> exists because a monthly salary hides
+              the hourly trade you make all day. Here&apos;s what that costs you — and why watching a
+              live counter changes how a working day feels.
+            </>
+          )}
         </p>
         <div className="cards-3">
           {items.map((item) => (
-            <div className="pcard" key={item.title}>
+            <div className="pcard" key={item.n}>
               <div className={`ico ${item.tone}`}>{item.icon}</div>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
+              <h3>{t(`pain.${item.n}.title`)}</h3>
+              <p>{t(`pain.${item.n}.body`)}</p>
             </div>
           ))}
         </div>
@@ -128,35 +68,35 @@ function Mock({ label, children }: { label: string; children: React.ReactNode })
 }
 
 export function Features() {
+  const { t, lang } = useI18n();
+  const href = useHref();
   const rows = [
     {
-      title: "A live counter, down to the second",
-      body: "Your salary per second is calculated from your actual schedule — not a generic 2,080-hour year. The number updates continuously while you're on paid time, so a two-hour meeting has a visible price and the last hour of a shift has a visible finish line.",
+      n: 1,
       art: (
-        <Mock label="Earned today">
+        <Mock label={t("feat.mock.earnedToday")}>
           <div className="n" style={{ color: "var(--mint-deep)" }}>
             $127.43
           </div>
           <div className="r">
-            <span>Per minute</span>
+            <span>{t("tick.perMinute")}</span>
             <b>$0.58</b>
           </div>
           <div className="r">
-            <span>Per hour</span>
+            <span>{t("tick.perHour")}</span>
             <b>$34.62</b>
           </div>
           <div className="r">
-            <span>Per second</span>
+            <span>{t("tick.perSecond")}</span>
             <b>$0.0096</b>
           </div>
         </Mock>
       ),
     },
     {
-      title: "Schedules for real jobs, not brochures",
-      body: "Five-day week, four-day week, six-day week, or pick your own days. Add public holidays and one-off days off. If you work nights, set a shift that crosses midnight — the timer follows it. Your hourly rate is recalculated the moment your schedule changes, because a 4-day week pays a very different hourly rate than a 5-day one.",
+      n: 2,
       art: (
-        <Mock label="Your week">
+        <Mock label={t("feat.mock.yourWeek")}>
           <div style={{ display: "flex", gap: 5, margin: "10px 0 14px" }}>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
               <span
@@ -171,41 +111,39 @@ export function Features() {
             ))}
           </div>
           <div className="r">
-            <span>Shift</span>
+            <span>{t("feat.mock.shift")}</span>
             <b>09:00 – 17:30</b>
           </div>
           <div className="r">
-            <span>Unpaid break</span>
+            <span>{t("feat.mock.unpaidBreak")}</span>
             <b>30 min</b>
           </div>
         </Mock>
       ),
     },
     {
-      title: "Unpaid breaks, handled honestly",
-      body: "Add as many breaks as your day really has: lunch, the school run, the gym, the 20 minutes you spend making coffee. The counter freezes during them. No fake numbers, no pretending your lunch break is billable.",
+      n: 3,
       art: (
-        <Mock label="Today">
+        <Mock label={t("feat.mock.today")}>
           <div className="r">
             <span>12:30 – 13:00 · Lunch</span>
-            <b>paused</b>
+            <b>{t("feat.mock.paused")}</b>
           </div>
           <div className="r">
             <span>15:10 – 15:20 · Coffee</span>
-            <b>paused</b>
+            <b>{t("feat.mock.paused")}</b>
           </div>
           <div className="r">
-            <span>Paid time</span>
+            <span>{t("feat.mock.paidTime")}</span>
             <b>6h 40m</b>
           </div>
         </Mock>
       ),
     },
     {
-      title: "Overtime, tips and bonuses",
-      body: "After clock-out the timer can keep running at 1.25×, 1.5× or 2×, so late evenings are worth something visible. Tips, commission and one-off bonuses can be added in a tap and roll straight into your month total.",
+      n: 4,
       art: (
-        <Mock label="Overtime">
+        <Mock label={t("feat.mock.overtime")}>
           <div className="n" style={{ fontSize: 28 }}>
             +$41.20
           </div>
@@ -214,36 +152,34 @@ export function Features() {
             <b>✓</b>
           </div>
           <div className="r">
-            <span>Tips added</span>
+            <span>{t("feat.mock.tips")}</span>
             <b>$18.00</b>
           </div>
         </Mock>
       ),
     },
     {
-      title: "Payday countdown & a savings jar",
-      body: "Set your payday and the site tells you how many days, hours and shifts are left. Then pick a savings rate and watch a little jar fill with every paid second — the only savings account that fills while you're sitting in a meeting.",
+      n: 5,
       art: (
-        <Mock label="Payday in">
+        <Mock label={t("feat.mock.paydayIn")}>
           <div className="n" style={{ fontSize: 30 }}>
-            9 days
+            {t("tick.daysLeft", { n: 9 })}
           </div>
           <div className="r">
-            <span>Jar</span>
+            <span>{t("feat.mock.jar")}</span>
             <b>$184 / $2,000</b>
           </div>
           <div className="r">
-            <span>This week</span>
+            <span>{t("feat.mock.thisWeek")}</span>
             <b>$312.40</b>
           </div>
         </Mock>
       ),
     },
     {
-      title: "A wishlist priced in hours",
-      body: "Add the things you're actually saving for. Every item shows its price in hours of your life, and a progress bar fills as you earn. \u201c$120 concert ticket\u201d becomes \u201c3.5 hours\u201d — which is a completely different decision.",
+      n: 6,
       art: (
-        <Mock label="Wishlist">
+        <Mock label={t("feat.mock.wishlist")}>
           <div className="r">
             <span>🎧 Headphones</span>
             <b>5.2 h</b>
@@ -260,15 +196,14 @@ export function Features() {
       ),
     },
     {
-      title: "Privacy mode for open offices",
-      body: "One tap blurs every number on screen. Handy when you're on a train, in a shared desk, or showing a colleague the timer without showing them your salary.",
+      n: 7,
       art: (
-        <Mock label="Earned today">
+        <Mock label={t("feat.mock.earnedToday")}>
           <div className="n" style={{ filter: "blur(9px)", color: "var(--mint-deep)" }}>
             $127.43
           </div>
           <div className="r">
-            <span>Per hour</span>
+            <span>{t("tick.perHour")}</span>
             <b style={{ filter: "blur(7px)" }}>$34.62</b>
           </div>
           <div className="r">
@@ -283,20 +218,32 @@ export function Features() {
   return (
     <section className="section" id="features">
       <div className="wrap">
-        <div className="eyebrow">What&apos;s inside</div>
-        <h2>What the salary timer handles</h2>
+        <div className="eyebrow">{t("feat.eyebrow")}</div>
+        <h2>{t("feat.h2")}</h2>
         <p className="sec-lede">
-          Most salary calculators assume a tidy 9-to-5. Real jobs have{" "}
-          <Link href="/learn/are-lunch-breaks-paid">unpaid lunch breaks</Link>, rotating shifts,
-          holiday schedules, tips, overtime and days you&apos;d rather forget. This free{" "}
-          <Link href="/#timer">salary timer</Link> handles all of it — see also{" "}
-          <Link href="/learn/how-salary-timers-work">how salary timers work</Link>.
+          {lang === "zh" ? (
+            <>
+              大多数薪资计算器假设一个标准的朝九晚五。真正的工作有
+              <Link href="/learn/are-lunch-breaks-paid">无薪午休</Link>
+              、轮班制、假期安排、小费、加班和那些你宁愿忘掉的日子。这个免费的
+              <Link href={href("/#timer")}>薪资计时器</Link>全都能处理——还可以了解
+              <Link href="/learn/how-salary-timers-work">计时器的工作原理</Link>。
+            </>
+          ) : (
+            <>
+              Most salary calculators assume a tidy 9-to-5. Real jobs have{" "}
+              <Link href="/learn/are-lunch-breaks-paid">unpaid lunch breaks</Link>, rotating shifts,
+              holiday schedules, tips, overtime and days you&apos;d rather forget. This free{" "}
+              <Link href={href("/#timer")}>salary timer</Link> handles all of it — see also{" "}
+              <Link href="/learn/how-salary-timers-work">how salary timers work</Link>.
+            </>
+          )}
         </p>
         {rows.map((row) => (
-          <div className="feature" key={row.title}>
+          <div className="feature" key={row.n}>
             <div className="txt">
-              <h3>{row.title}</h3>
-              <p>{row.body}</p>
+              <h3>{t(`feat.${row.n}.title`)}</h3>
+              <p>{t(`feat.${row.n}.body`)}</p>
             </div>
             <div className="art">{row.art}</div>
           </div>
@@ -307,13 +254,14 @@ export function Features() {
 }
 
 export function Personas() {
+  const { t, lang } = useI18n();
   const people = [
-    ["🏥", "Nurses & shift workers", "Twelve-hour shifts, rotating patterns, night differentials. Set the shift once and the timer follows your rota."],
-    ["🛒", "Retail & hospitality", "Variable hours, tips, split shifts. Watch a Sunday shift turn into a number you can actually plan with."],
-    ["💻", "Salaried 9-to-5ers", "The classic case: a fixed salary, a fixed schedule, and no idea what an hour of your life is worth."],
-    ["🧑‍💻", "Freelancers & contractors", "Know your true hourly rate before you quote. Add unpaid admin time and the real number gets honest fast."],
-    ["🏠", "Remote & hybrid workers", "When work and home blur, a visible counter draws the line back at 5:30."],
-    ["🎓", "Students & part-timers", "Four hours after class, one visible total. Suddenly a shift is worth more than \u201ca bit of cash\u201d."],
+    ["🏥", 1],
+    ["🛒", 2],
+    ["💻", 3],
+    ["🧑‍💻", 4],
+    ["🏠", 5],
+    ["🎓", 6],
   ] as const;
 
   return (
@@ -327,21 +275,31 @@ export function Personas() {
       }}
     >
       <div className="wrap">
-        <div className="eyebrow">Who it&apos;s for</div>
-        <h2>Who the salary timer is for</h2>
+        <div className="eyebrow">{t("persona.eyebrow")}</div>
+        <h2>{t("persona.h2")}</h2>
         <p className="sec-lede">
-          Built for anyone whose time has a price. If you&apos;re paid for hours — any hours, in any
-          arrangement — this was made for you. Shift workers can jump to the{" "}
-          <Link href="/shift-worker-salary-timer">shift worker salary timer</Link>, or read the{" "}
-          <Link href="/learn/salary-timer-for-shift-workers">shift work guide</Link> first.
+          {lang === "zh" ? (
+            <>
+              为所有时间有价格的人而做。如果你按小时拿钱——任何小时，任何形式——这就是为你做的。轮班工作者可以直接用
+              <Link href="/shift-worker-salary-timer">轮班薪资计时器</Link>，或者先读
+              <Link href="/learn/salary-timer-for-shift-workers">轮班工作指南</Link>。
+            </>
+          ) : (
+            <>
+              Built for anyone whose time has a price. If you&apos;re paid for hours — any hours, in
+              any arrangement — this was made for you. Shift workers can jump to the{" "}
+              <Link href="/shift-worker-salary-timer">shift worker salary timer</Link>, or read the{" "}
+              <Link href="/learn/salary-timer-for-shift-workers">shift work guide</Link> first.
+            </>
+          )}
         </p>
         <div className="cards-3">
-          {people.map(([emoji, title, body]) => (
-            <div className="persona" key={title}>
+          {people.map(([emoji, n]) => (
+            <div className="persona" key={n}>
               <div className="em">{emoji}</div>
               <div>
-                <h4>{title}</h4>
-                <p>{body}</p>
+                <h4>{t(`persona.${n}.title`)}</h4>
+                <p>{t(`persona.${n}.body`)}</p>
               </div>
             </div>
           ))}
@@ -352,59 +310,46 @@ export function Personas() {
 }
 
 export function Scenarios() {
+  const { t, lang } = useI18n();
+  const href = useHref();
   const cards = [
-    {
-      icon: "🕒",
-      tone: "i-peach",
-      title: "2:47pm, the meeting has no end",
-      body: "You glance at the tab: $96.20 earned, 42% of the shift gone. The meeting isn't more bearable — but it's finally measurable. You leave on time, because you can see what staying costs.",
-    },
-    {
-      icon: "🤔",
-      tone: "i-mint",
-      title: "\u201cCan you cover Saturday?\u201d",
-      body: "Instead of guessing, you check the real rate: an eight-hour Saturday at 1.5× is worth $415. Now it's a decision about a weekend, not a vague favour.",
-    },
-    {
-      icon: "🏝️",
-      tone: "i-lilac",
-      title: "The $1,800 trip",
-      body: "The wishlist turns it into 52 hours. Four working days. Somehow that's easier to commit to than a number on a savings app — and the jar fills every single shift.",
-    },
-    {
-      icon: "⚖️",
-      tone: "i-butter",
-      title: "Two job offers",
-      body: "$62k with a 45-minute commute versus $58k from your spare room. Run both through the timer with real hours. The higher salary is often the lower rate.",
-    },
+    { icon: "🕒", tone: "i-peach", n: 1 },
+    { icon: "🤔", tone: "i-mint", n: 2 },
+    { icon: "🏝️", tone: "i-lilac", n: 3 },
+    { icon: "⚖️", tone: "i-butter", n: 4 },
   ];
 
   return (
     <section className="section" id="scenarios">
       <div className="wrap">
-        <div className="eyebrow">In real life</div>
-        <h2>When a salary timer changes a decision</h2>
+        <div className="eyebrow">{t("scn.eyebrow")}</div>
+        <h2>{t("scn.h2")}</h2>
         <p className="sec-lede">
-          Four situations where seeing the number changes what you decide. Each one is a choice you
-          can only price while you still have the option to turn it down — and pricing it is what
-          the <Link href="/#timer">salary timer</Link> does.
+          {lang === "zh" ? (
+            <>
+              四个看到数字就改变决定的场景。每个都是你只有在还有机会拒绝时才能定价的选择——而定价正是
+              <Link href={href("/#timer")}>薪资计时器</Link>做的事。
+            </>
+          ) : (
+            <>
+              Four situations where seeing the number changes what you decide. Each one is a choice
+              you can only price while you still have the option to turn it down — and pricing it is
+              what the <Link href={href("/#timer")}>salary timer</Link> does.
+            </>
+          )}
         </p>
         <div className="cards-2">
           {cards.map((c) => (
-            <div className="pcard" key={c.title}>
+            <div className="pcard" key={c.n}>
               <div className={`ico ${c.tone}`}>{c.icon}</div>
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
+              <h3>{t(`scn.${c.n}.title`)}</h3>
+              <p>{t(`scn.${c.n}.body`)}</p>
             </div>
           ))}
         </div>
         <div className="quote" style={{ marginTop: 26 }}>
-          <p>
-            &ldquo;I used to think my salary was fine. Then I worked out it was $19.40 an hour after
-            the commute, the unpaid lunch and the 47-hour weeks. I asked for a raise two weeks
-            later.&rdquo;
-          </p>
-          <div className="who">— the moment most people have around day three</div>
+          <p>{t("scn.quote")}</p>
+          <div className="who">{t("scn.quoteWho")}</div>
         </div>
       </div>
     </section>
@@ -412,11 +357,8 @@ export function Scenarios() {
 }
 
 export function HowItWorks() {
-  const steps = [
-    ["Tell it what you earn", "Yearly, monthly or hourly — whichever you actually know. Pick your currency. That's the only number it needs."],
-    ["Tell it when you work", "Working days, start and finish times, unpaid breaks, holidays. Add overtime rules if you get them."],
-    ["Watch, and go back to work", "The counter runs only during paid time. Leave the tab open, or check in at lunch — it's always mid-sentence."],
-  ] as const;
+  const { t } = useI18n();
+  const steps = [1, 2, 3];
 
   return (
     <section
@@ -429,17 +371,15 @@ export function HowItWorks() {
       }}
     >
       <div className="wrap">
-        <div className="eyebrow">How it works</div>
-        <h2>How to set up the salary timer</h2>
-        <p className="sec-lede">
-          Twenty seconds to set up, then it just runs. Three steps, no account.
-        </p>
+        <div className="eyebrow">{t("how.eyebrow")}</div>
+        <h2>{t("how.h2")}</h2>
+        <p className="sec-lede">{t("how.lede")}</p>
         <div className="steps" style={{ marginTop: 30 }}>
-          {steps.map(([title, body], i) => (
-            <div className="step" key={title}>
+          {steps.map((n, i) => (
+            <div className="step" key={n}>
               <div className="num">{i + 1}</div>
-              <h3>{title}</h3>
-              <p>{body}</p>
+              <h3>{t(`how.${n}.title`)}</h3>
+              <p>{t(`how.${n}.body`)}</p>
             </div>
           ))}
         </div>
@@ -479,17 +419,16 @@ export function Faq({
 }
 
 export function CtaBand() {
+  const { t } = useI18n();
+  const href = useHref();
   return (
     <section className="section tight">
       <div className="wrap">
         <div className="cta-band">
-          <h2>Start the free salary timer</h2>
-          <p>
-            Your next hour is already worth something. Set it up once and watch it — it takes
-            twenty seconds, costs nothing, and you&apos;ll never look at 4:45pm the same way.
-          </p>
-          <Link className="btn btn-mint" href="/#timer">
-            Start my salary timer
+          <h2>{t("cta.h2")}</h2>
+          <p>{t("cta.body")}</p>
+          <Link className="btn btn-mint" href={href("/#timer")}>
+            {t("cta.btn")}
           </Link>
         </div>
       </div>
@@ -505,21 +444,32 @@ export function CtaBand() {
  * hubs then distribute authority to their own nodes. Listing every article here
  * would flatten the hierarchy and cost the homepage 11 outbound links it cannot
  * afford.
+ *
+ * The three cards keep their English labels: they are doorways into the English
+ * /learn/* hub pages, which are not translated.
  */
 export function LearnLinks() {
+  const { t, lang } = useI18n();
   const entry = entryArticle();
 
   return (
     <section className="section tight" id="learn">
       <div className="wrap">
-        <div className="eyebrow">Learn</div>
-        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>
-          The three topics behind the salary timer
-        </h2>
+        <div className="eyebrow">{t("learn.eyebrow")}</div>
+        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>{t("learn.h2")}</h2>
         <p className="sec-lede">
-          Everything this site explains belongs to one of three questions: what an hour is worth,
-          what counts as paid time, and when the money arrives. Start at the{" "}
-          <Link href="/learn">full topic map</Link> — or take the shortest route in.
+          {lang === "zh" ? (
+            <>
+              本站解释的一切都属于三个问题之一：一小时值多少钱、什么算计薪时间、钱什么时候到。从
+              <Link href="/learn">完整话题地图</Link>开始——或者选最短的路进去。
+            </>
+          ) : (
+            <>
+              Everything this site explains belongs to one of three questions: what an hour is
+              worth, what counts as paid time, and when the money arrives. Start at the{" "}
+              <Link href="/learn">full topic map</Link> — or take the shortest route in.
+            </>
+          )}
         </p>
         <div className="cards-3">
           {CLUSTERS.map((cluster) => (
@@ -532,9 +482,18 @@ export function LearnLinks() {
         </div>
         {entry ? (
           <p className="learn-related">
-            New to the idea?{" "}
-            <Link href={entry.href}>How salary timers work</Link> explains the whole thing in one
-            read, before the detail.
+            {lang === "zh" ? (
+              <>
+                第一次接触？<Link href={entry.href}>How salary timers work</Link>{" "}
+                用一篇文章解释了全部，在细节之前。
+              </>
+            ) : (
+              <>
+                New to the idea?{" "}
+                <Link href={entry.href}>How salary timers work</Link> explains the whole thing in
+                one read, before the detail.
+              </>
+            )}
           </p>
         ) : null}
       </div>
@@ -544,23 +503,33 @@ export function LearnLinks() {
 
 /** Cross-links between landing pages — the internal-link mesh Google needs. */
 export function ToolLinks({ current }: { current?: string }) {
-  const others = TOOLS.filter((t) => t.href !== current);
+  const { t, lang } = useI18n();
+  const others = TOOLS.filter((tool) => tool.href !== current);
   const relatedLearn =
     current && current !== "/"
-      ? TOOLS.find((t) => t.href === current)?.relatedLearnHref
+      ? TOOLS.find((tool) => tool.href === current)?.relatedLearnHref
       : undefined;
   const relatedArticle = relatedLearn ? getLearn(relatedLearn) : null;
 
   return (
     <section className="section tight">
       <div className="wrap">
-        <div className="eyebrow">Keep going</div>
-        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>More free salary tools</h2>
+        <div className="eyebrow">{t("tools.eyebrow")}</div>
+        <h2 style={{ fontSize: "clamp(24px, 3vw, 32px)" }}>{t("tools.h2")}</h2>
         {relatedArticle ? (
           <p className="sec-lede" style={{ marginBottom: 8 }}>
-            Prefer a walkthrough first? Read{" "}
-            <Link href={relatedArticle.href}>{relatedArticle.label}</Link>, then come back to the
-            calculator.
+            {lang === "zh" ? (
+              <>
+                想先看指南？读 <Link href={relatedArticle.href}>{relatedArticle.label}</Link>
+                ，然后回到计算器。
+              </>
+            ) : (
+              <>
+                Prefer a walkthrough first? Read{" "}
+                <Link href={relatedArticle.href}>{relatedArticle.label}</Link>, then come back to
+                the calculator.
+              </>
+            )}
           </p>
         ) : null}
         <div className="cards-3" style={{ marginTop: 22 }}>

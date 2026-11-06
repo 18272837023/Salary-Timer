@@ -6,9 +6,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -286,6 +288,9 @@ const en: Dict = {
   "footer.howWorks": "How a salary timer works",
   "footer.private": "Is my salary data private?",
   "footer.faq": "Salary timer FAQ",
+  // Label only — the policies themselves are English, with no /zh duplicates.
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Use",
   "footer.copyright": "© {year} Salary Timer. Estimates only — not financial or tax advice.",
   "footer.madeWith": "Made with 🪙 for people who count the hours.",
 
@@ -677,6 +682,9 @@ const zh: Dict = {
   "footer.howWorks": "计时器如何工作",
   "footer.private": "我的薪资数据安全吗？",
   "footer.faq": "常见问题",
+  // 仅本地化链接文字，政策正文只有英文版。
+  "footer.privacy": "隐私政策",
+  "footer.terms": "使用条款",
   "footer.copyright": "© {year} 薪资计时器。仅供参考——非财务或税务建议。",
   "footer.madeWith": "用 🪙 为每个认真计时的人而做。",
 
@@ -818,75 +826,60 @@ const DICTS: Record<Lang, Dict> = { en, zh };
 // Context
 // ─────────────────────────────────────────────────────────────────────────────
 
+// The URL is the single source of truth for language:
+//
+//   /            → English, for every visitor, including Chinese browsers
+//   /zh/         → Chinese
+//
+// Deriving the locale from the route (instead of navigator.language or a
+// localStorage flag) means the prerendered HTML of /zh is already Chinese —
+// no flash of English on load, no two languages served from one URL — and a
+// shared link always opens in the language it was shared in.
+export const DEFAULT_LANG: Lang = "en";
+export const EN_HOME = "/";
+export const ZH_HOME = "/zh/";
+
+const ZH_ROUTE = /^\/zh(?:\/|$)/;
+
+export function langFromPath(pathname: string | null | undefined): Lang {
+  return pathname && ZH_ROUTE.test(pathname) ? "zh" : "en";
+}
+
 interface I18nContextValue {
   lang: Lang;
-  /** Set the language and persist it. */
+  /** Navigate to the home page in the requested language. */
   setLang: (lang: Lang) => void;
-  /** Toggle between en and zh. */
+  /** Navigate to the other language. */
   toggleLang: () => void;
   /** Translate a key, with optional interpolation. Falls back to English. */
   t: (key: string, vars?: Record<string, string | number>) => string;
   /** Same as `t` but returns the raw English key if missing (for debugging). */
   tRaw: (key: string) => string;
-  /** Whether the locale has been hydrated from localStorage yet. */
+  /** Kept for API compatibility — the locale no longer needs hydration. */
   ready: boolean;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-const STORAGE_KEY = "st.lang";
-const DEFAULT_LANG: Lang = "en";
-
-/**
- * Detect the browser language once, on first mount. Returns "zh" for any
- * Chinese locale (zh-CN, zh-TW, zh-HK, etc.), otherwise "en".
- */
-function detectBrowserLang(): Lang {
-  if (typeof navigator === "undefined") return DEFAULT_LANG;
-  const langs = navigator.languages ?? [navigator.language];
-  for (const l of langs) {
-    if (l.toLowerCase().startsWith("zh")) return "zh";
-  }
-  return DEFAULT_LANG;
-}
-
 export function I18nProvider({ children }: { children: ReactNode }) {
-  // Server render and first client render must match — start from the default
-  // language and hydrate from localStorage / browser in an effect.
-  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
-  const [ready, setReady] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const lang = langFromPath(pathname);
 
+  // Keep <html lang> in sync for screen readers, translation tools and crawlers.
   useEffect(() => {
-    let stored: Lang | null = null;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw === "en" || raw === "zh") stored = raw;
-    } catch {
-      /* private mode */
-    }
-    // Stored preference wins; otherwise detect from the browser.
-    const next = stored ?? detectBrowserLang();
-    setLangState(next);
-    setReady(true);
-  }, []);
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  }, [lang]);
 
-  // Sync the <html lang="..."> attribute so screen readers and search engines
-  // see the correct language after hydration.
-  useEffect(() => {
-    if (!ready) return;
-    document.documentElement.lang = lang;
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch {
-      /* private mode */
-    }
-  }, [lang, ready]);
-
-  const setLang = useCallback((next: Lang) => setLangState(next), []);
-  const toggleLang = useCallback(
-    () => setLangState((prev) => (prev === "en" ? "zh" : "en")),
-    [],
+  const setLang = useCallback(
+    (next: Lang) => {
+      if (next === lang) return;
+      router.push(next === "zh" ? ZH_HOME : EN_HOME);
+    },
+    [lang, router],
   );
+
+  const toggleLang = useCallback(() => setLang(lang === "en" ? "zh" : "en"), [lang, setLang]);
 
   const t = useCallback(
     (key: string, vars?: Record<string, string | number>): string => {
@@ -908,8 +901,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<I18nContextValue>(
-    () => ({ lang, setLang, toggleLang, t, tRaw, ready }),
-    [lang, setLang, toggleLang, t, tRaw, ready],
+    () => ({ lang, setLang, toggleLang, t, tRaw, ready: true }),
+    [lang, setLang, toggleLang, t, tRaw],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
@@ -921,21 +914,108 @@ export function useI18n(): I18nContextValue {
   return ctx;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Language toggle button — used in the header
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function LangToggle() {
-  const { lang, toggleLang } = useI18n();
-  const label = lang === "en" ? "中文" : "EN";
-  return (
-    <button
-      type="button"
-      className="lang-toggle"
-      onClick={toggleLang}
-      aria-label={lang === "en" ? "切换到中文" : "Switch to English"}
-    >
-      {label}
-    </button>
+/**
+ * Localise an internal href for the active language. Homepage anchors stay on
+ * the Chinese homepage; links into /learn/* and the tool pages keep pointing at
+ * the English site, which is the only place those pages exist.
+ */
+export function useHref(): (href: string) => string {
+  const { lang } = useI18n();
+  return useCallback(
+    (href: string) => {
+      if (lang !== "zh") return href;
+      if (href === "/") return ZH_HOME;
+      if (href.startsWith("/#")) return `${ZH_HOME}${href.slice(1)}`;
+      return href;
+    },
+    [lang],
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Language picker — a dropdown in the header
+//
+// The button always shows the language of the page you are ON (EN / 中文) and
+// the menu offers both languages with the active one ticked. So EN always means
+// an English page and 中文 always means a Chinese page — no "label of the other
+// language" ambiguity. Language names are intentionally not translated: each
+// is written the way that language refers to itself.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LANG_OPTIONS: { id: Lang; code: string; name: string; htmlLang: string }[] = [
+  { id: "en", code: "EN", name: "English", htmlLang: "en" },
+  { id: "zh", code: "中", name: "简体中文", htmlLang: "zh-CN" },
+];
+
+export function LangDropdown() {
+  const { lang, setLang } = useI18n();
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const current = LANG_OPTIONS.find((o) => o.id === lang)!;
+
+  return (
+    <div className="lang-dd" ref={boxRef}>
+      <button
+        type="button"
+        className="lang-dd-btn"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Language: ${current.name}`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="lang-dd-globe" aria-hidden="true">
+          🌐
+        </span>
+        <span>{current.code}</span>
+        <span className="lang-dd-chev" aria-hidden="true">
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div className="lang-dd-menu" role="listbox" aria-label="Language">
+          {LANG_OPTIONS.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              role="option"
+              aria-selected={lang === o.id}
+              lang={o.htmlLang}
+              className={`lang-dd-item${lang === o.id ? " active" : ""}`}
+              onClick={() => {
+                setOpen(false);
+                setLang(o.id);
+              }}
+            >
+              <span className="lang-dd-code">{o.code}</span>
+              <span className="lang-dd-name">{o.name}</span>
+              <span className="lang-dd-check" aria-hidden="true">
+                {lang === o.id ? "✓" : ""}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** @deprecated use <LangDropdown /> — kept so older imports keep working. */
+export const LangToggle = LangDropdown;

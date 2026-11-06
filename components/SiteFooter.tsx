@@ -1,11 +1,12 @@
 "use client";
 
-import { useI18n } from "@/lib/i18n";
+import { useHref, useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
-import { LEARN, TOOLS } from "@/lib/site";
+import { LEARN, LEGAL_PAGES, TOOLS } from "@/lib/site";
 
 export function SiteFooter() {
   const { t } = useI18n();
+  const href = useHref();
   const YEAR = 2026;
 
   return (
@@ -13,7 +14,7 @@ export function SiteFooter() {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <Link className="brand" href="/" style={{ marginBottom: 10 }}>
+            <Link className="brand" href={href("/")} style={{ marginBottom: 10 }}>
               <span className="mark">$</span> {t("nav.brand")}
             </Link>
             <p
@@ -55,13 +56,13 @@ export function SiteFooter() {
             <h5>{t("footer.about")}</h5>
             <ul>
               <li>
-                <Link href="/#how">{t("footer.howWorks")}</Link>
+                <Link href={href("/#how")}>{t("footer.howWorks")}</Link>
               </li>
               <li>
-                <Link href="/#faq">{t("footer.private")}</Link>
+                <Link href={href("/#faq")}>{t("footer.private")}</Link>
               </li>
               <li>
-                <Link href="/#faq">{t("footer.faq")}</Link>
+                <Link href={href("/#faq")}>{t("footer.faq")}</Link>
               </li>
             </ul>
           </div>
@@ -69,6 +70,15 @@ export function SiteFooter() {
 
         <div className="foot-bottom">
           <span>{t("footer.copyright", { year: YEAR })}</span>
+          {/* Derived from LEGAL_PAGES so a policy page can never be published
+              without also being reachable from every page on the site. */}
+          <nav className="foot-legal" aria-label="Legal">
+            {LEGAL_PAGES.map((page) => (
+              <Link key={page.href} href={page.href}>
+                {t(page.labelKey)}
+              </Link>
+            ))}
+          </nav>
           <span>{t("footer.madeWith")}</span>
         </div>
       </div>

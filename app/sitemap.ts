@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { CLUSTERS, LEARN, TOOLS, absoluteUrl, pageUrl } from "@/lib/site";
+import { CLUSTERS, LEARN, LEGAL_PAGES, TOOLS, absoluteUrl, pageUrl } from "@/lib/site";
 
 // Required by `output: "export"` — metadata routes are prerendered at build time.
 export const dynamic = "force-static";
@@ -15,6 +15,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly",
       priority: 1,
+    },
+    {
+      // The Chinese homepage is a real prerendered route, not a client toggle.
+      url: pageUrl("/zh"),
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
     },
     ...TOOLS.map((tool) => ({
       // Trailing slash matches `trailingSlash: true` and the canonical tag,
@@ -41,6 +48,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.65,
+    })),
+    ...LEGAL_PAGES.map((page) => ({
+      url: pageUrl(page.href),
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
     })),
   ];
 }

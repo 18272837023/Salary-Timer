@@ -51,6 +51,53 @@ export const GA_MEASUREMENT_ID =
     ? "G-8T8JLTRSX9"
     : process.env.NEXT_PUBLIC_GA_ID;
 
+/**
+ * The one public inbox for privacy and terms questions. There is no account
+ * system and no support desk, so the legal pages point here instead of
+ * inventing a contact form that does not exist.
+ */
+export const CONTACT_EMAIL = "oiwagok@gmail.com";
+
+/** Bump whenever either legal page changes — shown as "Last updated" on both. */
+export const LEGAL_UPDATED = "2026-11-06";
+
+export interface LegalPageRoute {
+  href: string;
+  label: string;
+  /** i18n key for the footer link label */
+  labelKey: string;
+  /** <title> (layout adds "· Salary Timer") */
+  title: string;
+  description: string;
+}
+
+/**
+ * Legal pages are English-only on purpose: `/zh` is a translated homepage, not
+ * a translated site. The footer labels are localised, but the policies live at
+ * exactly one URL each so there is never a second, drifting copy to maintain.
+ *
+ * The footer and the sitemap both read this list, so a page cannot be published
+ * without being linked and indexed.
+ */
+export const LEGAL_PAGES: LegalPageRoute[] = [
+  {
+    href: "/privacy",
+    label: "Privacy Policy",
+    labelKey: "footer.privacy",
+    title: "Privacy Policy — what Salary Timer stores",
+    description:
+      "Salary Timer has no account and no server-side database: your pay figures are calculated in your browser and stay on your device. Here is exactly what Google Analytics does collect.",
+  },
+  {
+    href: "/terms",
+    label: "Terms of Use",
+    labelKey: "footer.terms",
+    title: "Terms of Use — estimates, not advice",
+    description:
+      "Salary Timer is a free gross-pay estimator, not a payslip or financial advice. Read the terms for using the live counter, the limits of its estimates and where your settings are kept.",
+  },
+];
+
 export function absoluteUrl(path = "/"): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

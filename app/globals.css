@@ -37,8 +37,10 @@
   --shadow-soft:0 18px 40px -26px rgba(51,49,59,.35);
   --shadow-card:0 2px 0 rgba(51,49,59,.035), 0 14px 34px -24px rgba(51,49,59,.30);
 
-  --display:var(--font-baloo), ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
-  --body:var(--font-nunito), ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Chinese glyphs fall back to a readable CJK face — Baloo/Nunito are
+     Latin-only, so without this the /zh page inherits a serif system font. */
+  --display:var(--font-baloo), ui-rounded, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+  --body:var(--font-nunito), ui-rounded, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
 }
 
 *{box-sizing:border-box}
@@ -501,6 +503,19 @@ footer{border-top:2px solid var(--line); padding:46px 0 34px; margin-top:20px}
 .foot-grid a{text-decoration:none; color:var(--muted); font-weight:700; font-size:14px}
 .foot-grid a:hover{color:var(--ink)}
 .foot-bottom{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--faint); font-size:12.5px; font-weight:700; border-top:2px solid var(--line); padding-top:20px}
+.foot-legal{display:inline-flex; align-items:center; gap:16px; flex-wrap:wrap}
+.foot-legal a{color:var(--muted); font-weight:800; text-decoration:none; white-space:nowrap}
+.foot-legal a:hover{color:var(--mint-deep); text-decoration:underline; text-underline-offset:3px}
+
+/* Legal pages: share the Learn page shell, with a few document-specific bits. */
+.legal-updated{display:inline-block; margin:-6px 0 4px; font-size:12.5px; font-weight:800; color:var(--faint)}
+.prose code{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.87em; font-weight:700; color:var(--mint-deep);
+  background:var(--mint-soft); border-radius:5px; padding:1px 5px;
+}
+/* The legal table's last column is prose, not a highlighted result figure. */
+.legal-table td:last-child{font-family:inherit; font-weight:700; color:var(--ink-2); white-space:normal}
 
 .toast{
   position:fixed; left:50%; bottom:26px; transform:translate(-50%,16px); background:var(--ink); color:#fff;
@@ -797,16 +812,43 @@ ol.checks li::before{
 .qs-preview-r{font-family:var(--display); font-weight:800; font-size:15px; color:var(--mint-deep); font-variant-numeric:tabular-nums; white-space:nowrap}
 .qs-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 22px 20px}
 
-/* ---------- language toggle ---------- */
-.lang-toggle{
+/* ---------- language picker ---------- */
+.lang-dd{position:relative; display:inline-flex; align-items:center}
+.lang-dd-btn{
+  display:inline-flex; align-items:center; gap:6px;
   border:2px solid var(--line); background:var(--cream); color:var(--ink-2);
-  padding:5px 12px; border-radius:10px; font-family:var(--display);
+  padding:5px 10px; border-radius:10px; font-family:var(--display);
   font-weight:800; font-size:12.5px; cursor:pointer; transition:.15s;
-  white-space:nowrap;
+  white-space:nowrap; line-height:1.2;
 }
-.lang-toggle:hover{border-color:var(--mint); color:var(--mint-deep)}
+.lang-dd-btn:hover, .lang-dd-btn[aria-expanded="true"]{border-color:var(--mint); color:var(--mint-deep)}
+.lang-dd-globe{font-size:13px; line-height:1}
+.lang-dd-chev{font-size:10px; opacity:.65; transition:transform .15s}
+.lang-dd-btn[aria-expanded="true"] .lang-dd-chev{transform:rotate(180deg)}
+.lang-dd-menu{
+  position:absolute; top:calc(100% + 8px); right:0; z-index:60;
+  min-width:172px; padding:6px;
+  background:var(--cream); border:2px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow-soft);
+  display:flex; flex-direction:column; gap:2px;
+}
+.lang-dd-item{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:8px 10px; border:0; border-radius:9px; background:transparent;
+  font-family:var(--display); font-size:13.5px; font-weight:800;
+  color:var(--ink-2); cursor:pointer; text-align:left;
+}
+.lang-dd-item:hover{background:var(--mint); color:var(--ink)}
+.lang-dd-item.active{color:var(--mint-deep)}
+.lang-dd-code{
+  flex:0 0 26px; height:24px; display:inline-flex; align-items:center; justify-content:center;
+  border:1.5px solid var(--line); border-radius:7px; font-size:11px; font-weight:800;
+  background:var(--paper,#fff); color:var(--ink-2);
+}
+.lang-dd-name{flex:1}
+.lang-dd-check{font-size:13px; color:var(--mint-deep); width:14px; text-align:right}
 .nav-right-mobile{display:none; gap:8px; align-items:center}
 @media(max-width:680px){
-  .nav-links .lang-toggle{display:none}
+  .nav-links .lang-dd{display:none}
   .nav-right-mobile{display:flex}
 }
