@@ -34,10 +34,13 @@ if (!CHROME) {
   console.error('No Chrome binary found. Set CHROME_PATH=/path/to/chrome');
   process.exit(2);
 }
-if (!fsx.existsSync(path.join(OUT, 'index.html'))) {
-  console.error('No build found at ./out — run `npm run build` first.');
+if (!fsx.existsSync(path.join(OUT, 'index.html')) && !process.env.CAPTURE_URL) {
+  console.error('No build found at ./out — run `npm run build` first (or set CAPTURE_URL).');
   process.exit(2);
 }
+
+/** Set CAPTURE_URL to run the same checks against the deployed site. */
+const BASE = process.env.CAPTURE_URL || `http://127.0.0.1:${PORT}`;
 
 const TYPES = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -85,7 +88,7 @@ const watchdog = setTimeout(() => bail('watchdog timeout (60s)'), 60_000);
 watchdog.unref?.();
 
 (async () => {
-  server = await serve();
+  if (!process.env.CAPTURE_URL) server = await serve();
 
   proc = spawn(CHROME, [
     '--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars',
@@ -158,7 +161,7 @@ watchdog.unref?.();
   // `node scripts/capture-wizard.cjs panel` → the settings panel's currency
   // picker, plus a JPY zero-decimal sanity readout.
   if (process.argv[2] === 'panel') {
-    await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/zh/` });
+    await send('Page.navigate', { url: `${BASE}/zh/` });
     await sleep(1500);
     await evalJS(`sessionStorage.setItem('st.qs.skip', '1')`);
     let ready = false;
@@ -195,7 +198,7 @@ watchdog.unref?.();
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
     await sleep(400);
     await shot('货币选择-手机.png');
-    ws.close(); proc.kill('SIGKILL'); server.close(); clearTimeout(watchdog);
+    ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
     console.log('done');
     process.exit(0);
   }
@@ -203,10 +206,10 @@ watchdog.unref?.();
   // `node scripts/capture-wizard.cjs demo` → annotated screenshot of the
   // yellow demo bar that opens the wizard, for "where do I click" questions.
   if (process.argv[2] === 'demo') {
-    await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/zh/` });
+    await send('Page.navigate', { url: `${BASE}/zh/` });
     await sleep(1500);
     await evalJS(`localStorage.removeItem('salarytimer.site.v2'); sessionStorage.setItem('st.qs.skip', '1')`);
-    await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/zh/` });
+    await send('Page.navigate', { url: `${BASE}/zh/` });
     let ready = false;
     for (let i = 0; i < 50; i++) {
       ready = await evalJS(`(() => { const el = document.querySelector('.demo-bar'); return !!el && getComputedStyle(el).display === 'flex'; })()`);
@@ -257,7 +260,7 @@ watchdog.unref?.();
     console.log('  demo bar box (mobile):', await annotate());
     await sleep(300);
     await shot('示例条位置-手机.png');
-    ws.close(); proc.kill('SIGKILL'); server.close(); clearTimeout(watchdog);
+    ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
     console.log('done');
     process.exit(0);
   }
@@ -268,10 +271,10 @@ watchdog.unref?.();
   await send('Page.addScriptToEvaluateOnNewDocument', {
     source: `window.__capToken = ${JSON.stringify(token)};`,
   });
-  await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/zh/` });
+  await send('Page.navigate', { url: `${BASE}/zh/` });
   await sleep(1200);
   await evalJS(`localStorage.removeItem('salarytimer.site.v2'); sessionStorage.removeItem('st.qs.skip')`);
-  await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/zh/` });
+  await send('Page.navigate', { url: `${BASE}/zh/` });
   for (let i = 0; i < 50; i++) {
     if (await evalJS(`window.__capToken === ${JSON.stringify(token)}`)) break;
     await sleep(200);
@@ -323,7 +326,7 @@ watchdog.unref?.();
 
   ws.close();
   proc.kill('SIGKILL');
-  server.close();
+  if (server) server.close();
   clearTimeout(watchdog);
   console.log('done');
   process.exit(0);
