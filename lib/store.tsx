@@ -26,12 +26,10 @@ interface SettingsContextValue {
   hydrated: boolean;
   /** whether the browser is actually persisting our data */
   storageOk: boolean;
-  /** true while the visitor is still looking at the demo salary */
-  demo: boolean;
   update: (patch: Partial<Settings>) => void;
   replace: (next: Settings) => void;
   reset: () => void;
-  /** marks the demo as converted and persists */
+  /** marks the setup as complete and persists */
   commit: () => StorageStatus;
 }
 
@@ -91,7 +89,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       settings,
       hydrated,
       storageOk,
-      demo: !settings.onboarded,
       update,
       replace,
       reset,

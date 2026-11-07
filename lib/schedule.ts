@@ -120,17 +120,6 @@ export function breaksToday(settings: Settings): { start: number; end: number }[
     .sort((a, b) => a.start - b.start);
 }
 
-export interface ComputeOptions {
-  /** Preview mode: start the clock 62% of the way through the shift. */
-  demo?: boolean;
-  /**
-   * Epoch ms the demo preview started. The demo clock advances from there, so
-   * the counter visibly ticks instead of freezing at a fixed point — the demo
-   * bar promises "the clock is running", and it should be telling the truth.
-   */
-  demoStartMs?: number;
-}
-
 /**
  * The core calculation: where are we in the shift, and what has that earned?
  *
@@ -140,26 +129,20 @@ export interface ComputeOptions {
 export function compute(
   settings: Settings,
   now: Date,
-  options: ComputeOptions = {},
 ): Snapshot {
   const derived = derive(settings);
   const { startMin, windowMin, paidMin } = derived;
   const overnight = derived.endMin <= derived.startMin;
   const shiftEndMin = startMin + windowMin;
 
-  const realMin =
+  const nowMin =
     now.getHours() * 60 +
     now.getMinutes() +
     now.getSeconds() / 60 +
     now.getMilliseconds() / 60000;
 
-  const demo = Boolean(options.demo);
-  const demoStartMs = options.demoStartMs ?? now.getTime();
-  const nowMin = demo
-    ? startMin + windowMin * 0.62 + Math.max(0, (now.getTime() - demoStartMs) / 60000)
-    : realMin;
   const shiftMin = overnight && nowMin < derived.endMin ? nowMin + MINUTES_PER_DAY : nowMin;
-  const workday = demo ? true : isWorkday(now, settings.days);
+  const workday = isWorkday(now, settings.days);
 
   let status: ShiftStatus = "dayoff";
   let paidElapsedMin = 0;

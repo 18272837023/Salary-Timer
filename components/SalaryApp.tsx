@@ -16,6 +16,7 @@ import {
   toHHMM,
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
+import type { Snapshot } from "@/lib/types";
 import { EMOJI_PALETTE, pickWishEmoji } from "@/lib/wish";
 import { track, trackOnce } from "@/lib/analytics";
 import { QuickStart } from "./QuickStart";
@@ -42,7 +43,7 @@ function pad2(n: number): string {
 
 export function SalaryApp() {
   const { t } = useI18n();
-  const { settings, demo, hydrated, update } = useSettings();
+  const { settings, hydrated, update } = useSettings();
   const { show } = useToast();
   const now = useNow(100);
 
@@ -57,18 +58,19 @@ export function SalaryApp() {
   const [wishName, setWishName] = useState("");
   const [wishPrice, setWishPrice] = useState("");
   const [wishUnit, setWishUnit] = useState<"price" | "hours">("price");
-  const [extraLabel, setExtraLabel] = useState("");
   const [extraAmount, setExtraAmount] = useState("");
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
-  const openPanel = useCallback(() => setPanelOpen(true), []);
-  const closeSettle = useCallback(() => setSettleOpen(false), []);
+    const closeSettle = useCallback(() => setSettleOpen(false), []);
 
   const busyRef = useRef(false);
   busyRef.current = panelOpen || settleOpen;
 
+  /** Until the visitor saves their own pay there is nothing to count. */
+  const onboarded = settings.onboarded;
+
   useEffect(() => {
-    if (!live || !demo) return;
+    if (!live || onboarded) return;
     let dismissed = false;
     try {
       dismissed = sessionStorage.getItem("st.qs.skip") === "1";
@@ -82,7 +84,7 @@ export function SalaryApp() {
       trackOnce("quickstart_shown");
     }, 12_000);
     return () => clearTimeout(timer);
-  }, [live, demo]);
+  }, [live, onboarded]);
 
   const closeQuickStart = useCallback(() => {
     setQsOpen(false);
@@ -96,17 +98,27 @@ export function SalaryApp() {
   const dayKey = dateKey(now);
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
 
-  const demoStartRef = useRef(Date.now());
+  const raw = compute(settings, live ? now : new Date(2026, 0, 1, 9, 0, 0));
 
-  const snapshot = compute(settings, live ? now : new Date(2026, 0, 1, 9, 0, 0), {
-    demo,
-    demoStartMs: live ? demoStartRef.current : undefined,
-  });
+  /**
+   * Empty state: before setup the app must not invent a salary. Everything
+   * money-shaped reads zero and the clock stays idle, so the first screen
+   * never shows a fake number ticking up.
+   */
+  const snapshot: Snapshot = onboarded
+    ? raw
+    : { ...raw, status: "before", paidElapsedMin: 0, overtimeMin: 0, earnedCents: 0, progress: 0 };
 
   const bases = useMemo(
-    () => periodBases(settings, new Date()),
+    () => (onboarded ? periodBases(settings, new Date()) : {
+      monthBeforeCents: 0,
+      monthDays: 0,
+      monthTotalDays: 0,
+      yearBeforeCents: 0,
+      yearDays: 0,
+    }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [settings, dayKey],
+    [settings, dayKey, onboarded],
   );
 
   const extrasCents = useMemo(
@@ -117,6 +129,14 @@ export function SalaryApp() {
 
   const derived = snapshot.derived;
   const sym = symbolFor(settings.currency);
+
+  /**
+   * Rates are derived from the saved pay, so before setup they must read zero.
+   * Otherwise the page would advertise an hourly figure the visitor never gave.
+   */
+  const rateHour = onboarded ? derived.hourlyCents : 0;
+  const rateMin = onboarded ? derived.perMinuteCents : 0;
+  const rateSec = onboarded ? derived.perSecondCents : 0;
 
   const monthBaseCents = bases.monthBeforeCents + snapshot.earnedCents;
   const unpaidCents = settings.unpaidDays * derived.dailyCents;
@@ -137,8 +157,8 @@ export function SalaryApp() {
     done: { key: "status.done", live: false },
     dayoff: { key: "status.dayoff", live: false },
   };
-  const statusInfo = demo
-    ? { label: t("status.preview"), live: true }
+  const statusInfo = !onboarded
+    ? { label: t("status.unset"), live: false }
     : (() => {
         const s = STATUS_MAP[snapshot.status];
         return s ? { label: t(s.key), live: s.live } : { label: t("status.working"), live: true };
@@ -148,7 +168,11 @@ export function SalaryApp() {
   // Countdown labels
   let cdLabel = t("cd.nextShift");
   let cdValue = "—";
-  if (snapshot.status === "working" || snapshot.status === "break") {
+  if (!onboarded) {
+    // No schedule yet — a countdown would be counting down to nothing.
+    cdLabel = t("cd.notSet");
+    cdValue = "—";
+  } else if (snapshot.status === "working" || snapshot.status === "break") {
     cdLabel = t("cd.clockOutIn");
     cdValue = formatClock((snapshot.shiftEndMin - snapshot.shiftMin) * 60);
   } else if (snapshot.status === "overtime") {
@@ -167,18 +191,18 @@ export function SalaryApp() {
 
   // Pause notes
   let pauseNote: string | null = null;
-  if (live && !demo && snapshot.status === "break") {
+  if (live && onboarded && snapshot.status === "break") {
     const active = breaksToday(settings).find(
       (b) => snapshot.shiftMin >= b.start && snapshot.shiftMin < b.end,
     );
     pauseNote = active
       ? `${t("pause.breakResume")} ${toHHMM(active.end % (24 * 60))}`
       : t("pause.break");
-  } else if (live && !demo && snapshot.status === "before") {
+  } else if (live && onboarded && snapshot.status === "before") {
     pauseNote = `${t("pause.before")} ${settings.start}`;
-  } else if (live && !demo && snapshot.status === "done") {
+  } else if (live && onboarded && snapshot.status === "done") {
     pauseNote = t("pause.done");
-  } else if (live && !demo && snapshot.status === "dayoff") {
+  } else if (live && onboarded && snapshot.status === "dayoff") {
     pauseNote = t("pause.dayoff");
   }
 
@@ -225,12 +249,12 @@ export function SalaryApp() {
   let wishPreview: string;
   if (wishTyped === null || wishTyped <= 0) {
     wishPreview = wishUnit === "hours" ? t("wish.preview.typeHours") : t("wish.preview.typePrice");
-  } else if (derived.hourlyCents <= 0) {
+  } else if (rateHour <= 0) {
     wishPreview = t("wish.preview.setPay");
   } else if (wishUnit === "hours") {
-    wishPreview = `≈ ${formatCents(Math.round(wishTyped * derived.hourlyCents), settings.currency)}`;
+    wishPreview = `≈ ${formatCents(Math.round(wishTyped * rateHour), settings.currency)}`;
   } else {
-    wishPreview = `≈ ${((wishTyped * 100) / derived.hourlyCents).toFixed(1)} ${t("wish.preview.hoursOfWork")}`;
+    wishPreview = `≈ ${((wishTyped * 100) / rateHour).toFixed(1)} ${t("wish.preview.hoursOfWork")}`;
   }
 
   function addWish() {
@@ -242,11 +266,11 @@ export function SalaryApp() {
     }
     let priceCents: number;
     if (wishUnit === "hours") {
-      if (derived.hourlyCents <= 0) {
+      if (rateHour <= 0) {
         show(t("wish.setPayFirst"));
         return;
       }
-      priceCents = Math.round(value * derived.hourlyCents);
+      priceCents = Math.round(value * rateHour);
     } else {
       priceCents = Math.round(value * 100);
     }
@@ -292,13 +316,12 @@ export function SalaryApp() {
         ...settings.extras,
         {
           id: `e${Date.now()}`,
-          label: extraLabel.trim().slice(0, 24) || "Extra",
+          label: t("month.extraPlaceholder"),
           amountCents: Math.round(amount * 100),
           ts: Date.now(),
         },
       ],
     });
-    setExtraLabel("");
     setExtraAmount("");
     show(t("toast.extraAdded"));
   }
@@ -332,19 +355,14 @@ export function SalaryApp() {
             >
               {t("action.settle")}
             </button>
-            <button type="button" className="btn btn-ink btn-sm" onClick={openPanel}>
+            <button
+              type="button"
+              className="btn btn-ink btn-sm"
+              onClick={() => (onboarded ? setPanelOpen(true) : setQsOpen(true))}
+            >
               {t("action.setPay")}
             </button>
           </div>
-        </div>
-
-        <div className={`demo-bar${demo ? " on" : ""}`}>
-          <span>
-            {t("demo.text")}
-          </span>
-          <button type="button" className="btn btn-ink btn-sm" onClick={() => setQsOpen(true)}>
-            {t("demo.btn")}
-          </button>
         </div>
 
         <div className="grid-main">
@@ -386,7 +404,7 @@ export function SalaryApp() {
 
             <div className="tick-sub">
               <span>
-                {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(derived.hourlyCents, settings.currency)}/hr</b>
+                {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(rateHour, settings.currency)}/hr</b>
               </span>
               <span className="sep" />
               <span>
@@ -424,15 +442,15 @@ export function SalaryApp() {
             <div className="chip-row">
               <div className="chip">
                 <div className="k">{t("tick.perMinute")}</div>
-                <div className={`v${blur}`}>{formatRate(derived.perMinuteCents, settings.currency)}</div>
+                <div className={`v${blur}`}>{formatRate(rateMin, settings.currency)}</div>
               </div>
               <div className="chip">
                 <div className="k">{t("tick.perHour")}</div>
-                <div className={`v${blur}`}>{formatRate(derived.hourlyCents, settings.currency)}</div>
+                <div className={`v${blur}`}>{formatRate(rateHour, settings.currency)}</div>
               </div>
               <div className="chip">
                 <div className="k">{t("tick.perSecond")}</div>
-                <div className={`v${blur}`}>{formatRate(derived.perSecondCents, settings.currency, 4)}</div>
+                <div className={`v${blur}`}>{formatRate(rateSec, settings.currency, 4)}</div>
               </div>
             </div>
           </div>
@@ -534,7 +552,7 @@ export function SalaryApp() {
                 </li>
               ) : (
                 settings.wishlist.map((item) => {
-                  const hours = derived.hourlyCents > 0 ? item.priceCents / derived.hourlyCents : 0;
+                  const hours = rateHour > 0 ? item.priceCents / rateHour : 0;
                   const pct =
                     item.priceCents > 0
                       ? Math.min(100, ((live ? monthTotalCents : 0) / item.priceCents) * 100)
@@ -685,13 +703,8 @@ export function SalaryApp() {
               </b>
             </div>
             <div className="mini-form">
-              <input
-                placeholder={t("month.extraPlaceholder")}
-                maxLength={18}
-                value={extraLabel}
-                onChange={(e) => setExtraLabel(e.target.value)}
-                aria-label={t("month.extraPlaceholder")}
-              />
+              {/* Plain text, not a field: only the amount is editable here. */}
+              <span className="mini-form-label">{t("month.extraPlaceholder")}</span>
               <input
                 type="number"
                 placeholder="50"

@@ -158,12 +158,79 @@ watchdog.unref?.();
 
   fsx.mkdirSync(OUT_DIR, { recursive: true });
 
+  // `node scripts/capture-wizard.cjs month` → the "本月真实收入" card with the
+  // now read-only label box, plus the setup row under the dashboard.
+  if (process.argv[2] === 'month') {
+    await send('Page.navigate', { url: `${BASE}/zh/` });
+    await sleep(1200);
+    await evalJS(`localStorage.setItem('salarytimer.site.v2', JSON.stringify({
+        onboarded: true, v: 3, currency: 'CNY', mode: 'annual', amountCents: 151000000
+      })); sessionStorage.setItem('st.qs.skip', '1')`);
+    await send('Page.navigate', { url: `${BASE}/zh/` });
+    let ready = false;
+    for (let i = 0; i < 50; i++) {
+      ready = await evalJS(`!!document.querySelector('.mini-form-label')`);
+      if (ready) break;
+      await sleep(200);
+    }
+    if (!ready) bail('month card never rendered');
+    await send('Emulation.setDeviceMetricsOverride', { width: 1180, height: 900, deviceScaleFactor: 1, mobile: false });
+    await sleep(400);
+    await evalJS(`document.querySelector('.mini-form-label').scrollIntoView({ block: 'center' })`);
+    await sleep(500);
+    console.log('  label text:', JSON.stringify(await evalJS(`document.querySelector('.mini-form-label')?.textContent`)));
+    await shot('本月卡片-奖金标签.png');
+    // The setup button is back in the top action row.
+    await evalJS(`window.scrollTo(0, 0)`);
+    await sleep(500);
+    await shot('设置入口-顶部按钮.png');
+    ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
+    console.log('done');
+    process.exit(0);
+  }
+
+  // `node scripts/capture-wizard.cjs home` → the first-visit screen (empty
+  // state, no demo bar), desktop and mobile.
+  if (process.argv[2] === 'home') {
+    await send('Page.navigate', { url: `${BASE}/zh/` });
+    await sleep(1200);
+    await evalJS(`localStorage.removeItem('salarytimer.site.v2');
+      sessionStorage.setItem('st.qs.skip', '1')`);
+    await send('Page.navigate', { url: `${BASE}/zh/` });
+    let ready = false;
+    for (let i = 0; i < 50; i++) {
+      ready = await evalJS(`!!document.querySelector('.ticker') && !!document.querySelector('.app-actions .btn-ink')`);
+      if (ready) break;
+      await sleep(200);
+    }
+    if (!ready) bail('app shell never hydrated');
+    await sleep(700);
+    // Taller viewport so the whole counter card is in frame, not just the hero.
+    await send('Emulation.setDeviceMetricsOverride', { width: 1180, height: 900, deviceScaleFactor: 1, mobile: false });
+    await sleep(400);
+    console.log('  status:', JSON.stringify(await evalJS(`document.querySelector('.status')?.textContent`)));
+    console.log('  ticker:', JSON.stringify(await evalJS(`document.querySelector('.ticker')?.textContent`)));
+    console.log('  rate  :', JSON.stringify(await evalJS(`document.querySelector('.tick-sub b')?.textContent`)));
+    await shot('首屏-未设置-桌面.png');
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+    await sleep(500);
+    await evalJS(`window.scrollTo(0, 0)`);
+    await shot('首屏-未设置-手机.png');
+    ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
+    console.log('done');
+    process.exit(0);
+  }
+
   // `node scripts/capture-wizard.cjs panel` → the settings panel's currency
   // picker, plus a JPY zero-decimal sanity readout.
   if (process.argv[2] === 'panel') {
     await send('Page.navigate', { url: `${BASE}/zh/` });
     await sleep(1500);
-    await evalJS(`sessionStorage.setItem('st.qs.skip', '1')`);
+    // Mark the app as set up first — before setup that button opens the wizard.
+    await evalJS(`localStorage.setItem('salarytimer.site.v2', JSON.stringify({ onboarded: true, v: 3 }));
+      sessionStorage.setItem('st.qs.skip', '1')`);
+    await send('Page.navigate', { url: `${BASE}/zh/` });
+    await sleep(1200);
     // `.panel` is portal-rendered only after React mounts, so its existence is
     // a real hydration signal. Clicking the server-rendered button earlier than
     // that silently does nothing (this is exactly what happened against the
@@ -222,68 +289,6 @@ watchdog.unref?.();
     process.exit(0);
   }
 
-  // `node scripts/capture-wizard.cjs demo` → annotated screenshot of the
-  // yellow demo bar that opens the wizard, for "where do I click" questions.
-  if (process.argv[2] === 'demo') {
-    await send('Page.navigate', { url: `${BASE}/zh/` });
-    await sleep(1500);
-    await evalJS(`localStorage.removeItem('salarytimer.site.v2'); sessionStorage.setItem('st.qs.skip', '1')`);
-    await send('Page.navigate', { url: `${BASE}/zh/` });
-    let ready = false;
-    for (let i = 0; i < 50; i++) {
-      ready = await evalJS(`(() => { const el = document.querySelector('.demo-bar'); return !!el && getComputedStyle(el).display === 'flex'; })()`);
-      if (ready) break;
-      await sleep(200);
-    }
-    if (!ready) bail('demo bar is not visible');
-    await sleep(400);
-    // Re-runnable: clears any previous annotation, then spotlights the bar.
-    const annotate = () => evalJS(`(() => {
-      document.querySelectorAll('[data-cap-anno]').forEach((n) => n.remove());
-      const bar = document.querySelector('.demo-bar');
-      const r = bar.getBoundingClientRect();
-      const style = document.createElement('style');
-      style.setAttribute('data-cap-anno', '1');
-      style.textContent = '.demo-bar{position:relative;z-index:2147483000;' +
-        'box-shadow:0 0 0 3px #E5484D,0 0 0 9999px rgba(24,18,12,.42);border-radius:18px}';
-      document.head.appendChild(style);
-      const tag = document.createElement('div');
-      tag.setAttribute('data-cap-anno', '1');
-      tag.textContent = '① 点这个黄色条，弹窗立刻出现';
-      const narrow = window.innerWidth < 500;
-      // Narrow screens have no free space above the bar (the action buttons sit
-      // there), so the callout docks to the bottom instead of covering them.
-      tag.style.cssText = narrow
-        ? 'position:fixed;left:16px;right:16px;bottom:24px;z-index:2147483001;background:#E5484D;color:#fff;' +
-          'font:700 15px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:14px 16px;' +
-          'border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.32)'
-        : 'position:fixed;left:' + Math.max(8, Math.round(r.left)) + 'px;top:' + Math.max(10, Math.round(r.top) - 48) + 'px;' +
-          'z-index:2147483001;background:#E5484D;color:#fff;font:700 15px/1 -apple-system,BlinkMacSystemFont,sans-serif;' +
-          'padding:10px 14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.28);white-space:nowrap';
-      document.body.appendChild(tag);
-      if (!narrow) {
-        const arrow = document.createElement('div');
-        arrow.setAttribute('data-cap-anno', '1');
-        arrow.style.cssText = 'position:fixed;left:' + Math.round(r.left + 26) + 'px;top:' + Math.round(r.top - 12) + 'px;' +
-          'width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;' +
-          'border-top:12px solid #E5484D;z-index:2147483001';
-        document.body.appendChild(arrow);
-      }
-      return JSON.stringify({ top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width) });
-    })()`);
-    console.log('  demo bar box:', await annotate());
-    await shot('示例条位置-桌面.png');
-    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
-    await sleep(500);
-    await evalJS(`window.scrollTo(0, 0)`);
-    console.log('  demo bar box (mobile):', await annotate());
-    await sleep(300);
-    await shot('示例条位置-手机.png');
-    ws.close(); proc.kill('SIGKILL'); if (server) server.close(); clearTimeout(watchdog);
-    console.log('done');
-    process.exit(0);
-  }
-
   // Chinese wizard, fresh state. A token proves we are looking at the NEW
   // document — otherwise stale-DOM queries can fire before the reload commits.
   const token = 'cap-' + Date.now();
@@ -298,20 +303,21 @@ watchdog.unref?.();
     if (await evalJS(`window.__capToken === ${JSON.stringify(token)}`)) break;
     await sleep(200);
   }
-  let demoReady = false;
+  // The wizard is reached through the black "设置薪资" button before setup.
+  let ready = false;
   for (let i = 0; i < 50; i++) {
-    demoReady = await evalJS(`!!document.querySelector('.demo-bar.on button')`);
-    if (demoReady) break;
+    ready = await evalJS(`!!document.querySelector('.app-actions .btn-ink')`);
+    if (ready) break;
     await sleep(200);
   }
-  if (!demoReady) bail('demo bar never appeared');
+  if (!ready) bail('app shell never hydrated');
   await sleep(600);
-  await click('.demo-bar.on button');
+  await click('.app-actions .btn-ink');
   await sleep(600);
 
   let open = await evalJS(`document.querySelector('.qs')?.classList.contains('on') === true`);
   if (!open) {
-    await click('.demo-bar.on button');
+    await click('.app-actions .btn-ink');
     await sleep(800);
     open = await evalJS(`document.querySelector('.qs')?.classList.contains('on') === true`);
   }

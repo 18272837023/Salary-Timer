@@ -26,7 +26,7 @@ export function SetupPanel({
   onClose: () => void;
 }) {
   const { t, lang } = useI18n();
-  const { settings, replace, demo } = useSettings();
+  const { settings, replace } = useSettings();
   const { show } = useToast();
   const [draft, setDraft] = useState<Settings>(settings);
   const [amountText, setAmountText] = useState(centsToInput(settings.amountCents, settings.currency));
@@ -67,7 +67,7 @@ export function SetupPanel({
   const now = useNow(open ? 1000 : 30000);
   const minuteKey = Math.floor(now.getTime() / 60_000);
   const overtimeMin = useMemo(
-    () => (draft.overtime ? compute(draft, new Date(), { demo: false }).overtimeMin : 0),
+    () => (draft.overtime ? compute(draft, new Date()).overtimeMin : 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [draft, minuteKey],
   );
@@ -130,9 +130,7 @@ export function SetupPanel({
     setOtHoursEditing(false);
     if (!Number.isFinite(typed) || typed < 0) return;
     const min = Math.min(24 * 60, Math.round(typed * 60));
-    const clockMin = compute({ ...draft, otOverride: undefined }, new Date(), {
-      demo: false,
-    }).overtimeMin;
+    const clockMin = compute({ ...draft, otOverride: undefined }, new Date()).overtimeMin;
     if (min <= clockMin) {
       show(
         clockMin > 0
@@ -168,9 +166,9 @@ export function SetupPanel({
     replace(next);
     onClose();
 
-    const snap = compute(next, new Date(), { demo: false });
+    const snap = compute(next, new Date());
     if (snap.status === "working" || snap.status === "overtime") {
-      show(demo ? t("panel.savedRunning") : t("panel.savedUpdated"));
+      show(!settings.onboarded ? t("panel.savedRunning") : t("panel.savedUpdated"));
     } else if (snap.status === "break") {
       show(t("panel.savedBreak"));
     } else if (snap.status === "before") {

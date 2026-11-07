@@ -133,12 +133,22 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
     process.exit(results.length - pass);
   }
 
-  // ---------- 1. 首屏与 demo ----------
-  check('demo bar visible', (await evalJS(`getComputedStyle(document.querySelector('.demo-bar')).display`)) === 'flex');
-  const t1 = await text('.ticker');
+  // ---------- 1. 首屏：未设置薪资时必须是归零的空状态 ----------
+  check('no demo bar on the page', (await evalJS(`document.querySelectorAll('.demo-bar').length`)) === 0);
+  // Hydration sets the real label a tick after `.app-shell` appears, so poll
+  // instead of racing it.
+  let statusLabel = "";
+  for (let i = 0; i < 20; i++) {
+    statusLabel = (await text('.status')) || "";
+    if (/Pay not set yet/.test(statusLabel)) break;
+    await sleep(150);
+  }
+  check('status reads "Pay not set yet"', /Pay not set yet/.test(statusLabel), String(statusLabel));
+  const idle1 = await text('.ticker');
   await sleep(900);
-  const t2 = await text('.ticker');
-  check('ticker is live (increases)', t1 !== t2, `${t1} -> ${t2}`);
+  const idle2 = await text('.ticker');
+  check('counter stays at zero before setup', idle1 === idle2 && /0\.00/.test(idle1 || ''), `${idle1} -> ${idle2}`);
+  check('no invented hourly rate before setup', /0\.00/.test((await text('.tick-sub b')) || ''), String(await text('.tick-sub b')));
 
   // ---------- 2. 金额分位精度 ----------
   const precision = await evalJS(`(() => {
@@ -163,8 +173,9 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   check('cent precision (integer-cents render)', JSON.parse(precision).mismatches === 0, precision);
 
   // ---------- 2b. QuickStart pay periods ----------
-  await click('.demo-bar.on button');
-  await sleep(300);
+  // Before setup the black "Set my pay" button opens the 3-step wizard.
+  await click('.app-actions .btn-ink');
+  await sleep(400);
   const payOptions = await evalJS(`[...document.querySelectorAll('.qs.on .qs-seg button')].map(b => b.textContent.trim())`);
   check('quick setup offers year / month / day', JSON.stringify(payOptions) === JSON.stringify(['Per year', 'Per month', 'Per day']), JSON.stringify(payOptions));
   await click('.qs.on .qs-seg button:nth-child(2)');
@@ -203,20 +214,20 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await pickCurrency('USD');
   await sleep(150);
 
-  await click('.qs.on .qs-skip');
-  await sleep(150);
+  // 走完向导：保存后应变成已设置状态（800/工作日）
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(200);
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(200);
+  await click('.qs.on .qs-foot button:nth-child(2)');
+  await sleep(600);
+  const wizardSaved = await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2') || 'null')`);
+  check('wizard marks the app as set up', wizardSaved?.onboarded === true, `${wizardSaved?.mode} ${wizardSaved?.amountCents}`);
 
   // ---------- 3. 设置面板 + 持久化 ----------
-  // First dismiss the QuickStart wizard if it's visible (it auto-pops after 12s
-  // but may have appeared during the precision test loop above).
-  await evalJS(`(() => {
-    const qs = document.querySelector('.quickstart [data-step]');
-    if (qs) { const skip = [...document.querySelectorAll('.quickstart button')].find(b=>b.textContent.match(/skip|later/i)); if (skip) skip.click(); }
-    try { sessionStorage.setItem('st.qs.skip', '1'); } catch {}
-  })()`);
+  // Once set up, the same black button opens the full settings panel instead.
+  await evalJS(`try { sessionStorage.setItem('st.qs.skip', '1'); } catch {}`);
 
-  await click('#\\30 , button.btn-ink.btn-sm');
-  // Find the "Set my pay" button by text content (i18n-safe: checks both languages)
   const setPayClicked = await evalJS(`(() => {
     const btns = [...document.querySelectorAll('.app-actions .btn')];
     let btn = btns.find(b => b.textContent.includes('Set my pay') || b.textContent.includes('设置薪资'));
@@ -227,7 +238,11 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   })()`);
   check('set-pay button clicked', setPayClicked === 'OK', setPayClicked);
   await sleep(600);
-  check('panel opens', (await evalJS(`document.querySelector('.panel').classList.contains('on')`)) === true);
+  check('panel opens once set up', (await evalJS(`document.querySelector('.panel').classList.contains('on')`)) === true);
+
+  // Back to yearly pay so the preview rate is the familiar 90000/2080.
+  await click('.seg-pay button:nth-child(1)');
+  await sleep(250);
 
   await evalJS(`(() => {
     const inp = document.querySelector('#amountInput');
@@ -241,7 +256,8 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
 
   await evalJS(`[...document.querySelectorAll('.panel-foot .btn')].find(b => b.textContent.includes('Start the clock') || b.textContent.includes('开始计时'))?.click()`);
   await sleep(800);
-  check('demo bar gone after save', (await evalJS(`getComputedStyle(document.querySelector('.demo-bar')).display`)) === 'none');
+  check('status leaves the empty state after setup',
+    !/Pay not set yet/.test((await text('.status')) || ''), String(await text('.status')));
   check('panel closed', (await evalJS(`document.querySelector('.panel').classList.contains('on')`)) === false);
   const stored = await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2') || 'null')?.amountCents`);
   check('persisted as integer cents', stored === 9000000, String(stored));
@@ -310,16 +326,16 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await sleep(900);
   await evalJS(`localStorage.removeItem('salarytimer.site.v2'); sessionStorage.removeItem('st.qs.skip')`);
   await send('Page.reload');
-  let demoReady = false;
+  let zhReady = false;
   for (let i = 0; i < 40; i++) {
-    demoReady = await evalJS(`!!document.querySelector('.demo-bar.on button')`);
-    if (demoReady) break;
+    zhReady = await evalJS(`!!document.querySelector('.app-actions .btn-ink') && document.querySelectorAll('.demo-bar').length === 0`);
+    if (zhReady) break;
     await sleep(200);
   }
-  check('Chinese demo ready', demoReady);
+  check('Chinese first visit has no demo bar', zhReady);
   await sleep(500);
-  await click('.demo-bar.on button');
-  await sleep(300);
+  await click('.app-actions .btn-ink');
+  await sleep(500);
   const zhPayOptions = await evalJS(`[...document.querySelectorAll('.qs.on .qs-seg button')].map(b => b.textContent.trim())`);
   check('Chinese options: 按年 / 按月 / 按天', JSON.stringify(zhPayOptions) === JSON.stringify(['按年', '按月', '按天']), JSON.stringify(zhPayOptions));
   const outDir = path.join(__dirname, '..', 'outputs');

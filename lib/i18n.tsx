@@ -67,7 +67,7 @@ const en: Dict = {
   "status.before": "Shift hasn't started",
   "status.done": "Clocked out",
   "status.dayoff": "Day off",
-  "status.preview": "Previewing a shift",
+  "status.unset": "Pay not set yet",
 
   // SalaryApp — actions
   "action.showNumbers": "👀 Show numbers",
@@ -78,8 +78,6 @@ const en: Dict = {
   "action.setPay": "⚙️ Set my pay",
 
   // Demo bar
-  "demo.text": "👋 This is a demo salary of $78,000/yr. The clock is running so you can see how it feels — 3 questions and it becomes yours.",
-  "demo.btn": "Make it mine",
 
   // Ticker
   "tick.earnedToday": "Earned today",
@@ -100,6 +98,7 @@ const en: Dict = {
 
   // Countdown labels
   "cd.nextShift": "Next shift",
+  "cd.notSet": "Set your pay to start",
   "cd.clockOutIn": "Clock out in",
   "cd.overtimeFor": "Overtime for",
   "cd.shiftStartsIn": "Shift starts in",
@@ -471,7 +470,7 @@ const zh: Dict = {
   "status.before": "尚未开始",
   "status.done": "已下班",
   "status.dayoff": "休息日",
-  "status.preview": "预览模式",
+  "status.unset": "还没设置薪资",
 
   // SalaryApp — actions
   "action.showNumbers": "👀 显示数字",
@@ -482,8 +481,6 @@ const zh: Dict = {
   "action.setPay": "⚙️ 设置薪资",
 
   // Demo bar
-  "demo.text": "👋 这是 $78,000/年 的演示薪资。时钟正在运行，让你感受一下效果——3 个问题就能变成你的专属计时器。",
-  "demo.btn": "设为我的",
 
   // Ticker
   "tick.earnedToday": "今日已赚",
@@ -504,6 +501,7 @@ const zh: Dict = {
 
   // Countdown labels
   "cd.nextShift": "下次上班",
+  "cd.notSet": "设置薪资后开始",
   "cd.clockOutIn": "距下班",
   "cd.overtimeFor": "加班时长",
   "cd.shiftStartsIn": "距上班",
