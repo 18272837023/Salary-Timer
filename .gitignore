@@ -11,4 +11,5 @@ next-env.d.ts
 # local working notes / tooling artefacts (this repo is public)
 .workbuddy-ai/
 docs/
+outputs/
 nul

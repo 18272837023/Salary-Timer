@@ -199,7 +199,9 @@ watchdog.unref?.();
     await send('Page.navigate', { url: `${BASE}/zh/` });
     let ready = false;
     for (let i = 0; i < 50; i++) {
-      ready = await evalJS(`!!document.querySelector('.ticker') && !!document.querySelector('.app-actions .btn-ink')`);
+      // `.panel` is portal-rendered after mount, so it proves hydration — the
+      // static HTML alone already has `.ticker` and the action buttons.
+      ready = await evalJS(`!!document.querySelector('.panel') && !!document.querySelector('.ticker')`);
       if (ready) break;
       await sleep(200);
     }
