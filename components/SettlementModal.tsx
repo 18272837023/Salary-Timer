@@ -64,6 +64,10 @@ export function SettlementModal({
       aria-modal="true"
       aria-label={t("settle.label")}
       aria-hidden={!open}
+      // A closed .modal is only visually hidden (opacity/pointer-events), so
+      // without `inert` its Done button stays in the tab order — an ARIA-hidden
+      // focusable element. QuickStart and SetupPanel already do this.
+      inert={!open ? true : undefined}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

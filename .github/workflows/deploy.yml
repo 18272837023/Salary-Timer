@@ -50,6 +50,13 @@ jobs:
             if [ -d /var/www/salarytimer/out ]; then
               sudo rm -rf /var/www/salarytimer/out
             fi
+            # `scp out/*` never matches dot-directories, so a committed
+            # public/.well-known/ would exist locally but never go live. Mirror
+            # the single ARD source instead: consumers that only probe the
+            # well-known path still get a real JSON file rather than the SPA
+            # fallback's index.html (which Lighthouse reports as invalid JSON).
+            sudo mkdir -p /var/www/salarytimer/.well-known
+            sudo cp /var/www/salarytimer/ard.json /var/www/salarytimer/.well-known/ard.json
             sudo find /var/www/salarytimer -type d -exec chmod 755 {} \;
             sudo find /var/www/salarytimer -type f -exec chmod 644 {} \;
             sudo nginx -t && sudo systemctl reload nginx
@@ -83,4 +90,29 @@ jobs:
             echo "::error::GA4 tag is missing from the live HTML"
             exit 1
           fi
-          echo "Live bundle OK: overtime defaults to false, settings schema v3, GA4 tag present."
+          if ! printf '%s' "$html" | grep -q 'rel="ard"'; then
+            echo "::error::ARD manifest link is missing from the live HTML"
+            exit 1
+          fi
+          # Nginx serves index.html for any unknown path, so a 200 here is not
+          # proof the agent-discovery files were deployed. Assert their content.
+          llms=$(curl -fsS "https://salarytimer.work/llms.txt?cb=${GITHUB_SHA}")
+          if ! printf '%s' "$llms" | grep -q '^# Salary Timer'; then
+            echo "::error::Live /llms.txt is missing or is the SPA fallback HTML"
+            exit 1
+          fi
+          if ! printf '%s' "$llms" | grep -q '\[.*\](https://salarytimer\.work/'; then
+            echo "::error::Live /llms.txt has no Markdown links"
+            exit 1
+          fi
+          ard=$(curl -fsS "https://salarytimer.work/ard.json?cb=${GITHUB_SHA}")
+          if ! printf '%s' "$ard" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);if(!Array.isArray(j.entries)||!j.entries.length)process.exit(1);for(const e of j.entries){if(!e.identifier||!e.displayName||!e.type||!e.url)process.exit(1)}})'; then
+            echo "::error::Live /ard.json is missing, invalid JSON, or incomplete"
+            exit 1
+          fi
+          wellknown=$(curl -fsS "https://salarytimer.work/.well-known/ard.json?cb=${GITHUB_SHA}")
+          if [ "$ard" != "$wellknown" ]; then
+            echo "::error::/.well-known/ard.json does not match /ard.json"
+            exit 1
+          fi
+          echo "Live bundle OK: settings v3, GA4, ARD manifest, well-known mirror and llms.txt."

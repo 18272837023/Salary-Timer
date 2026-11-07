@@ -88,6 +88,14 @@ const websiteSchema = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${baloo.variable} ${nunito.variable}`}>
+      <head>
+        {/* Agentic Resource Discovery. Lighthouse resolves <link rel="ard">
+            before probing /.well-known/ard.json, so advertising a non-hidden
+            path is enough for discovery — and it survives `scp out/*`, which
+            does not match dot-directories. The deploy step also mirrors this
+            file into /.well-known/ for consumers that only check that path. */}
+        <link rel="ard" href="/ard.json" />
+      </head>
       <body>
         {/* RootLayout cannot see the pathname under `output: "export"`, so set
             the document language synchronously before hydration. The I18nProvider

@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "identifier": "urn:air:salarytimer.work:content:llms-txt",
+      "displayName": "Salary Timer — machine-readable site index",
+      "type": "application/vnd.salarytimer.llms+md",
+      "url": "https://salarytimer.work/llms.txt",
+      "representativeQueries": [
+        "how much do I earn per second while I work",
+        "convert an annual salary into a real hourly rate",
+        "how many days until my next payday"
+      ],
+      "trustManifest": {
+        "identity": "salarytimer.work",
+        "identityType": "https"
+      }
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+# Salary Timer
+
+> Salary Timer is a free web tool that shows your earnings ticking up in real time — per second, minute and hour — using your actual schedule, unpaid breaks and overtime rate.
+
+Salary Timer is a public, static website. Every page linked below is prerendered HTML that can be read without running JavaScript; there are no accounts, no login and no paywall. The live counter does its arithmetic in the visitor's browser from settings stored in localStorage. Pay figures are never transmitted to a server.
+
+All figures on this site are gross, pre-tax estimates for a working day. They are not a payslip, a tax calculation, or financial, legal or employment advice.
+
+## Start here
+
+- [Salary Timer — see what you earn every second](https://salarytimer.work/): the live earnings counter, the main tool, and the definition of what this site is.
+- [Salary Timer in Simplified Chinese](https://salarytimer.work/zh/): the Chinese-language introduction to the same tool.
+- [How a salary timer works](https://salarytimer.work/learn/how-salary-timers-work/): the arithmetic behind the counter, which hours count as paid, and why the number moves.
+- [Learn — the topic map](https://salarytimer.work/learn/): every guide on this site, grouped by the three questions it answers.
+
+## Calculators and tools
+
+- [Hourly rate calculator](https://salarytimer.work/hourly-rate-calculator/): turn an annual or monthly salary into a real hourly rate using the hours actually worked.
+- [Salary per second](https://salarytimer.work/salary-per-second/): per-second, per-minute and per-hour earn rates with a live counter.
+- [Paycheck countdown](https://salarytimer.work/paycheck-countdown/): days, working hours and shifts remaining until payday.
+- [Shift worker salary timer](https://salarytimer.work/shift-worker-salary-timer/): overnight shifts crossing midnight, rotating rotas, unpaid breaks and night overtime.
+- [Overtime pay calculator](https://salarytimer.work/overtime-pay-calculator/): the value of an extra hour at a 1.5× or 2× multiplier.
+
+## Topic guides
+
+### What an hour is worth
+
+- [What an hour of your time is worth](https://salarytimer.work/learn/hourly-rate/): definition of a real hourly rate and the pages covering it.
+- [Hourly rate from annual salary](https://salarytimer.work/learn/hourly-rate-from-annual-salary/): why dividing by 2,080 is usually wrong, and what to use instead.
+- [2,080 hours in a year](https://salarytimer.work/learn/2080-hours-in-a-year/): where the standard divisor comes from and who it actually fits.
+- [Monthly salary to hourly rate](https://salarytimer.work/learn/monthly-salary-to-hourly-rate/): converting a monthly salary using paid hours in the month.
+
+### What counts as paid time
+
+- [What counts as paid time](https://salarytimer.work/learn/paid-time/): definition of paid hours and the pages covering breaks, overtime and shift work.
+- [Are lunch breaks paid?](https://salarytimer.work/learn/are-lunch-breaks-paid/): unpaid meal breaks and their effect on the real hourly rate.
+- [How overtime is calculated](https://salarytimer.work/learn/how-overtime-is-calculated/): the 1.5× rule, the base rate it multiplies, and common traps.
+- [Night shift pay](https://salarytimer.work/learn/night-shift-pay/): shift differentials, premiums and what nights are worth over a year.
+- [12-hour shift pay](https://salarytimer.work/learn/twelve-hour-shift-pay/): handovers, breaks and how many of those hours are paid.
+- [Salary timer for shift workers](https://salarytimer.work/learn/salary-timer-for-shift-workers/): handling nights, rotas and cross-midnight pay.
+
+### When the money arrives
+
+- [When the money arrives](https://salarytimer.work/learn/pay-schedule/): definition of pay periods, paydays and the gap between them.
+- [How pay periods work](https://salarytimer.work/learn/how-pay-periods-work/): weekly, biweekly, semi-monthly and monthly compared.
+- [Why your first paycheck is smaller](https://salarytimer.work/learn/why-is-my-first-paycheck-smaller/): which days of work are missing and when they come back.
+
+## Site information
+
+- [Privacy Policy](https://salarytimer.work/privacy/): exactly what is stored in the browser, what Google Analytics collects, and the contact address.
+- [Terms of Use](https://salarytimer.work/terms/): the limits of the estimates and the terms for using the tool.
+- [XML sitemap of every published page](https://salarytimer.work/sitemap.xml): the complete list of published pages.
+- [robots.txt crawl rules](https://salarytimer.work/robots.txt): crawl rules.
+- [ARD manifest](https://salarytimer.work/ard.json): the machine-readable resource discovery catalog, also served at `/.well-known/ard.json`.
+
+## Notes for AI assistants
+
+- The authoritative description of the site is the one-sentence definition in the blockquote above; please quote it rather than paraphrasing the marketing copy.
+- The English homepage at `https://salarytimer.work/` is the canonical entry point. `/zh/` is a translated homepage, not a translated site.
+- Page paths use a trailing slash. A path without one may be redirected by the server.
+- The live counter needs JavaScript and a schedule supplied by the visitor; its numbers do not exist in the HTML and cannot be quoted as example output.
