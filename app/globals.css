@@ -202,24 +202,27 @@ h1 .hl{
   background:var(--mint-soft); border:2px solid #CFF3E4;
   display:flex; align-items:center; gap:10px;
 }
-.clockout-bar.done{
-  background:var(--cream); border-color:var(--line-2);
+/* Stopped clock: same bar, calmer colour, so a countdown to tomorrow never
+   looks like the clock is running. */
+.clockout-bar.idle{
+  background:var(--cream); border-color:var(--line-2); flex-wrap:wrap;
 }
 .clockout-label{
   font-size:11.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
   color:var(--mint-deep); flex-shrink:0;
 }
-.clockout-bar.done .clockout-label{color:var(--faint)}
+.clockout-bar.idle .clockout-label{color:var(--faint)}
 .clockout-value{
   font-family:var(--display); font-weight:800; font-size:22px;
   font-variant-numeric:tabular-nums; color:var(--ink);
   letter-spacing:-.02em; margin-left:auto;
 }
-.clockout-bar.done .clockout-value{font-size:16px; color:var(--muted)}
+.clockout-bar.idle .clockout-value{font-size:20px; color:var(--ink-2)}
 .clockout-time{
   font-size:12px; font-weight:700; color:var(--mint-deep);
   font-variant-numeric:tabular-nums; opacity:.75;
 }
+.clockout-bar.idle .clockout-time{color:var(--muted); opacity:.9}
 .payday-today{
   color:var(--mint-deep); font-weight:800; font-size:13px;
   animation:breathe 2.2s infinite;
@@ -261,7 +264,7 @@ h1 .hl{
 .slack-btn.on{background:var(--peach); color:#5A2A18; border-color:var(--peach-deep)}
 
 /* ---------- module cards ---------- */
-.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:16px}
+.grid-1{display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px}
 .mod{background:#fff; border:2px solid var(--line); border-radius:var(--r-md); padding:20px 22px; box-shadow:var(--shadow-card); position:relative}
 .mod h3{font-size:17px; display:flex; align-items:center; gap:8px; margin-bottom:4px}
 .mod .hint{font-size:12.5px; color:var(--faint); font-weight:700; margin-bottom:12px}
@@ -269,26 +272,8 @@ h1 .hl{
 .mod .rowline{display:flex; justify-content:space-between; align-items:baseline; font-size:13.5px; font-weight:700; color:var(--muted); padding:5px 0}
 .mod .rowline b{color:var(--ink); font-family:var(--display); font-size:15px}
 
-.jar{height:14px; border-radius:999px; background:var(--lilac-soft); overflow:hidden; margin:12px 0 6px; border:2px solid #EAE2FF}
-.jar > i{display:block; height:100%; background:linear-gradient(90deg, var(--lilac), #A98CFF); width:0; transition:width .5s}
-.jar-note{margin-top:10px; font-size:12.5px; font-weight:800; color:var(--mint-deep); background:var(--mint-soft); border-radius:12px; padding:8px 10px; text-align:center}
 .bar{height:12px; border-radius:999px; background:var(--cream); overflow:hidden; border:2px solid var(--line)}
 .bar > i{display:block; height:100%; background:var(--mint); width:0; transition:width .5s}
-
-.wishlist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; max-height:190px; overflow:auto}
-.wishlist li{display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:700}
-.wishlist .em{font-size:18px}
-.wishlist .em{position:relative; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:9px; cursor:pointer; transition:background .15s ease}
-.wishlist .em:hover{background:var(--cream)}
-.wishlist .em:focus-within{background:var(--cream); outline:2px solid var(--mint)}
-/* Invisible native select on top of the glyph — a dropdown that can never be
-   clipped by the scrolling list, and works with a keyboard or on mobile. */
-.wishlist .em-pick{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:none; background:none; -webkit-appearance:none; appearance:none; font-size:18px}
-.wish-em-hint{font-size:10.5px; font-weight:700; color:var(--faint); margin-top:6px; letter-spacing:.01em}
-.wishlist .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.wishlist .hr{color:var(--faint); font-size:12.5px; font-variant-numeric:tabular-nums}
-.wishlist button{border:none; background:none; color:var(--faint); cursor:pointer; font-size:15px; padding:0 2px}
-.wishlist button:hover{color:var(--pink-deep)}
 
 .mini-form{display:flex; gap:6px; margin-top:10px}
 .mini-form input{flex:1; min-width:0; border:2px solid var(--line); border-radius:12px; padding:8px 10px; font-family:var(--body); font-weight:700; font-size:13.5px; color:var(--ink); outline:none; background:var(--cream)}
@@ -296,14 +281,6 @@ h1 .hl{
 .mini-form input[type=number]{max-width:88px}
 .mini-form-label{flex:1; min-width:0; display:flex; align-items:center; font-family:var(--body); font-weight:700; font-size:13.5px; color:var(--muted); padding:8px 2px}
 .mini-form button{border:2px solid var(--line-2); background:#fff; border-radius:12px; padding:0 12px; font-family:var(--display); font-weight:800; cursor:pointer; color:var(--ink-2)}
-
-/* unit switch for the wishlist's second box + live read-back */
-.wish-unit-row{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
-.wish-unit{display:inline-flex; border:2px solid var(--line); border-radius:99px; overflow:hidden; background:var(--cream)}
-.wish-unit button{border:none; background:none; cursor:pointer; font-family:var(--body); font-weight:800; font-size:11.5px; line-height:1; color:var(--faint); padding:5px 10px; transition:background .16s ease, color .16s ease}
-.wish-unit button.on{background:var(--ink); color:#fff}
-.wish-unit button:not(.on):hover{color:var(--ink-2)}
-.wish-preview{font-size:11.5px; font-weight:700; color:var(--faint); margin-left:auto; font-variant-numeric:tabular-nums}
 
 /* ---------- pay-setup panel (frosted glass modal) ---------- */
 .scrim{
@@ -790,10 +767,6 @@ ol.checks li::before{
 .qs-days{display:grid; grid-template-columns:repeat(4,1fr); gap:6px}
 .qs-days button{border:2px solid var(--line); background:var(--cream); color:var(--muted); padding:11px 0; border-radius:12px; font-family:var(--display); font-weight:800; font-size:14px; cursor:pointer; transition:.14s}
 .qs-days button.on{background:var(--ink); color:#fff; border-color:var(--ink)}
-
-.qs-goals{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px}
-.qs-goals button{border:2px solid var(--line); background:var(--cream); color:var(--ink-2); padding:10px 0; border-radius:12px; font-family:var(--display); font-weight:800; font-size:13px; cursor:pointer; transition:.14s}
-.qs-goals button.on{background:var(--ink); color:#fff; border-color:var(--ink)}
 
 .qs-fact{margin-top:14px; padding:12px 14px; border-radius:14px; background:var(--mint-soft); border:2px solid #CFF3E4; font-size:13px; font-weight:700; color:#1F6B52; line-height:1.55}
 .qs-fact b{font-family:var(--display); font-weight:800; color:#14624A}

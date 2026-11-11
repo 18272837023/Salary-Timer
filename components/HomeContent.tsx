@@ -36,8 +36,6 @@ const FEATURES_EN = [
   "Unpaid break handling",
   "Overtime multipliers",
   "Payday countdown",
-  "Savings jar",
-  "Wishlist priced in working hours",
   "Privacy mode",
 ];
 
@@ -48,8 +46,6 @@ const FEATURES_ZH = [
   "无薪休息处理",
   "加班倍率",
   "发薪日倒计时",
-  "存钱罐",
-  "用工时标价的心愿单",
   "隐私模式",
 ];
 

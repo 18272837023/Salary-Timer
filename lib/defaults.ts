@@ -1,6 +1,5 @@
-import type { BreakWindow, ExtraIncome, Settings, WishItem } from "./types";
+import type { BreakWindow, ExtraIncome, Settings } from "./types";
 import { isCurrencyCode } from "./money";
-import { normalizeWishEmoji, pickWishEmoji } from "./wish";
 
 const KEY = "salarytimer.site.v2";
 const LEGACY_KEY = "salarytimer.site.v1";
@@ -32,15 +31,8 @@ export function defaultSettings(): Settings {
     overtime: false,
     otMult: 1.5,
     privacy: false,
-    jarGoalCents: 200_000, // $2,000
-    jarRate: 10,
     extras: [],
     unpaidDays: 0,
-    wishlist: [
-      { id: "w1", name: "preset.coffee", priceCents: 500, emoji: "☕" },
-      { id: "w2", name: "preset.lunch", priceCents: 1500, emoji: "🍱" },
-      { id: "w3", name: "preset.trip", priceCents: 80_000, emoji: "🏝️" },
-    ],
     onboarded: false,
     v: SETTINGS_VERSION,
   };
@@ -133,27 +125,6 @@ export function normalize(raw: unknown): Settings | null {
         .filter((e) => e.amountCents !== 0)
     : [];
 
-  const wishlist: WishItem[] = Array.isArray(input.wishlist)
-    ? (input.wishlist as Record<string, unknown>[])
-        .filter((w) => w && typeof w === "object")
-        .map((w, i) => {
-          const name = typeof w.name === "string" ? w.name.slice(0, 60) : `Item ${i + 1}`;
-          const picked =
-            w.emojiPicked === true && typeof w.emoji === "string" && w.emoji.trim().length > 0;
-          return {
-            id: typeof w.id === "string" ? w.id : makeId("w"),
-            name,
-            priceCents: Math.max(0, Math.round(num(w.priceCents, 0))),
-            // Hand-picked emojis win; anything else is derived from the name, so
-            // items saved under the old random assignment (a camera wearing 💻)
-            // repair themselves on load.
-            emoji: picked ? (w.emoji as string) : pickWishEmoji(name),
-            ...(picked ? { emojiPicked: true as const } : {}),
-          };
-        })
-        .filter((w) => w.name.trim().length > 0)
-    : normalizeWishEmoji(base.wishlist);
-
   const rawOverride = input.otOverride;
   const otOverride =
     rawOverride && typeof rawOverride === "object"
@@ -181,11 +152,8 @@ export function normalize(raw: unknown): Settings | null {
     otMult: Math.min(5, Math.max(1, num(input.otMult, 1.5))),
     ...(otOverride ? { otOverride } : {}),
     privacy: input.privacy === true,
-    jarGoalCents: Math.max(0, Math.round(num(input.jarGoalCents, base.jarGoalCents))),
-    jarRate: Math.min(100, Math.max(0, num(input.jarRate, 10))),
     extras,
     unpaidDays: Math.min(31, Math.max(0, Math.round(num(input.unpaidDays, 0)))),
-    wishlist,
     onboarded: input.onboarded === true,
     v: SETTINGS_VERSION,
   };
@@ -209,7 +177,6 @@ function migrateV1(raw: unknown): Settings | null {
   return normalize({
     ...o,
     amountCents: Math.round(num(o.amount, 0) * 100),
-    jarGoalCents: Math.round(num(o.jarGoal, 2000) * 100),
     breaks,
     extras: Array.isArray(o.extras)
       ? (o.extras as Record<string, unknown>[]).map((e, i) => ({
@@ -219,14 +186,6 @@ function migrateV1(raw: unknown): Settings | null {
           ts: num(e.ts, Date.now()),
         }))
       : [],
-    wishlist: Array.isArray(o.wishlist)
-      ? (o.wishlist as Record<string, unknown>[]).map((w, i) => ({
-          id: typeof w.id === "string" ? w.id : `w${i}`,
-          name: typeof w.name === "string" ? w.name : "Item",
-          priceCents: Math.round(num(w.price, 0) * 100),
-          emoji: typeof w.emoji === "string" ? w.emoji : "🎁",
-        }))
-      : undefined,
     onboarded: true,
   });
 }

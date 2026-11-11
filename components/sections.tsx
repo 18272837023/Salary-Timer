@@ -166,37 +166,18 @@ export function Features() {
             {t("tick.daysLeft", { n: 9 })}
           </div>
           <div className="r">
-            <span>{t("feat.mock.jar")}</span>
-            <b>$184 / $2,000</b>
-          </div>
-          <div className="r">
             <span>{t("feat.mock.thisWeek")}</span>
             <b>$312.40</b>
+          </div>
+          <div className="r">
+            <span>{t("feat.mock.earnedToday")}</span>
+            <b>$127.43</b>
           </div>
         </Mock>
       ),
     },
     {
       n: 6,
-      art: (
-        <Mock label={t("feat.mock.wishlist")}>
-          <div className="r">
-            <span>🎧 Headphones</span>
-            <b>5.2 h</b>
-          </div>
-          <div className="r">
-            <span>🎫 Concert</span>
-            <b>3.5 h</b>
-          </div>
-          <div className="r">
-            <span>🏝️ Weekend away</span>
-            <b>15.0 h</b>
-          </div>
-        </Mock>
-      ),
-    },
-    {
-      n: 7,
       art: (
         <Mock label={t("feat.mock.earnedToday")}>
           <div className="n" style={{ filter: "blur(9px)", color: "var(--mint-deep)" }}>

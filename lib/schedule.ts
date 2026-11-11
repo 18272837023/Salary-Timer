@@ -283,18 +283,28 @@ export function daysUntilPayday(settings: Settings, now: Date): number {
   return Math.max(0, Math.round((target.getTime() - today.getTime()) / 86400000));
 }
 
-export function nextShiftLabel(settings: Settings, now: Date): string {
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+/**
+ * When the next shift starts, as data rather than a sentence — the caller knows
+ * which language to say "tomorrow" in.
+ *
+ * `seconds` is measured from `now` so the UI can run a live countdown off it
+ * while the clock is stopped. That countdown is the only thing still moving on
+ * the page at 9pm on a Sunday, so it has to be a number, not a string.
+ */
+export function nextShift(
+  settings: Settings,
+  now: Date,
+): { dayOffset: number; start: string; seconds: number } | null {
+  const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  const startMin = toMinutes(settings.start);
+
   for (let i = 0; i < 8; i++) {
     const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     if (!isWorkday(dt, settings.days)) continue;
-    if (i === 0) {
-      if (nowMinutes < toMinutes(settings.start)) return `Today ${settings.start}`;
-      continue;
-    }
-    const name =
-      i === 1 ? "Tomorrow" : dt.toLocaleDateString("en-US", { weekday: "long" });
-    return `${name} ${settings.start}`;
+    // Today only counts while the shift is still ahead of us.
+    if (i === 0 && nowMin >= startMin) continue;
+    const seconds = Math.round((i * MINUTES_PER_DAY + startMin - nowMin) * 60);
+    return { dayOffset: i, start: settings.start, seconds: Math.max(0, seconds) };
   }
-  return "—";
+  return null;
 }

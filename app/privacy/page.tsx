@@ -47,10 +47,9 @@ export default function PrivacyPage() {
           When you change a setting, your browser saves it to <code>localStorage</code> under the
           key <code>salarytimer.site.v2</code>. That record can contain: your pay amount (stored as
           an integer in the smallest unit of your chosen currency), currency, working days, shift
-          start and end times, unpaid breaks, payday date, overtime multiplier, savings-jar goal
-          and rate, wishlist items and their prices, extra income entries you add, and interface
-          flags such as privacy mode and whether you completed the setup wizard. A version number is
-          included so a future release can migrate older settings safely.
+          start and end times, unpaid breaks, payday date, overtime multiplier, extra income entries
+          you add, and interface flags such as privacy mode and whether you completed the setup
+          wizard. A version number is included so a future release can migrate older settings safely.
         </p>
         <p>
           A separate <code>sessionStorage</code> flag, <code>st.qs.skip</code>, remembers that you
@@ -136,15 +135,6 @@ export default function PrivacyPage() {
                   <code>n</code>, <code>step_cents</code>
                 </td>
                 <td>How far the live counter gets</td>
-              </tr>
-              <tr>
-                <td>
-                  <code>wish_add</code>
-                </td>
-                <td>
-                  <code>unit</code>, <code>items</code>
-                </td>
-                <td>Whether the wishlist is used</td>
               </tr>
               <tr>
                 <td>

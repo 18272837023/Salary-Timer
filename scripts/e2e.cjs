@@ -290,20 +290,27 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await evalJS(`[...document.querySelectorAll('.sheet .btn')].find(b => b.textContent.includes('Done') || b.textContent.includes('完成'))?.click()`);
   await sleep(400);
 
-  // ---------- 6. 愿望清单 ----------
-  const wishBefore = await evalJS(`document.querySelectorAll('.wishlist li').length`);
+  // ---------- 6. 本月额外收入 ----------
+  check('savings jar and wishlist are gone', (await evalJS(`!!document.querySelector('.jar, .wishlist, .wish-unit')`)) === false);
+  const extraRow = () => evalJS(`(() => {
+    const row = [...document.querySelectorAll('.mod .rowline')].find(r => /Extras|额外/.test(r.textContent));
+    return row ? row.querySelector('b').textContent : null;
+  })()`);
+  const extraBefore = await extraRow();
   await evalJS(`(() => {
     const setV = (el, v) => { Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set.call(el, v); el.dispatchEvent(new Event('input',{bubbles:true})); };
-    const inputs = document.querySelectorAll('.mini-form input');
-    setV(inputs[0], 'Test item'); setV(inputs[1], '43.27');
+    setV(document.querySelector('.mod .mini-form input[type=number]'), '43.27');
   })()`);
   await sleep(300);
-  await evalJS(`document.querySelectorAll('.mini-form button')[0].click()`);
-  await sleep(500);
-  const wishAfter = await evalJS(`document.querySelectorAll('.wishlist li').length`);
-  check('wishlist add works', wishAfter === wishBefore + 1, `${wishBefore} -> ${wishAfter}`);
-  const hoursText = await evalJS(`document.querySelector('.wishlist li:last-child .hr')?.textContent`);
-  check('wishlist priced in hours', hoursText === '1.0 h', String(hoursText));
+  await evalJS(`document.querySelector('.mod .mini-form button').click()`);
+  await sleep(600);
+  const extraAfter = await extraRow();
+  check('extra income add works', extraBefore !== extraAfter && /43\.27/.test(extraAfter || ''), `${extraBefore} -> ${extraAfter}`);
+  const monthTotal = await evalJS(`(() => {
+    const row = [...document.querySelectorAll('.mod .rowline')].find(r => /^Total|^合计|^总计/.test(r.textContent.trim()));
+    return row ? row.querySelector('b').textContent : null;
+  })()`);
+  check('month total still renders', !!monthTotal, String(monthTotal));
 
   // ---------- 7. Slack 模式 ----------
   await evalJS(`document.querySelector('.slack-btn').click()`);
@@ -384,6 +391,32 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   await sleep(600);
   check('JPY saved as the active currency', await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2')).currency === 'JPY'`));
   check('JPY ticker has no decimal part', await evalJS(`document.querySelectorAll('.ticker .cents').length === 0`));
+
+  // ---------- 10. 停表时页面上必须还有一串在动的数字 ----------
+  // Force a shift that has not started yet (or has just ended) by moving the
+  // schedule relative to the real clock, so this assertion holds at any hour.
+  await evalJS(`(() => {
+    const s = JSON.parse(localStorage.getItem('salarytimer.site.v2'));
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const fmt = (m) => pad(Math.floor((m % 1440) / 60)) + ':' + pad(m % 60);
+    const startMin = d.getHours() * 60 + d.getMinutes() + 30;
+    s.start = fmt(startMin);
+    s.end = fmt(startMin + 60);
+    s.days = [d.getDay()];
+    localStorage.setItem('salarytimer.site.v2', JSON.stringify(s));
+  })()`);
+  await send('Page.reload');
+  for (let i = 0; i < 40; i++) {
+    if (await evalJS(`!!document.querySelector('.panel')`)) break;
+    await sleep(200);
+  }
+  await sleep(700);
+  const idleCd1 = await text('.clockout-bar.idle .clockout-value');
+  await sleep(1300);
+  const idleCd2 = await text('.clockout-bar.idle .clockout-value');
+  check('stopped clock still shows a countdown', !!idleCd1, String(idleCd1));
+  check('that countdown actually ticks', !!idleCd1 && idleCd1 !== idleCd2, `${idleCd1} -> ${idleCd2}`);
 
   console.log('\n===== 功能测试 =====');
   let pass = 0;

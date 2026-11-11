@@ -57,19 +57,6 @@ export interface ExtraIncome {
   ts: number;
 }
 
-export interface WishItem {
-  id: string;
-  name: string;
-  priceCents: number;
-  emoji: string;
-  /**
-   * True when the visitor chose the emoji by hand. Without it the emoji is
-   * re-derived from the name, which is how items saved under the old random
-   * assignment get repaired.
-   */
-  emojiPicked?: boolean;
-}
-
 export interface Settings {
   mode: PayMode;
   /** annual / monthly salary, pay per working day, or hourly rate, in integer cents */
@@ -93,13 +80,9 @@ export interface Settings {
    */
   otOverride?: { day: string; min: number };
   privacy: boolean;
-  jarGoalCents: number;
-  /** percent of earnings routed to the jar */
-  jarRate: number;
   extras: ExtraIncome[];
   unpaidDays: number;
-  wishlist: WishItem[];
-  /** false until the visitor saves their own numbers — drives demo mode */
+  /** false until the visitor saves their own numbers — drives the empty state */
   onboarded: boolean;
   /**
    * Schema version of the persisted payload. Absent on payloads written before

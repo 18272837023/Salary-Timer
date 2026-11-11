@@ -11,13 +11,12 @@ import {
   extrasThisMonth,
   formatClock,
   formatHM,
-  nextShiftLabel,
+  nextShift,
   periodBases,
   toHHMM,
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import type { Snapshot } from "@/lib/types";
-import { EMOJI_PALETTE, pickWishEmoji } from "@/lib/wish";
 import { track, trackOnce } from "@/lib/analytics";
 import { QuickStart } from "./QuickStart";
 import { SetupPanel } from "./SetupPanel";
@@ -35,6 +34,19 @@ function untilLabel(seconds: number): string {
   if (s < 60) return `${s}s`;
   if (s < 3600) return `${Math.floor(s / 60)}m ${pad2(s % 60)}s`;
   return `${Math.floor(s / 3600)}h ${pad2(Math.floor((s % 3600) / 60))}m`;
+}
+
+/** "Today 09:00" / "明天 09:00" / "周一 09:00" — never a hard-coded English day. */
+function shiftWhen(
+  dayOffset: number,
+  start: string,
+  now: Date,
+  t: (key: string) => string,
+): string {
+  if (dayOffset === 0) return `${t("day.today")} ${start}`;
+  if (dayOffset === 1) return `${t("day.tomorrow")} ${start}`;
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
+  return `${t(`day.${day.getDay()}`)} ${start}`;
 }
 
 function pad2(n: number): string {
@@ -55,9 +67,6 @@ export function SalaryApp() {
   const [settleOpen, setSettleOpen] = useState(false);
   const [qsOpen, setQsOpen] = useState(false);
   const [slack, setSlack] = useState({ on: false, startedAt: 0, totalSec: 0 });
-  const [wishName, setWishName] = useState("");
-  const [wishPrice, setWishPrice] = useState("");
-  const [wishUnit, setWishUnit] = useState<"price" | "hours">("price");
   const [extraAmount, setExtraAmount] = useState("");
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
@@ -142,9 +151,6 @@ export function SalaryApp() {
   const unpaidCents = settings.unpaidDays * derived.dailyCents;
   const monthTotalCents = monthBaseCents + extrasCents - unpaidCents;
 
-  const jarCents = Math.max(0, monthBaseCents) * (settings.jarRate / 100);
-  const jarPct = settings.jarGoalCents > 0 ? Math.min(100, (jarCents / settings.jarGoalCents) * 100) : 0;
-
   const slackSeconds =
     slack.totalSec + (slack.on ? Math.max(0, (now.getTime() - slack.startedAt) / 1000) : 0);
 
@@ -164,6 +170,8 @@ export function SalaryApp() {
         return s ? { label: t(s.key), live: s.live } : { label: t("status.working"), live: true };
       })();
   const earning = Boolean(statusInfo.live);
+
+  const upcoming = onboarded ? nextShift(settings, now) : null;
 
   // Countdown labels
   let cdLabel = t("cd.nextShift");
@@ -186,23 +194,39 @@ export function SalaryApp() {
     cdValue = formatHM(derived.paidMin);
   } else {
     cdLabel = t("cd.nextShift");
-    cdValue = nextShiftLabel(settings, now);
+    cdValue = upcoming ? shiftWhen(upcoming.dayOffset, upcoming.start, now, t) : "—";
   }
 
-  // Pause notes
+  /**
+   * The hero card needs one number that keeps moving even while the clock is
+   * stopped. Without it, "clocked out" and "day off" are a frozen figure with
+   * nothing to wait for — and the visit ends right there.
+   */
+  let idle: { label: string; seconds: number; when: string } | null = null;
+  if (live && onboarded && !earning) {
+    if (snapshot.status === "break") {
+      const active = breaksToday(settings).find(
+        (b) => snapshot.shiftMin >= b.start && snapshot.shiftMin < b.end,
+      );
+      if (active) {
+        idle = {
+          label: t("tick.breakEndsIn"),
+          seconds: Math.max(0, (active.end - snapshot.shiftMin) * 60),
+          when: toHHMM(active.end % (24 * 60)),
+        };
+      }
+    } else if (upcoming) {
+      idle = {
+        label: snapshot.status === "before" ? t("tick.shiftStartsIn") : t("tick.nextShiftIn"),
+        seconds: upcoming.seconds,
+        when: shiftWhen(upcoming.dayOffset, upcoming.start, now, t),
+      };
+    }
+  }
+
+  // Pause notes — only where the countdown alone doesn't explain the pause.
   let pauseNote: string | null = null;
-  if (live && onboarded && snapshot.status === "break") {
-    const active = breaksToday(settings).find(
-      (b) => snapshot.shiftMin >= b.start && snapshot.shiftMin < b.end,
-    );
-    pauseNote = active
-      ? `${t("pause.breakResume")} ${toHHMM(active.end % (24 * 60))}`
-      : t("pause.break");
-  } else if (live && onboarded && snapshot.status === "before") {
-    pauseNote = `${t("pause.before")} ${settings.start}`;
-  } else if (live && onboarded && snapshot.status === "done") {
-    pauseNote = t("pause.done");
-  } else if (live && onboarded && snapshot.status === "dayoff") {
+  if (live && onboarded && snapshot.status === "dayoff") {
     pauseNote = t("pause.dayoff");
   }
 
@@ -213,8 +237,15 @@ export function SalaryApp() {
   const blur = privacy ? " blurred" : "";
 
   // Milestone
-  const MILE_LADDER = [25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000];
-  const mileMinStep = derived.perSecondCents * 90;
+  //
+  // The cadence matters more than the amount: this is the page's only reward
+  // loop, and a visitor who leaves at 40s has to still have an event coming up.
+  // The step is picked so the next milestone is ~20s away, and because every
+  // ladder rung is at most 2.5× the one below, the worst case stays under 50s —
+  // something is always inside the next minute.
+  const MILE_LADDER = [1, 2, 5, 10, 25, 50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000, 50_000];
+  const MILE_TARGET_SEC = 20;
+  const mileMinStep = derived.perSecondCents * MILE_TARGET_SEC;
   const mileStepCents = MILE_LADDER.find((s) => s >= mileMinStep) ?? 100_000;
   const mileNextCents = (Math.floor(snapshot.earnedCents / mileStepCents) + 1) * mileStepCents;
   const mileRemainCents = Math.max(0, mileNextCents - snapshot.earnedCents);
@@ -243,67 +274,6 @@ export function SalaryApp() {
     const timer = setTimeout(() => setPop(false), 900);
     return () => clearTimeout(timer);
   }, [mileIdx, live, earning, mileStepCents]);
-
-  // Wishlist form preview
-  const wishTyped = clampNumber(wishPrice, 0, 100_000_000);
-  let wishPreview: string;
-  if (wishTyped === null || wishTyped <= 0) {
-    wishPreview = wishUnit === "hours" ? t("wish.preview.typeHours") : t("wish.preview.typePrice");
-  } else if (rateHour <= 0) {
-    wishPreview = t("wish.preview.setPay");
-  } else if (wishUnit === "hours") {
-    wishPreview = `≈ ${formatCents(Math.round(wishTyped * rateHour), settings.currency)}`;
-  } else {
-    wishPreview = `≈ ${((wishTyped * 100) / rateHour).toFixed(1)} ${t("wish.preview.hoursOfWork")}`;
-  }
-
-  function addWish() {
-    const name = wishName.trim();
-    const value = clampNumber(wishPrice, 0.01, 100_000_000);
-    if (!name || value === null) {
-      show(t("wish.nameNumber"));
-      return;
-    }
-    let priceCents: number;
-    if (wishUnit === "hours") {
-      if (rateHour <= 0) {
-        show(t("wish.setPayFirst"));
-        return;
-      }
-      priceCents = Math.round(value * rateHour);
-    } else {
-      priceCents = Math.round(value * 100);
-    }
-    if (priceCents <= 0) {
-      show(t("wish.nothing"));
-      return;
-    }
-    update({
-      wishlist: [
-        ...settings.wishlist,
-        {
-          id: `w${Date.now()}`,
-          name: name.slice(0, 40),
-          priceCents,
-          emoji: pickWishEmoji(name),
-        },
-      ],
-    });
-    setWishName("");
-    setWishPrice("");
-    track("wish_add", { unit: wishUnit, items: settings.wishlist.length + 1 });
-    show(t("toast.addedWish"));
-  }
-
-  function setWishEmoji(id: string, choice: string) {
-    update({
-      wishlist: settings.wishlist.map((w) => {
-        if (w.id !== id) return w;
-        if (choice === "auto") return { ...w, emoji: pickWishEmoji(w.name), emojiPicked: false };
-        return { ...w, emoji: choice, emojiPicked: true };
-      }),
-    });
-  }
 
   function addExtra() {
     const amount = clampNumber(extraAmount, -1_000_000, 1_000_000);
@@ -385,7 +355,7 @@ export function SalaryApp() {
             {pauseNote ? <div className="tick-pause">{pauseNote}</div> : null}
 
             {/* Clock-out countdown — gives users a reason to keep the tab open */}
-            {live && (snapshot.status === "working" || snapshot.status === "break") && (() => {
+            {live && snapshot.status === "working" && (() => {
               const remainSec = Math.max(0, (snapshot.shiftEndMin - snapshot.shiftMin) * 60);
               return (
                 <div className="clockout-bar">
@@ -395,12 +365,15 @@ export function SalaryApp() {
                 </div>
               );
             })()}
-            {live && snapshot.status === "done" && (
-              <div className="clockout-bar done">
-                <span className="clockout-label">{t("tick.shiftDone")}</span>
-                <span className="clockout-value">{settings.end}</span>
+            {/* Stopped clock: the countdown to whatever happens next is the only
+                thing still moving, so it takes the hero slot. */}
+            {idle ? (
+              <div className="clockout-bar idle">
+                <span className="clockout-label">{idle.label}</span>
+                <span className="clockout-value">{untilLabel(idle.seconds)}</span>
+                <span className="clockout-time">{idle.when}</span>
               </div>
-            )}
+            ) : null}
 
             <div className="tick-sub">
               <span>
@@ -517,158 +490,7 @@ export function SalaryApp() {
           </div>
         </div>
 
-        <div className="grid-3">
-          <div className="mod">
-            <h3>{t("jar.title")}</h3>
-            <div className="hint">{t("jar.hint", { rate: settings.jarRate })}</div>
-            <div className={`big${blur}`}>{formatCents(live ? jarCents : 0, settings.currency, { digits: 0 })}</div>
-            <div className="jar">
-              <i style={{ width: `${live ? jarPct.toFixed(1) : 0}%` }} />
-            </div>
-            <div className="rowline">
-              <span>{t("jar.goal")}</span>
-              <b className={privacy ? "blurred" : undefined}>
-                {formatCents(settings.jarGoalCents, settings.currency, { digits: 0 })}
-              </b>
-            </div>
-            <div className="rowline">
-              <span>{t("jar.leftToGo")}</span>
-              <b className={privacy ? "blurred" : undefined}>
-                {formatCents(Math.max(0, settings.jarGoalCents - (live ? jarCents : 0)), settings.currency, { digits: 0 })}
-              </b>
-            </div>
-            <div className="jar-note">
-              {jarPct >= 100 ? t("jar.goalReached") : t("jar.progress", { pct: Math.round(live ? jarPct : 0) })}
-            </div>
-          </div>
-
-          <div className="mod">
-            <h3>{t("wish.title")}</h3>
-            <div className="hint">{t("wish.hint")}</div>
-            <ul className="wishlist">
-              {settings.wishlist.length === 0 ? (
-                <li style={{ color: "var(--faint)", fontWeight: 700, fontSize: 13 }}>
-                  {t("wish.empty")}
-                </li>
-              ) : (
-                settings.wishlist.map((item) => {
-                  const hours = rateHour > 0 ? item.priceCents / rateHour : 0;
-                  const pct =
-                    item.priceCents > 0
-                      ? Math.min(100, ((live ? monthTotalCents : 0) / item.priceCents) * 100)
-                      : 0;
-                  return (
-                    <li key={item.id}>
-                      <span className="em" title={t("wish.emojiChange")}>
-                        {item.emoji}
-                        <select
-                          className="em-pick"
-                          value={item.emojiPicked ? item.emoji : "auto"}
-                          onChange={(e) => setWishEmoji(item.id, e.target.value)}
-                          aria-label={`${t("wish.emojiChange")} ${item.name}`}
-                        >
-                          <option value="auto">{t("wish.emojiAuto")} — {pickWishEmoji(item.name)}</option>
-                          {!EMOJI_PALETTE.includes(item.emoji) ? (
-                            <option value={item.emoji}>{item.emoji}</option>
-                          ) : null}
-                          {EMOJI_PALETTE.filter((e) => e !== item.emoji).map((e) => (
-                            <option key={e} value={e}>
-                              {e}
-                            </option>
-                          ))}
-                        </select>
-                      </span>
-                      <span className="nm">
-                        {item.name.startsWith("preset.")
-                          ? t(`wish.${item.name}`)
-                          : item.name}
-                      </span>
-                      <span className="hr">{hours > 0 ? `${hours.toFixed(1)} h` : "—"}</span>
-                      <span
-                        style={{
-                          width: 52,
-                          height: 6,
-                          borderRadius: 99,
-                          background: "var(--line)",
-                          overflow: "hidden",
-                          display: "inline-block",
-                        }}
-                      >
-                        <i
-                          style={{
-                            display: "block",
-                            height: "100%",
-                            width: `${pct.toFixed(0)}%`,
-                            background: "var(--mint)",
-                          }}
-                        />
-                      </span>
-                      <button
-                        type="button"
-                        aria-label={`${t("wish.emojiChange")} ${item.name}`}
-                        onClick={() =>
-                          update({ wishlist: settings.wishlist.filter((w) => w.id !== item.id) })
-                        }
-                      >
-                        ×
-                      </button>
-                    </li>
-                  );
-                })
-              )}
-            </ul>
-            <div className="wish-em-hint">{t("wish.emojiHint")}</div>
-            <div className="mini-form">
-              <input
-                placeholder={t("wish.placeholder")}
-                maxLength={24}
-                value={wishName}
-                onChange={(e) => setWishName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addWish()}
-                aria-label={t("wish.title")}
-              />
-              <input
-                type="number"
-                placeholder={wishUnit === "hours" ? "10" : "120"}
-                inputMode="decimal"
-                min={0}
-                step="any"
-                value={wishPrice}
-                onChange={(e) => setWishPrice(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addWish()}
-                aria-label={
-                  wishUnit === "hours"
-                    ? t("wish.unit.hours")
-                    : t("wish.unit.price", { sym })
-                }
-              />
-              <button type="button" onClick={addWish} aria-label={t("wish.title")}>
-                +
-              </button>
-            </div>
-            <div className="wish-unit-row">
-              <div className="wish-unit" role="group" aria-label={t("wish.unit.hours")}>
-                <button
-                  type="button"
-                  className={wishUnit === "price" ? "on" : ""}
-                  aria-pressed={wishUnit === "price"}
-                  onClick={() => setWishUnit("price")}
-                >
-                  {t("wish.unit.price", { sym })}
-                </button>
-                <button
-                  type="button"
-                  className={wishUnit === "hours" ? "on" : ""}
-                  aria-pressed={wishUnit === "hours"}
-                  onClick={() => setWishUnit("hours")}
-                >
-                  {t("wish.unit.hours")}
-                </button>
-              </div>
-              <span className="wish-preview">{wishPreview}</span>
-            </div>
-          </div>
-
+        <div className="grid-1">
           <div className="mod">
             <h3>{t("month.title")}</h3>
             <div className="hint">{t("month.hint")}</div>

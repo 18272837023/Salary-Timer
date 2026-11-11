@@ -2,7 +2,7 @@
  * 真实代码测试：compute() 在"过了下班时间"时的行为
  */
 const assert = require("node:assert");
-const { compute, derive, isWorkday } = require("../.tmptest/schedule.js");
+const { compute, derive, isWorkday, nextShift } = require("../.tmptest/schedule.js");
 const { defaultSettings } = require("../.tmptest/defaults.js");
 
 function S(partial = {}) {
@@ -181,6 +181,39 @@ console.log("\n=== 8. 日薪换算与旧收入模式兼容 ===");
     assert.strictEqual(derive(S({ mode: "annual", amountCents: 5_200_000 })).hourlyCents, 2500);
     assert.strictEqual(derive(S({ mode: "monthly", amountCents: 520_000 })).hourlyCents, 3000);
     assert.strictEqual(derive(S({ mode: "hourly", amountCents: 3500 })).hourlyCents, 3500);
+  });
+}
+
+console.log("\n=== 9. nextShift()：停表时页面上唯一还在动的那串数字 ===");
+{
+  check("上班前 → 指向今天，秒数等于距上班时间", () => {
+    const ns = nextShift(S(), at(8, 0));
+    assert.strictEqual(ns.dayOffset, 0);
+    assert.strictEqual(ns.start, "09:00");
+    assert.strictEqual(ns.seconds, 3600);
+  });
+  check("下班后 → 指向下一个工作日", () => {
+    const ns = nextShift(S(), at(10, 0));
+    assert.strictEqual(ns.dayOffset, 1);
+    assert.strictEqual(ns.seconds, 23 * 3600);
+  });
+  check("周五下班后跳过周末，落到周一", () => {
+    const ns = nextShift(S(), at(21, 0, 5));
+    assert.strictEqual(ns.dayOffset, 3);
+    assert.strictEqual(ns.seconds, 60 * 3600);
+  });
+  check("周末整天 → 倒计时跨过不工作的两天", () => {
+    const ns = nextShift(S(), at(21, 0, 6));
+    assert.strictEqual(ns.dayOffset, 2);
+    assert.strictEqual(ns.seconds, 36 * 3600);
+  });
+  check("夜班凌晨下班后指向当晚 22:00，而不是「今天已过」", () => {
+    const ns = nextShift(S({ start: "22:00", end: "06:00" }), at(6, 30));
+    assert.strictEqual(ns.dayOffset, 0);
+    assert.strictEqual(ns.seconds, Math.round(15.5 * 3600));
+  });
+  check("没有任何工作日时不编造时间", () => {
+    assert.strictEqual(nextShift(S({ days: [] }), at(10, 0)), null);
   });
 }
 

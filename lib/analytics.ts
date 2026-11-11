@@ -2,7 +2,7 @@
  * GA4 event helper.
  *
  * The site only ever sent `page_view` (see `RouteAnalytics`), which means every
- * question worth asking — did they finish setup? did they add a wish? how long
+ * question worth asking — did they finish setup? do they stick around? how long
  * did they actually stay? — was unanswerable. These are the five events that
  * make the funnel visible.
  *

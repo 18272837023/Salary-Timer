@@ -150,7 +150,7 @@ export function formatCents(
 
   if (digits === 0) {
     // Truncate, never round up: a balance must not show money you have not
-    // earned yet, and it keeps the ticker and the jar in agreement.
+    // earned yet, and the month total must never exceed the live ticker.
     return sign + symbolFor(currency) + group(Math.trunc(abs / 100), 0);
   }
   const whole = Math.trunc(abs / 100);

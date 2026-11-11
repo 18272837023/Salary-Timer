@@ -120,8 +120,8 @@ export default function PaycheckCountdownPage() {
             also see what you have already earned this month, and what is still to come.
           </li>
           <li>
-            <b>The savings jar.</b> A jar that fills from your earnings turns the wait into progress.
-            By payday the jar is not empty, which is the entire point of saving automatically.
+            <b>The month total.</b> Base pay earned so far, plus tips and bonuses you added, minus
+            unpaid days — so the wait has a running figure attached to it instead of a vague feeling.
           </li>
           <li>
             <b>Your real hourly rate.</b> If the countdown says six shifts, and each shift is worth

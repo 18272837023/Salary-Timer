@@ -502,36 +502,6 @@ export function SetupPanel({
             </div>
           </div>
 
-          <div className="field">
-            <label>{t("panel.jar")}</label>
-            <div className="row2">
-              <input
-                type="number"
-                min={0}
-                step={50}
-                placeholder={t("panel.jarGoal")}
-                aria-label={t("panel.jarGoal")}
-                value={centsToInput(draft.jarGoalCents, draft.currency)}
-                onChange={(e) => {
-                  const cents = parseAmountToCents(e.target.value);
-                  patch({ jarGoalCents: cents ?? 0 });
-                }}
-              />
-              <select
-                aria-label={t("panel.jar")}
-                value={String(draft.jarRate)}
-                onChange={(e) => patch({ jarRate: Number(e.target.value) })}
-              >
-                {[5, 10, 15, 20, 30].map((r) => (
-                  <option key={r} value={r}>
-                    {t("panel.saveRate", { r })}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="help">{t("panel.jarHelp")}</div>
-          </div>
-
           <div className="preview">
             <div className="k">{t("panel.preview")}</div>
             <div className="v">{formatRate(preview.hourlyCents, draft.currency)}</div>

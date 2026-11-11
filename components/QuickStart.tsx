@@ -11,7 +11,6 @@ import { useSettings, useToast } from "@/lib/store";
 import type { BreakWindow, CurrencyCode, PayMode, Settings } from "@/lib/types";
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday … Sunday
-const GOALS = [500, 1000, 2500, 5000];
 const DAY_OPTIONS = [3, 4, 5, 6];
 type QuickPayMode = Exclude<PayMode, "hourly">;
 const PAY_OPTIONS: Record<QuickPayMode, { label: string; unit: string; max: number; step: number }> = {
@@ -52,7 +51,6 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
   const [amount, setAmount] = useState(78_000);
   const [days, setDays] = useState(5);
   const [hours, setHours] = useState(8);
-  const [goal, setGoal] = useState(2_000);
 
   useEffect(() => setMounted(true), []);
 
@@ -66,7 +64,6 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
     setAmount(settings.mode === "hourly" ? Math.round(saved.dailyCents) / 100 : settings.amountCents / 100);
     setDays(settings.days.length || 5);
     setHours(saved.paidMin / 60);
-    setGoal(Math.max(100, Math.round(settings.jarGoalCents / 100)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -98,23 +95,14 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       end: shift.end,
       days: daysFor(days),
       breaks: shift.breaks,
-      jarGoalCents: Math.round(goal * 100),
       onboarded: true,
       v: SETTINGS_VERSION,
     };
-  }, [settings, mode, currency, amount, days, hours, goal]);
+  }, [settings, mode, currency, amount, days, hours]);
 
   const preview = useMemo(() => derive(draft), [draft]);
   const sym = symbolFor(currency);
   const locale = lang === "zh" ? "zh-CN" : "en-US";
-
-  const goalCents = Math.round(goal * 100);
-  const goalHours = preview.hourlyCents > 0 ? goalCents / preview.hourlyCents : 0;
-  const weeklyPayCents = (preview.hourlyCents * preview.weeklyHours) || 0;
-  const weeksToGoal =
-    weeklyPayCents > 0 && settings.jarRate > 0
-      ? goalCents / ((weeklyPayCents * settings.jarRate) / 100)
-      : 0;
 
   function switchMode(next: QuickPayMode) {
     if (next === mode) return;
@@ -162,12 +150,12 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       >
         <div className="qs-head">
           <div className="qs-dots" aria-hidden="true">
-            {[0, 1, 2].map((i) => (
+            {[0, 1].map((i) => (
               <span key={i} className={`qs-dot${i <= step ? " on" : ""}`} />
             ))}
           </div>
           <button type="button" className="qs-skip" onClick={onClose}>
-            {step === 2 ? t("qs.notNow") : t("qs.skip")}
+            {step === 1 ? t("qs.notNow") : t("qs.skip")}
           </button>
         </div>
 
@@ -283,63 +271,6 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             </>
           ) : null}
-
-          {step === 2 ? (
-            <>
-              <h3>{t("qs.step3.title")}</h3>
-              <p className="qs-sub">{t("qs.step3.sub", { rate: settings.jarRate })}</p>
-
-              <div className="qs-goals">
-                {GOALS.map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    className={goal === g ? "on" : ""}
-                    onClick={() => setGoal(g)}
-                  >
-                    {sym}
-                    {g.toLocaleString(locale)}
-                  </button>
-                ))}
-              </div>
-
-              <div className="qs-amount">
-                <span className="cur">{sym}</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="any"
-                  value={goal}
-                  onChange={(e) => {
-                    const v = Number.parseFloat(e.target.value);
-                    setGoal(Number.isFinite(v) ? Math.max(0, v) : 0);
-                  }}
-                  aria-label={t("qs.savingsGoal")}
-                />
-                <span className="unit">{t("qs.step3.goalUnit")}</span>
-              </div>
-
-              <div className="qs-fact">
-                {goalHours > 0 ? (
-                  <>
-                    {t("qs.step3.factHours", { hours: goalHours.toFixed(1) })}
-                    {weeksToGoal > 0 ? (
-                      <>
-                        {" "}
-                        {t("qs.step3.factWeeks", { weeks: Math.ceil(weeksToGoal), rate: settings.jarRate })}
-                      </>
-                    ) : (
-                      "."
-                    )}
-                  </>
-                ) : (
-                  t("qs.step3.addPay")
-                )}
-              </div>
-            </>
-          ) : null}
-
           <div className="qs-preview">
             <div>
               <div className="k">{t("qs.preview.earn")}</div>
@@ -367,14 +298,14 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
             type="button"
             className="btn btn-ink"
             onClick={() => {
-              if (step < 2) {
+              if (step < 1) {
                 setStep(step + 1);
                 return;
               }
               finish();
             }}
           >
-            {step < 2 ? t("qs.next") : t("qs.startClock")}
+            {step < 1 ? t("qs.next") : t("qs.startClock")}
           </button>
         </div>
       </div>

@@ -158,8 +158,8 @@ export default function HowSalaryTimersWorkPage() {
         <p>
           That is the whole product thesis: shorten the gap between effort and reward. Everything
           else — per-second figures,{" "}
-          <Link href="/paycheck-countdown">paycheck countdown</Link>, savings jar priced in hours —
-          is a way of keeping that gap visible.
+          <Link href="/paycheck-countdown">paycheck countdown</Link>, the month total with tips and
+          unpaid days — is a way of keeping that gap visible.
         </p>
         <p>
           When you are ready, open the <Link href="/">free salary timer</Link> on the homepage, set

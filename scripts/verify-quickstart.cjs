@@ -105,22 +105,14 @@ const server = http.createServer((req, res) => {
   await sleep(300);
   await shot('qs-step2.png');
 
-  // step 2 → 3
-  await evalJs(`document.querySelectorAll('.qs-foot button')[1].click()`);
-  await sleep(400);
-  check('step 3 reached (goal chips)', await evalJs(`!!document.querySelector('.qs-goals')`));
-  await evalJs(`document.querySelectorAll('.qs-goals button')[1].click()`);
-  await sleep(300);
-  await shot('qs-step3.png');
-
-  // finish
+  // step 2 is the last step now — the same button finishes
   await evalJs(`document.querySelectorAll('.qs-foot button')[1].click()`);
   await sleep(1200);
   check('wizard closed after finish', await evalJs(`!document.querySelector('.qs.on')`));
   const stored = await evalJs(`localStorage.getItem('salarytimer.site.v2') || ''`);
   let parsed = {};
   try { parsed = JSON.parse(stored); } catch (e) {}
-  check('onboarded persisted', parsed.onboarded === true, `days=${JSON.stringify(parsed.days)} goal=${parsed.jarGoalCents}`);
+  check('onboarded persisted', parsed.onboarded === true, `days=${JSON.stringify(parsed.days)}`);
   check('demo bar gone', await evalJs(`!document.querySelector('.demo-bar.on')`));
 
   // Right now the local clock is outside the shift, so the counter is paused and
