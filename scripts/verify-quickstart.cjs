@@ -96,16 +96,21 @@ const server = http.createServer((req, res) => {
   check('wizard auto-opens after ~12s', await evalJs(`!!document.querySelector('.qs.on')`));
   await shot('qs-step1.png');
 
-  // step 1 → 2
+  // step 1 → 2 (working hours) → 3 (days / paid hours)
   await evalJs(`document.querySelectorAll('.qs-foot button')[1].click()`);
   await sleep(400);
-  check('step 2 reached (days picker)', await evalJs(`!!document.querySelector('.qs-days')`));
+  check('step 2 reached (working-hours step)', await evalJs(`!!document.querySelector('.qs-when')`));
+  await shot('qs-step2.png');
+
+  await evalJs(`document.querySelectorAll('.qs-foot button')[1].click()`);
+  await sleep(350);
+  check('step 3 reached (days picker)', await evalJs(`!!document.querySelector('.qs-days')`));
   // pick 4 days
   await evalJs(`[...document.querySelectorAll('.qs-days button')].find(b=>b.textContent.trim()==='4').click()`);
   await sleep(300);
-  await shot('qs-step2.png');
+  await shot('qs-step3.png');
 
-  // step 2 is the last step now — the same button finishes
+  // step 3 is the last step — the same button finishes
   await evalJs(`document.querySelectorAll('.qs-foot button')[1].click()`);
   await sleep(1200);
   check('wizard closed after finish', await evalJs(`!document.querySelector('.qs.on')`));

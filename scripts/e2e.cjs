@@ -109,17 +109,19 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
 
   await send('Page.navigate', { url: BASE + '/' });
 
-  // Poll for hydration completion — React needs to mount before any DOM
-  // assertions are meaningful. The I18nProvider wraps everything in a
-  // useEffect that sets `ready=true`, which triggers a second render pass.
-  // Wait until the app-shell (rendered by SalaryApp) is present.
+  // The app shell is already in prerendered HTML, so its presence alone does
+  // not prove styles or the initial client state are ready. Wait for the
+  // first-visit empty state and loaded document before checking its appearance.
   let hydrated = false;
   for (let i = 0; i < 30; i++) {
-    const has = await evalJS(`!!document.querySelector('.app-shell')`);
+    const has = await evalJS(`document.readyState === 'complete' &&
+      !!document.querySelector('.app-shell') &&
+      !!document.querySelector('.app-actions .btn-ink') &&
+      /Pay not set yet/.test(document.querySelector('.status')?.textContent || '')`);
     if (has) { hydrated = true; break; }
     await sleep(500);
   }
-  check('page hydrated (app-shell present)', hydrated);
+  check('first-visit empty page ready (document, styles and initial state)', hydrated);
   if (!hydrated) {
     // Dump error logs and bail — nothing else will work if React didn't mount
     console.log('HYDRATION FAILED — console/network errors:', logs.length ? JSON.stringify(logs, null, 1) : 'none');
@@ -292,6 +294,9 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
 
   // ---------- 6. 本月额外收入 ----------
   check('savings jar and wishlist are gone', (await evalJS(`!!document.querySelector('.jar, .wishlist, .wish-unit')`)) === false);
+  check('monthly income starts collapsed', await evalJS(`document.querySelector('.monthly-income').open === false`));
+  await click('.month-summary');
+  check('monthly income can be expanded', await evalJS(`document.querySelector('.monthly-income').open === true`));
   const extraRow = () => evalJS(`(() => {
     const row = [...document.querySelectorAll('.mod .rowline')].find(r => /Extras|额外/.test(r.textContent));
     return row ? row.querySelector('b').textContent : null;
@@ -311,6 +316,11 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
     return row ? row.querySelector('b').textContent : null;
   })()`);
   check('month total still renders', !!monthTotal, String(monthTotal));
+  await click('.month-summary');
+  check('monthly income can be collapsed again', await evalJS(`document.querySelector('.monthly-income').open === false`));
+  await click('.month-summary');
+  check('monthly income keeps extra income after reopening', await extraRow() === extraAfter);
+  await click('.month-summary');
 
   // ---------- 7. Slack 模式 ----------
   await evalJS(`document.querySelector('.slack-btn').click()`);
@@ -373,12 +383,21 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   const savedDaily = await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2') || 'null')`);
   check('daily salary saved as integer cents', savedDaily?.mode === 'daily' && savedDaily?.amountCents === 80000,
     `${savedDaily?.mode} ${savedDaily?.amountCents}`);
+  await evalJS(`window.__beforeDailyReload = true`);
   await send('Page.reload');
-  await sleep(600);
+  for (let i = 0; i < 40; i++) {
+    if (await evalJS(`!window.__beforeDailyReload && document.readyState === 'complete' && !!document.querySelector('.panel')`)) break;
+    await sleep(150);
+  }
   check('daily salary survives reload', await evalJS(`JSON.parse(localStorage.getItem('salarytimer.site.v2')).mode === 'daily'`));
   await click('.app-actions .btn-ink');
-  await sleep(200);
-  check('daily salary remains editable in settings', (await text('.seg-pay button.on'))?.includes('日薪'));
+  let dailyModeText = '';
+  for (let i = 0; i < 40; i++) {
+    dailyModeText = (await text('.panel.on .seg-pay button.on')) || '';
+    if (dailyModeText.includes('日薪')) break;
+    await sleep(150);
+  }
+  check('daily salary remains editable in settings', dailyModeText.includes('日薪'), dailyModeText);
 
   // 零小数货币：日元不该出现 ".00"
   await evalJS(`(() => {
@@ -412,9 +431,9 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
     await sleep(200);
   }
   await sleep(700);
-  const idleCd1 = await text('.clockout-bar.idle .clockout-value');
+  const idleCd1 = await text('.ring-card .cd.idle .v');
   await sleep(1300);
-  const idleCd2 = await text('.clockout-bar.idle .clockout-value');
+  const idleCd2 = await text('.ring-card .cd.idle .v');
   check('stopped clock still shows a countdown', !!idleCd1, String(idleCd1));
   check('that countdown actually ticks', !!idleCd1 && idleCd1 !== idleCd2, `${idleCd1} -> ${idleCd2}`);
 

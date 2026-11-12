@@ -23,7 +23,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "How do I work out my hourly rate from an annual salary?",
-    a: "The common shortcut is salary ÷ 2,080, which assumes 40 hours a week, 52 weeks a year. It's wrong for almost everyone. This site does the honest version: your actual paid hours per day, minus unpaid breaks, times the number of days you actually work, times 52. Work a 4-day week and your hourly rate jumps; work 50-hour weeks and it drops.",
+    a: "Divide gross annual pay by your scheduled paid hours per week times 52. The 2,080-hour divisor is appropriate for 40 paid hours per week. Count unpaid breaks once: an 8.5-hour shift minus a 30-minute unpaid lunch still gives eight paid hours. This annualized estimate does not adjust for specific leave dates or determine a statutory overtime regular rate.",
   },
   {
     q: "Does it count my lunch break as paid time?",
@@ -55,7 +55,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: "Why does watching money tick up actually help?",
-    a: "Because abstract rewards don't motivate behaviour; visible ones do. A salary arrives once a month, far from the effort that produced it. A counter that moves every second shortens that gap — which is why people report leaving on time more often, saying no to unpaid extras, and negotiating harder after a week of watching.",
+    a: "A live counter makes the relationship between time and estimated gross pay visible. Some people may find that useful for planning or motivation, but the site has not established that it changes behaviour or improves pay negotiations.",
   },
 ];
 
@@ -71,7 +71,7 @@ export const HOME_FAQ_ZH: FaqItem[] = [
   },
   {
     q: "年薪怎么换算成真实时薪？",
-    a: "常见的捷径是年薪 ÷ 2,080，它假设每周 40 小时、每年 52 周，对几乎所有人都不准。这里用的是诚实的算法：每天实际计薪工时减去无薪休息，乘以每周实际工作天数，再乘以 52。上四天班，时薪会变高；每周干 50 小时，时薪会变低。",
+    a: "用税前年薪除以「每周排班中的计薪工时 × 52」。每周计薪 40 小时时，2,080 是适用的年化除数。无薪休息只扣除一次：8.5 小时班次减去 30 分钟无薪午休，仍是每天计薪 8 小时。这是按排班年化的估算，不单独调整休假日期，也不确定法定加班工资基数。",
   },
   {
     q: "午休会被算成计薪时间吗？",
@@ -103,6 +103,6 @@ export const HOME_FAQ_ZH: FaqItem[] = [
   },
   {
     q: "为什么看着数字跳动真的有用？",
-    a: "因为抽象的奖励改变不了行为，看得见的奖励可以。工资一个月才来一次，离产生它的努力很远。每秒都在跳的计数器缩短了这个距离——这也是为什么很多人用了一周之后，更常准时下班、更敢拒绝无薪的额外工作、也更愿意去谈加薪。",
+    a: "实时计数器让工作时间与估算税前收入的关系更直观，可能有助于个人规划或激励。本站尚无研究证明它能改变行为或改善薪资谈判结果。",
   },
 ];

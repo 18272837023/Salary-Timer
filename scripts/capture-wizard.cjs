@@ -144,6 +144,16 @@ watchdog.unref?.();
   await send('Page.enable');
   await send('Runtime.enable');
 
+  // `--window-size` includes browser chrome, so the real viewport ends up
+  // shorter than requested (1200x760 yielded 1182x608). Pin the viewport
+  // explicitly so screenshots match the geometry the tests assert.
+  // QS_H=688 reproduces a 1366x768 laptop's viewport for visual review.
+  const VIEW_H = Number(process.env.QS_H) || 760;
+  const SHOT_SUFFIX = process.env.QS_H ? '-h' + VIEW_H : '';
+  await send('Emulation.setDeviceMetricsOverride', {
+    width: 1200, height: VIEW_H, deviceScaleFactor: 1, mobile: false,
+  });
+
   const evalJS = async (expr) => {
     const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
     if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || 'eval error');
@@ -327,13 +337,13 @@ watchdog.unref?.();
   const opts = await evalJS(`[...document.querySelectorAll('.qs .qs-seg button')].map(b=>b.textContent.trim())`);
   console.log('  pay options:', JSON.stringify(opts));
 
-  await shot('快速设置-第1步.png');
+  await shot(`快速设置-第1步${SHOT_SUFFIX}.png`);
   await click('.qs-foot button:nth-child(2)');
   await sleep(350);
-  await shot('快速设置-第2步.png');
+  await shot(`快速设置-第2步${SHOT_SUFFIX}.png`);
   await click('.qs-foot button:nth-child(2)');
   await sleep(350);
-  await shot('快速设置-第3步.png');
+  await shot(`快速设置-第3步${SHOT_SUFFIX}.png`);
 
   // Mobile pass (390 × 844), reusing the same wizard.
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });

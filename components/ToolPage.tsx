@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n";
+import { ContentByline, ContentNotes } from "@/components/ContentNotes";
 import { Link } from "@/components/SmartLink";
 import { SalaryApp } from "@/components/SalaryApp";
 import { Faq, ToolLinks, type FaqItem } from "@/components/sections";
@@ -36,6 +37,7 @@ export function ToolPage({
 
           <h1 className="tool-h1">{h1}</h1>
           <p className="lede">{lede}</p>
+          <ContentByline href={tool.href} />
           {relatedLearn ? (
             <p className="learn-related">
               {t("tool.relatedNew")} <Link href={relatedLearn.href}>{relatedLearn.label}</Link>{t("tool.relatedOr")}
@@ -52,7 +54,10 @@ export function ToolPage({
         <SalaryApp />
       </div>
 
-      <article className="prose">{children}</article>
+      <article className="prose">
+        {children}
+        <ContentNotes cluster={tool.cluster} />
+      </article>
 
       <Faq
         items={faq}

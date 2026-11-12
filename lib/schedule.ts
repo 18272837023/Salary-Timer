@@ -59,6 +59,12 @@ export function derive(settings: Settings): Derived {
     let b1 = toMinutes(b.start);
     let b2 = toMinutes(b.end);
     if (b2 <= b1) b2 += MINUTES_PER_DAY;
+    // `breaksToday()` lifts a wall-clock break that falls before the shift
+    // start onto the next day (02:00 on a 22:00 → 06:00 shift). derive() must
+    // do exactly the same: otherwise an overnight break is unpaid in compute()
+    // but still paid in the hourly rate, and the day total never adds up.
+    if (b1 < startMin) b1 += MINUTES_PER_DAY;
+    if (b2 < b1) b2 += MINUTES_PER_DAY;
     breakMin += Math.max(0, Math.min(b2, startMin + windowMin) - Math.max(b1, startMin));
   }
   // A shift cannot be entirely break time.

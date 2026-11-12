@@ -77,6 +77,20 @@ const en: Dict = {
   "action.settle": "📋 Today's settlement",
   "action.setPay": "⚙️ Set my pay",
 
+  "float.title": "Desktop live earnings",
+  "float.open": "Desktop live earnings",
+  "float.focus": "Show floating timer",
+  "float.opening": "Opening…",
+  "float.hint": "Keep this tab open while you work in other apps. Closing it also closes the floating timer.",
+  "float.windowHint": "Keep the original tab open · Gross-pay estimate",
+  "float.setup": "Set your pay first, then open a floating timer over your other apps.",
+  "float.unsupported": "Floating timers are unavailable in this browser. Try a supported desktop browser such as Chrome or Edge.",
+  "float.error": "The floating timer could not open. Check your browser settings and try again.",
+  "float.return": "Back to webpage ↗",
+  "float.hide": "Hide earnings",
+  "float.show": "Show earnings",
+  "float.hidden": "Earnings hidden",
+
   // Demo bar
 
   // Ticker
@@ -126,6 +140,8 @@ const en: Dict = {
 
   // This month
   "month.title": "💸 This month, honestly",
+  "month.expand": "Expand",
+  "month.collapse": "Collapse",
   "month.hint": "Base pay plus extras, minus unpaid days",
   "month.baseEarned": "Base earned",
   "month.extras": "Extras (bonus, tips, OT)",
@@ -155,6 +171,21 @@ const en: Dict = {
   "qs.step1.dayUnit": "/ workday",
   "qs.step1.hourUnit": "/ hour",
   "qs.step1.conversionHint": "A day means one paid shift. Estimates use your working days and paid hours.",
+  "qs.when.title": "When are you at work?",
+  "qs.when.sub": "Pick your shift and your unpaid break. The counter only runs while you are on the clock.",
+  "qs.when.shift": "Working hours",
+  "qs.when.start": "Clock in",
+  "qs.when.end": "Clock out",
+  "qs.when.lunch": "Unpaid break",
+  "qs.when.lunchHelp": "The clock pauses here — no pay is added during this window.",
+  "qs.when.breakStart": "Break starts",
+  "qs.when.breakEnd": "Break ends",
+  "qs.when.timeline": "Your working day",
+  "qs.when.paidShort": "paid",
+  "qs.when.paid": "Paid time",
+  "qs.when.paused": "Unpaid break · paused",
+  "qs.when.pauseNote": "Earnings only grow between clock-in and clock-out. Before the shift, during your break and after clock-out the counter is paused — nothing is added.",
+  "qs.when.hoursHint": "Worked out from your shift and break. Drag to adjust — it moves your clock-out time.",
   "qs.step2.title": "How many hours is that?",
   "qs.step2.sub": "Choose your paid hours and working days to see what each hour is really worth.",
   "qs.step2.daysWeek": "Days a week",
@@ -275,8 +306,8 @@ const en: Dict = {
   "pain.4.body": "Four extra evenings, one slightly bigger payslip, zero sense of which hours produced it. Extra effort disappears into the average.",
   "pain.5.title": "Savings are abstract — hours are not",
   "pain.5.body": "\u201cSave $2,000\u201d is a number with no weight. \u201c74 hours of my life\u201d is something you can actually decide about.",
-  "pain.6.title": "You don't know your real rate — 2,080 is a fiction",
-  "pain.6.body": "Salary ÷ 2,080 is not your hourly rate if you work 47 hours a week and answer Slack on Sundays. Most people are paid less per hour than they think.",
+  "pain.6.title": "Does your schedule fit a 2,080-hour year?",
+  "pain.6.body": "A 2,080-hour divisor fits a 40-hour paid week annualized over 52 weeks. Different paid hours need a different divisor; unpaid extra work changes a separate effective-rate comparison.",
 
   // Features
   "feat.eyebrow": "What's inside",
@@ -436,6 +467,20 @@ const zh: Dict = {
   "action.settle": "📋 今日结算",
   "action.setPay": "⚙️ 设置薪资",
 
+  "float.title": "桌面实时计薪",
+  "float.open": "桌面实时计薪",
+  "float.focus": "查看悬浮窗",
+  "float.opening": "正在打开…",
+  "float.hint": "请保留此标签页，可切换到其他应用。关闭标签页也会关闭悬浮窗。",
+  "float.windowHint": "请保留原标签页 · 税前收入估算",
+  "float.setup": "先设置薪资，再打开悬浮计薪，切换应用也能看收入。",
+  "float.unsupported": "此浏览器暂不支持悬浮计薪，请使用支持的桌面浏览器，如 Chrome 或 Edge。",
+  "float.error": "无法打开悬浮窗，请检查浏览器设置后重试。",
+  "float.return": "返回网页 ↗",
+  "float.hide": "隐藏收入",
+  "float.show": "显示收入",
+  "float.hidden": "收入已隐藏",
+
   // Demo bar
 
   // Ticker
@@ -485,6 +530,8 @@ const zh: Dict = {
 
   // This month
   "month.title": "💸 本月真实收入",
+  "month.expand": "展开",
+  "month.collapse": "收起",
   "month.hint": "基本薪资 + 额外收入 − 无薪天数",
   "month.baseEarned": "基本收入",
   "month.extras": "额外（奖金、小费、加班）",
@@ -514,6 +561,21 @@ const zh: Dict = {
   "qs.step1.dayUnit": "/ 工作日",
   "qs.step1.hourUnit": "/ 时",
   "qs.step1.conversionHint": "按天指一个计薪工作日；估算会考虑你的工作天数与计薪工时。",
+  "qs.when.title": "你什么时候在上班？",
+  "qs.when.sub": "选择上下班时间和无薪休息。计时器只在你上班的时段累加。",
+  "qs.when.shift": "上班时段",
+  "qs.when.start": "上班时间",
+  "qs.when.end": "下班时间",
+  "qs.when.lunch": "无薪午休",
+  "qs.when.lunchHelp": "这段时间内计时器暂停，不再累加收入。",
+  "qs.when.breakStart": "休息开始",
+  "qs.when.breakEnd": "休息结束",
+  "qs.when.timeline": "你的一天",
+  "qs.when.paidShort": "计薪",
+  "qs.when.paid": "计薪时段",
+  "qs.when.paused": "无薪休息 · 暂停",
+  "qs.when.pauseNote": "只有上班到下班之间才会累加收入；上班前、午休时和下班后，计时器都会暂停，不再计薪。",
+  "qs.when.hoursHint": "根据上班时段和午休自动算出；拖动可调整，下班时间会同步变化。",
   "qs.step2.title": "工作多少小时？",
   "qs.step2.sub": "选择每周工作天数与每日计薪工时，看看一小时实际值多少钱。",
   "qs.step2.daysWeek": "每周工作天数",
@@ -634,8 +696,8 @@ const zh: Dict = {
   "pain.4.body": "四个额外的晚上，一张稍微大一点的工资条，完全分不清是哪些小时产生了那点差额。额外的努力消失在了平均数里。",
   "pain.5.title": "存钱是抽象的——工时不是",
   "pain.5.body": "\u201c存 $2,000\u201d是一个没有重量的数字。\u201c我生命的 74 小时\u201d才是你能真正做决定的东西。",
-  "pain.6.title": "你不知道真实时薪——2,080 小时是个谎言",
-  "pain.6.body": "年薪 ÷ 2,080 不是你的真实时薪，如果你每周工作 47 小时还在周日回消息的话。大多数人的时薪比他们以为的要低。",
+  "pain.6.title": "你的排班适合按每年 2,080 小时计算吗？",
+  "pain.6.body": "2,080 适合每周计薪 40 小时、按 52 周年化的估算。计薪工时不同就应调整除数；无薪额外工作则需要另算实际投入时间的有效时薪。",
 
   // Features
   "feat.eyebrow": "功能一览",

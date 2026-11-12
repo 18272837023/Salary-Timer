@@ -40,6 +40,9 @@ export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const ENTITY_DEFINITION =
   "Salary Timer is a free web tool that shows your earnings ticking up in real time — per second, minute and hour — using your actual schedule, unpaid breaks and overtime rate.";
 
+export const ZH_ENTITY_DEFINITION =
+  "薪资计时器是一个免费的网页工具，按你的真实排班、无薪休息和加班倍率，实时显示你每秒、每分钟、每小时赚多少钱。";
+
 /**
  * GA4 measurement ID. Page-view analytics only — the timer's numbers live in
  * localStorage and are never sent anywhere. Override with NEXT_PUBLIC_GA_ID
@@ -147,12 +150,12 @@ export const CLUSTERS: Cluster[] = [
     label: "What an hour is worth",
     title: "What an Hour of Your Time Is Worth — the real hourly rate",
     description:
-      "Every way to turn a salary into an hourly, daily or per-second figure — and why the standard 2,080-hour divisor overstates almost everyone's pay.",
+      "Convert salary into hourly, daily or per-second estimates, and understand when a 2,080-hour annualized divisor fits your paid schedule.",
     definition:
-      "Your real hourly rate is your pay divided by the hours you actually spend working — not by the 2,080 hours a generic calculator assumes.",
+      "An hourly equivalent divides pay by hours measured on the same basis: scheduled paid hours for an annualized estimate, or recorded hours for an effective-rate comparison.",
     covers: [
       "how to convert an annual salary into an hourly rate",
-      "why the 2,080-hour year is wrong for most jobs",
+      "when a 2,080-hour annualized estimate is appropriate",
       "how an unpaid lunch or a 45-hour week changes the number",
       "what your time is worth per day, per minute and per second",
     ],
@@ -166,7 +169,7 @@ export const CLUSTERS: Cluster[] = [
     description:
       "Which hours are actually paid: unpaid meal breaks, overtime multipliers, night-shift differentials, 12-hour shifts and rotas that cross midnight.",
     definition:
-      "Paid time is the part of your day your employer is contractually paying for — breaks, handovers and travel between sites are only paid if your agreement says so.",
+      "Paid time is determined by applicable law and the employment arrangement; required duties, breaks and workday travel must be assessed under those rules.",
     covers: [
       "whether lunch and rest breaks are paid",
       "how overtime is calculated and which hours qualify",
@@ -223,7 +226,7 @@ export const TOOLS: ToolRoute[] = [
     title: "Hourly Rate Calculator — real pay per hour",
     description:
       "Turn an annual or monthly salary into your real hourly rate, using the hours you actually work. Unpaid lunch, overtime and a 4-day week all change the number.",
-    blurb: "Salary ÷ 2,080 lies. Get the rate you actually earn.",
+    blurb: "Convert salary using your scheduled paid hours.",
     emoji: "🧮",
     cluster: "hourly-rate",
     relatedLearnHref: "/learn/hourly-rate-from-annual-salary",
@@ -320,10 +323,10 @@ export const LEARN: LearnArticle[] = [
   {
     href: "/learn/hourly-rate-from-annual-salary",
     label: "Hourly rate from annual salary",
-    title: "Hourly Rate from Annual Salary — skip the 2,080 myth",
+    title: "Hourly Rate from Annual Salary — formulas and paid-hour assumptions",
     description:
-      "Salary ÷ 2,080 is a fiction for most jobs. Learn how to convert an annual salary into a real hourly rate using the hours you actually work.",
-    blurb: "Why ÷ 2,080 lies, and what to use instead.",
+      "Convert gross annual salary into an annualized hourly estimate. See when 2,080 hours fits, how unpaid breaks are counted, and how effective and statutory rates differ.",
+    blurb: "Choose an annual-hours divisor that matches your paid schedule.",
     cluster: "hourly-rate",
     relatedToolHref: "/hourly-rate-calculator",
   },
@@ -332,7 +335,7 @@ export const LEARN: LearnArticle[] = [
     label: "2,080 hours in a year",
     title: "2,080 Hours in a Year — where the number comes from, and who it fits",
     description:
-      "2,080 is 40 hours × 52 weeks. It is the default divisor in almost every salary calculator, and it describes almost nobody. Here is the arithmetic and who it actually suits.",
+      "2,080 is 40 paid hours × 52 weeks. Learn when that annualized divisor fits and how leave, part-time schedules and actual-hours comparisons differ.",
     blurb: "The default divisor, its arithmetic, and who it actually fits.",
     cluster: "hourly-rate",
     relatedToolHref: "/hourly-rate-calculator",
@@ -342,8 +345,8 @@ export const LEARN: LearnArticle[] = [
     label: "Monthly salary to hourly rate",
     title: "Monthly Salary to Hourly Rate — the conversion without the guesswork",
     description:
-      "Converting a monthly salary to an hourly rate needs one thing most calculators skip: the number of paid hours in the month you are actually working.",
-    blurb: "Why dividing by 173.3 is a trap, and what to divide by instead.",
+      "Compare an annualized monthly-salary conversion with pay per hour for one specific month. Understand when the 173.33-hour monthly average is appropriate.",
+    blurb: "Annualized monthly averages versus hours in a specific month.",
     cluster: "hourly-rate",
     relatedToolHref: "/hourly-rate-calculator",
   },
@@ -352,7 +355,7 @@ export const LEARN: LearnArticle[] = [
     label: "Are lunch breaks paid?",
     title: "Are Lunch Breaks Paid? — unpaid time and your real rate",
     description:
-      "Most lunch breaks are unpaid. Here's how that changes your real hourly rate, and why a salary timer that keeps counting through lunch is lying to you.",
+      "Check when meal and rest breaks are paid under US federal and UK rules, then see how a genuinely unpaid lunch changes an annualized hourly estimate.",
     blurb: "Unpaid lunch, your real rate, and the pause that matters.",
     cluster: "paid-time",
     relatedToolHref: "/",
@@ -382,7 +385,7 @@ export const LEARN: LearnArticle[] = [
     label: "12-hour shift pay",
     title: "12-Hour Shift Pay — how many of those hours are actually paid",
     description:
-      "A 12-hour shift is rarely 12 paid hours. Handovers, unpaid breaks and travel between sites all come out of it — and on a 3-day week the difference is large.",
+      "Calculate paid hours in a 12-hour shift using genuinely unpaid breaks. Required handovers and travel during the workday may be compensable under applicable law.",
     blurb: "Handovers and breaks, and how many hours you are really paid for.",
     cluster: "paid-time",
     relatedToolHref: "/shift-worker-salary-timer",

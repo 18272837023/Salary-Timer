@@ -20,6 +20,8 @@ const nextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost"],
 
   reactStrictMode: true,
+  // Two language-specific root layouts share a standalone missing-route page.
+  experimental: { globalNotFound: true },
 };
 
 export default nextConfig;

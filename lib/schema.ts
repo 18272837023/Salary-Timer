@@ -1,6 +1,8 @@
 import type { FaqItem } from "@/components/sections";
+import { contentUpdated, sourcesFor } from "./editorial";
 import {
   SITE_NAME,
+  ORGANIZATION_ID,
   absoluteUrl,
   clusterNodes,
   pageUrl,
@@ -42,8 +44,11 @@ export function learnArticleSchema(article: LearnArticle) {
     description: article.description,
     url: pageUrl(article.href),
     inLanguage: "en",
+    mainEntityOfPage: pageUrl(article.href),
+    dateModified: contentUpdated(article.href),
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
-    publisher: { "@type": "Organization", name: SITE_NAME, url: absoluteUrl("/") },
+    publisher: { "@id": ORGANIZATION_ID },
+    citation: sourcesFor(article.cluster).map((source) => source.url),
   };
 }
 
@@ -74,6 +79,7 @@ export function clusterHubSchema(cluster: Cluster) {
     description: cluster.description,
     url: pageUrl(cluster.href),
     inLanguage: "en",
+    dateModified: contentUpdated(cluster.href),
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
     about: { "@type": "Thing", name: cluster.label, description: cluster.definition },
     hasPart: [
@@ -124,6 +130,7 @@ export function webPageSchema(tool: ToolRoute) {
     description: tool.description,
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absoluteUrl("/") },
     inLanguage: "en",
+    dateModified: contentUpdated(tool.href),
     about: { "@type": "Thing", name: tool.label },
   };
 }

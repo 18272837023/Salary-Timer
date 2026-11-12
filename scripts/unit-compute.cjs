@@ -217,5 +217,81 @@ console.log("\n=== 9. nextShift()：停表时页面上唯一还在动的那串�
   });
 }
 
+console.log("\n=== 10. 向导「选择上班时间」产出的排班：上班才计薪，午休/下班暂停 ===");
+{
+  // What the new wizard step writes for 08:30 → 18:00 with a 12:00–13:00 lunch.
+  const scheduled = S({
+    start: "08:30",
+    end: "18:00",
+    breaks: [{ id: "qs-lunch", start: "12:00", end: "13:00" }],
+    overtime: false,
+  });
+
+  check("08:30–18:00 减 1 小时午休 = 8.5 计薪小时", () => {
+    const d = derive(scheduled);
+    assert.strictEqual(d.windowMin, 570);
+    assert.strictEqual(d.breakMin, 60);
+    assert.strictEqual(d.paidMin, 510);
+  });
+
+  check("上班中状态为 working 且金额随时间增长", () => {
+    const a = compute(scheduled, at(9, 0));
+    const b = compute(scheduled, at(11, 59));
+    assert.strictEqual(a.status, "working");
+    assert.ok(!LIVE.has("break"));
+    assert.ok(b.earnedCents > a.earnedCents);
+  });
+
+  check("午休期间状态为 break 且金额完全冻结", () => {
+    const atNoon = compute(scheduled, at(12, 0));
+    const mid = compute(scheduled, at(12, 30));
+    const resumed = compute(scheduled, at(13, 0));
+    assert.strictEqual(mid.status, "break");
+    assert.strictEqual(mid.onBreak, true);
+    assert.strictEqual(mid.earnedCents, atNoon.earnedCents, "午休中不得累加");
+    assert.strictEqual(resumed.earnedCents, atNoon.earnedCents, "午休结束瞬间不得跳涨");
+    assert.ok(!LIVE.has(mid.status));
+  });
+
+  check("午休结束后恢复计薪", () => {
+    const resumed = compute(scheduled, at(13, 0));
+    const later = compute(scheduled, at(14, 0));
+    assert.strictEqual(later.status, "working");
+    assert.ok(later.earnedCents > resumed.earnedCents);
+  });
+
+  check("下班后状态为 done，金额封顶且不再增长", () => {
+    for (const [h, m] of [[18, 1], [19, 0], [23, 59]]) {
+      const snap = compute(scheduled, at(h, m));
+      assert.strictEqual(snap.status, "done");
+      assert.strictEqual(snap.overtimeMin, 0);
+      assert.ok(!LIVE.has(snap.status));
+    }
+    assert.strictEqual(
+      compute(scheduled, at(19, 0)).earnedCents,
+      compute(scheduled, at(23, 59)).earnedCents,
+    );
+  });
+
+  check("关掉午休后整段上班时间都计薪，且不再出现 break 状态", () => {
+    const noLunch = S({ ...scheduled, breaks: [] });
+    assert.strictEqual(derive(noLunch).paidMin, 570);
+    assert.strictEqual(compute(noLunch, at(12, 30)).status, "working");
+  });
+
+  check("夜班 22:00–06:00 的 02:00 午休同样暂停计薪", () => {
+    const night = S({
+      start: "22:00",
+      end: "06:00",
+      breaks: [{ id: "qs-lunch", start: "02:00", end: "02:30" }],
+      overtime: false,
+    });
+    const snap = compute(night, at(2, 15));
+    assert.strictEqual(snap.status, "break");
+    assert.strictEqual(snap.onBreak, true);
+    assert.strictEqual(derive(night).paidMin, 450);
+  });
+}
+
 console.log(`\n结果: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

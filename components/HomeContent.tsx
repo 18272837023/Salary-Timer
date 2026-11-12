@@ -14,7 +14,8 @@ import {
 } from "@/components/sections";
 import { HOME_FAQ, HOME_FAQ_ZH } from "@/lib/home-faq";
 import type { Lang } from "@/lib/i18n";
-import { ENTITY_DEFINITION, ORGANIZATION_ID, SAME_AS, SITE_NAME, pageUrl } from "@/lib/site";
+import { ENTITY_DEFINITION, ZH_ENTITY_DEFINITION, ORGANIZATION_ID, SAME_AS, SITE_NAME, pageUrl } from "@/lib/site";
+import { contentUpdated } from "@/lib/editorial";
 
 /**
  * The homepage body, shared by / (English) and /zh (Chinese).
@@ -26,8 +27,6 @@ import { ENTITY_DEFINITION, ORGANIZATION_ID, SAME_AS, SITE_NAME, pageUrl } from 
  */
 
 const ZH_NAME = "薪资计时器";
-const ZH_ENTITY_DEFINITION =
-  "薪资计时器是一个免费的网页工具，按你的真实排班、无薪休息和加班倍率，实时显示你每秒、每分钟、每小时赚多少钱。";
 
 const FEATURES_EN = [
   "Live salary counter, updated every second",
@@ -37,6 +36,7 @@ const FEATURES_EN = [
   "Overtime multipliers",
   "Payday countdown",
   "Privacy mode",
+  "Floating salary timer in supported desktop browsers",
 ];
 
 const FEATURES_ZH = [
@@ -47,6 +47,7 @@ const FEATURES_ZH = [
   "加班倍率",
   "发薪日倒计时",
   "隐私模式",
+  "支持的桌面浏览器可使用悬浮计薪",
 ];
 
 export function HomeContent({ lang }: { lang: Lang }) {
@@ -64,6 +65,7 @@ export function HomeContent({ lang }: { lang: Lang }) {
     browserRequirements: "Requires JavaScript",
     description: zh ? ZH_ENTITY_DEFINITION : ENTITY_DEFINITION,
     inLanguage: zh ? "zh-CN" : "en",
+    dateModified: contentUpdated(zh ? "/zh" : "/"),
     isAccessibleForFree: true,
     // Reference the Organization node by @id instead of leaving it null — one
     // entity, described once, pointed at from every schema block.

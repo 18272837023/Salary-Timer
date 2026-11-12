@@ -14,6 +14,9 @@
     "test:ga": "node scripts/verify-ga.cjs",
     "test:legal": "node scripts/verify-legal.cjs",
     "test:agentic": "node scripts/verify-agentic.cjs",
+    "test:geo": "node scripts/verify-geo.cjs",
+    "test:schedule": "node scripts/verify-schedule.cjs",
+    "test:floating": "node scripts/verify-floating.cjs",
     "serve:out": "npx --yes serve out -l 8850"
   },
   "dependencies": {

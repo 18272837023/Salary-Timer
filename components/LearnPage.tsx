@@ -1,4 +1,5 @@
 import { Link } from "@/components/SmartLink";
+import { ContentByline, ContentNotes } from "@/components/ContentNotes";
 import { Faq, type FaqItem } from "@/components/sections";
 import { clusterNodes, getCluster, getTool, type LearnArticle } from "@/lib/site";
 
@@ -60,6 +61,7 @@ export function LearnPage({
 
           <h1 className="tool-h1">{h1}</h1>
           <p className="lede">{lede}</p>
+          <ContentByline href={article.href} />
 
           {related ? (
             <p className="learn-related">
@@ -69,7 +71,10 @@ export function LearnPage({
         </div>
       </section>
 
-      <article className="prose">{children}</article>
+      <article className="prose">
+        {children}
+        <ContentNotes cluster={article.cluster} />
+      </article>
 
       {cluster && siblings.length > 0 ? (
         <section className="section tight" id="in-this-topic">

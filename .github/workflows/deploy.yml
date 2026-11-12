@@ -20,6 +20,10 @@ jobs:
         run: |
           npm ci
           npm run build
+          npm run typecheck
+          npm run test:geo
+          npm run test:legal
+          npm run test:agentic
         env:
           NEXT_PUBLIC_SITE_URL: https://salarytimer.work
 
@@ -113,6 +117,16 @@ jobs:
           wellknown=$(curl -fsS "https://salarytimer.work/.well-known/ard.json?cb=${GITHUB_SHA}")
           if [ "$ard" != "$wellknown" ]; then
             echo "::error::/.well-known/ard.json does not match /ard.json"
+            exit 1
+          fi
+          zh_html=$(curl -fsS "https://salarytimer.work/zh/?cb=${GITHUB_SHA}")
+          if ! printf '%s' "$zh_html" | grep -q '<html[^>]*lang="zh-CN"'; then
+            echo "::error::Chinese HTML has the wrong language before JavaScript"
+            exit 1
+          fi
+          missing_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/__missing_${GITHUB_SHA}/")
+          if [ "$missing_status" != "404" ]; then
+            echo "::error::Unknown route returned ${missing_status}; apply the repository nginx.conf routing rules"
             exit 1
           fi
           echo "Live bundle OK: settings v3, GA4, ARD manifest, well-known mirror and llms.txt."

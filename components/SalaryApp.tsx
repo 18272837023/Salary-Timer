@@ -21,6 +21,7 @@ import { track, trackOnce } from "@/lib/analytics";
 import { QuickStart } from "./QuickStart";
 import { SetupPanel } from "./SetupPanel";
 import { SettlementModal } from "./SettlementModal";
+import { FloatingSalary } from "./FloatingSalary";
 
 function clampNumber(value: string, min: number, max: number): number | null {
   const n = Number.parseFloat(value);
@@ -198,9 +199,8 @@ export function SalaryApp() {
   }
 
   /**
-   * The hero card needs one number that keeps moving even while the clock is
-   * stopped. Without it, "clocked out" and "day off" are a frozen figure with
-   * nothing to wait for — and the visit ends right there.
+   * Keep the progress-card countdown moving while earnings are paused, without
+   * adding a second countdown inside the earnings card.
    */
   let idle: { label: string; seconds: number; when: string } | null = null;
   if (live && onboarded && !earning) {
@@ -354,27 +354,6 @@ export function SalaryApp() {
             ) : null}
             {pauseNote ? <div className="tick-pause">{pauseNote}</div> : null}
 
-            {/* Clock-out countdown — gives users a reason to keep the tab open */}
-            {live && snapshot.status === "working" && (() => {
-              const remainSec = Math.max(0, (snapshot.shiftEndMin - snapshot.shiftMin) * 60);
-              return (
-                <div className="clockout-bar">
-                  <span className="clockout-label">{t("tick.clockOutIn")}</span>
-                  <span className="clockout-value">{untilLabel(remainSec)}</span>
-                  <span className="clockout-time">{settings.end}</span>
-                </div>
-              );
-            })()}
-            {/* Stopped clock: the countdown to whatever happens next is the only
-                thing still moving, so it takes the hero slot. */}
-            {idle ? (
-              <div className="clockout-bar idle">
-                <span className="clockout-label">{idle.label}</span>
-                <span className="clockout-value">{untilLabel(idle.seconds)}</span>
-                <span className="clockout-time">{idle.when}</span>
-              </div>
-            ) : null}
-
             <div className="tick-sub">
               <span>
                 {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(rateHour, settings.currency)}/hr</b>
@@ -449,9 +428,9 @@ export function SalaryApp() {
                   <div className="ring-cap">{t("tick.ofShift")}</div>
                 </div>
               </div>
-              <div className="cd">
-                <div className="k">{cdLabel}</div>
-                <div className="v">{cdValue}</div>
+              <div className={`cd${idle ? " idle" : ""}`} title={idle?.when}>
+                <div className="k">{idle?.label ?? cdLabel}</div>
+                <div className="v">{idle ? formatClock(idle.seconds) : cdValue}</div>
               </div>
             </div>
 
@@ -490,9 +469,20 @@ export function SalaryApp() {
           </div>
         </div>
 
+        <FloatingSalary />
+
         <div className="grid-1">
-          <div className="mod">
-            <h3>{t("month.title")}</h3>
+          <details className="mod monthly-income">
+            <summary className="month-summary">
+              <span className="month-title">{t("month.title")}</span>
+              <b className={`month-summary-total${blur}`}>{formatCents(live ? monthTotalCents : 0, settings.currency)}</b>
+              <span className="month-toggle">
+                <span className="month-expand">{t("month.expand")}</span>
+                <span className="month-collapse">{t("month.collapse")}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </span>
+            </summary>
+            <div className="month-body">
             <div className="hint">{t("month.hint")}</div>
             <div className="rowline">
               <span>{t("month.baseEarned")}</span>
@@ -555,7 +545,8 @@ export function SalaryApp() {
                 style={{ width: 64, padding: "6px 8px", fontSize: 13, textAlign: "center" }}
               />
             </div>
-          </div>
+            </div>
+          </details>
         </div>
       </div>
 

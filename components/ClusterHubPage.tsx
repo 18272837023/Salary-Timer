@@ -1,4 +1,5 @@
 import { Link } from "@/components/SmartLink";
+import { ContentByline, ContentNotes } from "@/components/ContentNotes";
 import { Faq, type FaqItem } from "@/components/sections";
 import { clusterNodes, type Cluster } from "@/lib/site";
 
@@ -39,6 +40,7 @@ export function ClusterHubPage({
 
           <h1 className="tool-h1">{h1}</h1>
           <p className="lede">{lede}</p>
+          <ContentByline href={cluster.href} />
           <p className="learn-related">
             One of three topics on this site. The others are{" "}
             {cluster.id === "hourly-rate" ? (
@@ -61,7 +63,10 @@ export function ClusterHubPage({
         </div>
       </section>
 
-      <article className="prose">{children}</article>
+      <article className="prose">
+        {children}
+        <ContentNotes cluster={cluster.id} />
+      </article>
 
       <section className="section tight" id="in-this-topic">
         <div className="wrap">

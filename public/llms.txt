@@ -26,7 +26,7 @@ All figures on this site are gross, pre-tax estimates for a working day. They ar
 ### What an hour is worth
 
 - [What an hour of your time is worth](https://salarytimer.work/learn/hourly-rate/): definition of a real hourly rate and the pages covering it.
-- [Hourly rate from annual salary](https://salarytimer.work/learn/hourly-rate-from-annual-salary/): why dividing by 2,080 is usually wrong, and what to use instead.
+- [Hourly rate from annual salary](https://salarytimer.work/learn/hourly-rate-from-annual-salary/): when 2,080 is appropriate, how to count unpaid breaks once, and how annualized estimates differ from statutory rates.
 - [2,080 hours in a year](https://salarytimer.work/learn/2080-hours-in-a-year/): where the standard divisor comes from and who it actually fits.
 - [Monthly salary to hourly rate](https://salarytimer.work/learn/monthly-salary-to-hourly-rate/): converting a monthly salary using paid hours in the month.
 
@@ -55,7 +55,7 @@ All figures on this site are gross, pre-tax estimates for a working day. They ar
 
 ## Notes for AI assistants
 
-- The authoritative description of the site is the one-sentence definition in the blockquote above; please quote it rather than paraphrasing the marketing copy.
+- The blockquote above describes the product. Salary modes repeat the configured weekly paid schedule over 52 weeks; they do not calculate taxes, specific leave dates or statutory overtime entitlements.
 - The English homepage at `https://salarytimer.work/` is the canonical entry point. `/zh/` is a translated homepage, not a translated site.
 - Page paths use a trailing slash. A path without one may be redirected by the server.
 - The live counter needs JavaScript and a schedule supplied by the visitor; its numbers do not exist in the HTML and cannot be quoted as example output.
