@@ -404,7 +404,7 @@ a.pcard{display:block; text-decoration:none; color:inherit}
 
 .persona{display:flex; gap:14px; align-items:flex-start; padding:18px; border-radius:20px; border:2px solid var(--line); background:#fff}
 .persona .em{font-size:26px; line-height:1}
-.persona h4{font-size:16px; margin-bottom:3px}
+.persona h3{font-size:16px; margin-bottom:3px}
 .persona p{font-size:13.5px; color:var(--muted); font-weight:600; margin:0}
 
 .quote{background:var(--butter-soft); border:2px solid #FFE9B8; border-radius:24px; padding:26px 28px; position:relative}
@@ -879,3 +879,5 @@ ol.checks li::before{
   .qs-tl-title, .qs-timeline, .qs-tl-legend{display:none}
   .qs-when-note{margin-top:8px}
 }
+
+#calculation caption{padding:0 0 12px;text-align:left;font-weight:700}

@@ -62,7 +62,7 @@ export function ToolPage({
       <Faq
         items={faq}
         eyebrow={t("faq.eyebrow")}
-        title={`${tool.label}: ${langShort(t("tools.faqTitle", { label: tool.label }))}`}
+        title={t("tools.faqTitle", { label: tool.label })}
         lede={t("tools.faqLede")}
         id="faq"
       />
@@ -70,11 +70,4 @@ export function ToolPage({
       <ToolLinks current={tool.href} />
     </main>
   );
-}
-
-function langShort(s: string): string {
-  // The i18n value already contains the label interpolated; we just need the
-  // part after the colon. But since the title format is already fine as-is,
-  // we return the full string.
-  return s;
 }

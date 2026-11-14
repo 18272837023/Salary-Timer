@@ -14,95 +14,70 @@ export interface FaqItem {
 
 export const HOME_FAQ: FaqItem[] = [
   {
-    q: "What exactly is a salary timer?",
-    a: "A salary timer is a live counter that converts your working time into money as it passes. Instead of calculating what you earned at the end of a month, it shows the number moving in real time — so you can see the value of an hour, a meeting, or an extra shift while it's happening.",
+    "q": "What is a salary timer?",
+    "a": "A salary timer is a live earnings counter. Enter your pay and working schedule to see estimated gross earnings for elapsed paid time, along with your rates per second, minute and hour."
   },
   {
-    q: "How does it calculate my salary per second?",
-    a: "It takes your pay, converts it to an hourly rate using your real schedule (paid hours per day × working days × 52), then divides by 3,600. That per-second figure is added only while you're inside a paid window of your shift — never during breaks, before you start, or after you clock out (unless you've turned on overtime).",
+    "q": "Does the counter run outside my working hours?",
+    "a": "The counter follows your saved schedule. It pauses during configured unpaid breaks and does not add regular earnings before or after the shift. Enabling overtime lets it count after the scheduled shift end at your chosen multiplier."
   },
   {
-    q: "How do I work out my hourly rate from an annual salary?",
-    a: "Divide gross annual pay by your scheduled paid hours per week times 52. The 2,080-hour divisor is appropriate for 40 paid hours per week. Count unpaid breaks once: an 8.5-hour shift minus a 30-minute unpaid lunch still gives eight paid hours. This annualized estimate does not adjust for specific leave dates or determine a statutory overtime regular rate.",
+    "q": "Should I add paid lunch or coffee breaks?",
+    "a": "Only enter unpaid breaks in the break settings. A paid break remains part of paid working time, so leave it out of that list. The timer cannot determine whether your employer pays for a break."
   },
   {
-    q: "Does it count my lunch break as paid time?",
-    a: "No — and that's deliberate. Any break you add is treated as unpaid, and the counter freezes while you're on it. If your lunch is genuinely paid, just don't add it as a break and the timer will keep running through it.",
+    "q": "Can I keep the salary timer visible while using other apps?",
+    "a": "Supported desktop browsers can open Desktop live earnings as a floating window. Keep the original tab open: closing it closes the floating window. Other browsers can use the timer in the webpage."
   },
   {
-    q: "Can I use it if I'm paid hourly instead of a salary?",
-    a: "Yes, and it's the most accurate mode. Switch the pay type to hourly and the timer uses your rate directly — no annual-hours estimation involved. It's ideal for retail, hospitality, warehouse, agency and gig work.",
+    "q": "Does it handle night shifts and rotating schedules?",
+    "a": "A shift can cross midnight, with unpaid breaks inside that shift. The timer repeats the working days you select each week. When a rotating rota changes, update those days and times manually; it does not generate a rotating calendar or apply holiday dates automatically."
   },
   {
-    q: "Does it handle overtime and shift work?",
-    a: "Yes. Turn on overtime and the timer keeps counting after your shift ends at 1.25×, 1.5× or 2×, whichever matches your contract. Shifts that cross midnight are supported, so night shifts work correctly. Rotating patterns are handled by changing your working days.",
+    "q": "Is this my take-home pay or a payroll record?",
+    "a": "No. This is a gross-pay estimate based on your inputs. It does not calculate taxes, deductions, payroll rounding or statutory overtime eligibility. It does not record client billing sessions or generate invoices. Check your payslip or payroll records for actual pay."
   },
   {
-    q: "Is my salary data private?",
-    a: "Your pay figures never leave your device. Everything is calculated in your browser and saved to your own device's local storage — there's no account and no server holding your numbers. We do count page views with Google Analytics so we know which pages are worth keeping, but that records the page you visited, never what you earn. Privacy mode blurs the figures on screen when someone's looking over your shoulder.",
+    "q": "Where are my salary settings stored?",
+    "a": "Your pay settings are saved in this browser’s local storage and calculations run on your device. They do not sync between devices. Google Analytics records page views and usage events, not your entered salary figures. Privacy mode blurs numbers on screen."
   },
   {
-    q: "Do I need to install an app or create an account?",
-    a: "No. It's a website — open it, use it, close the tab. Your settings stay saved on that device for next time. It works on phones, tablets and desktops, and it keeps working offline once loaded.",
-  },
-  {
-    q: "Is a salary timer accurate enough to rely on?",
-    a: "For tracking and motivation, yes. It's a gross-pay estimate: it doesn't model tax, pension contributions, deductions or pay-period rounding, so treat it as \"what I earned before deductions\" rather than \"what will hit my bank\". Many people find the pre-tax number more motivating anyway.",
-  },
-  {
-    q: "Can freelancers use it for billing?",
-    a: "Yes — set an hourly rate and use the timer as a live session tracker. It won't produce invoices, but it will show you what a task is really worth, including the unpaid admin around it. Many freelancers use it to sanity-check quotes before sending them.",
-  },
-  {
-    q: "Why does watching money tick up actually help?",
-    a: "A live counter makes the relationship between time and estimated gross pay visible. Some people may find that useful for planning or motivation, but the site has not established that it changes behaviour or improves pay negotiations.",
-  },
+    "q": "Do I need an account or an installed app?",
+    "a": "No account or installation is required. You can use the webpage on a phone, tablet or computer. Settings remain in the same browser for your next visit unless you clear its stored data; private browsing may discard them when the session ends."
+  }
 ];
 
-/** Chinese FAQ for /zh — same order and intent as HOME_FAQ. */
 export const HOME_FAQ_ZH: FaqItem[] = [
   {
-    q: "什么是薪资计时器？",
-    a: "薪资计时器是一个实时计数器，把你正在流逝的工作时间换算成钱。它不是在月底才算出你赚了多少，而是让数字实时跳动——让你在一小时、一场会议、一次加班正在发生时，就看见它的价值。",
+    "q": "什么是薪资计时器？",
+    "a": "薪资计时器是一种实时收入计数器。输入薪资与排班，便可查看已过去计薪时间对应的税前收入估算，以及每秒、每分钟和每小时的收入。"
   },
   {
-    q: "它怎么算我每秒赚多少钱？",
-    a: "它先按你的真实排班把收入换算成时薪（每日计薪工时 × 每周工作日 × 52），再除以 3,600。这个每秒数字只在你处于班次的计薪时间段内累加——休息、上班前、下班后都不算（除非你打开了加班）。",
+    "q": "工作时间之外也会计薪吗？",
+    "a": "计时器按保存的排班运行，在设置的无薪休息期间暂停，上班前和下班后不继续累计普通工时收入。开启加班后，会按所选倍率估算排班结束后的收入。"
   },
   {
-    q: "年薪怎么换算成真实时薪？",
-    a: "用税前年薪除以「每周排班中的计薪工时 × 52」。每周计薪 40 小时时，2,080 是适用的年化除数。无薪休息只扣除一次：8.5 小时班次减去 30 分钟无薪午休，仍是每天计薪 8 小时。这是按排班年化的估算，不单独调整休假日期，也不确定法定加班工资基数。",
+    "q": "带薪午休或茶歇需要填写吗？",
+    "a": "休息设置只填写无薪时段。带薪休息属于计薪时间，无需加入该列表。计时器无法判断雇主是否为某个休息时段支付工资。"
   },
   {
-    q: "午休会被算成计薪时间吗？",
-    a: "不会，这是刻意的。你添加的休息时段都按无薪处理，计时器在这段时间冻结。如果你的午休确实是带薪的，不要把它加进休息时段，计时器就会继续走。",
+    "q": "使用其他应用时还能看到实时计薪吗？",
+    "a": "支持的桌面浏览器可通过“桌面实时计薪”打开悬浮窗。请保留原标签页，关闭它会同时关闭悬浮窗。其他浏览器可继续使用网页中的计薪器。"
   },
   {
-    q: "我拿时薪而不是年薪，能用吗？",
-    a: "能，而且这是最准确的模式。把薪资类型切成「时薪」，计时器直接采用你的时薪，不需要按年工时估算。适合零售、餐饮、仓储、外包和零工。",
+    "q": "支持夜班和轮班吗？",
+    "a": "支持跨午夜班次及班次内的无薪休息。计时器每周重复你选择的工作日；轮班变化后需手动更新工作日和时间，不自动生成循环轮班表或应用节假日日期。"
   },
   {
-    q: "支持加班和轮班吗？",
-    a: "支持。打开加班后，计时器会在班次结束后按 1.25 倍、1.5 倍或 2 倍继续计薪，与你合同里的倍率对应。跨午夜的班次也能正确处理，所以夜班没问题；轮班表通过修改工作日来实现。",
+    "q": "这些数字是到手工资或工资记录吗？",
+    "a": "这些数字是按输入计算的税前收入估算，不计算税费、扣款、工资结算舍入或法定加班资格，也不记录客户计费会话或生成发票。实际薪资请核对工资单或工资记录。"
   },
   {
-    q: "我的薪资数据安全吗？",
-    a: "你的薪资数字永远不会离开设备。所有计算都在浏览器里完成，只保存在你自己设备的本地存储中——没有账号，也没有服务器保存你的数字。我们会用 Google Analytics 统计页面浏览量，以便判断哪些页面值得保留，但它只记录你访问了哪个页面，从不记录你赚多少。隐私模式可以在有人路过时模糊屏幕上的所有数字。",
+    "q": "薪资设置保存在哪里？",
+    "a": "薪资设置保存在当前浏览器的本地存储中，计算在本机完成，不会跨设备同步。Google Analytics记录页面浏览和使用事件，不记录输入的薪资金额。隐私模式可以模糊屏幕上的数字。"
   },
   {
-    q: "需要下载 App 或注册账号吗？",
-    a: "不需要。它就是一个网页——打开就用，用完关掉标签页。设置会保存在这台设备上，下次打开自动恢复。手机、平板、电脑都能用，加载过一次之后断网也能继续运行。",
-  },
-  {
-    q: "计薪器的结果够准、能当依据吗？",
-    a: "用来追踪和激励，够准。它是税前估算：不计算税金、社保、扣款和发薪周期的四舍五入，所以请把它理解成「我税前赚了多少」，而不是「到账会有多少」。很多人反而觉得税前数字更有动力。",
-  },
-  {
-    q: "自由职业者能拿它来计费吗？",
-    a: "可以——设置时薪，把计时器当成实时的工时记录器。它不会生成发票，但会告诉你一项任务真正值多少钱，包括周围那些无薪的行政时间。很多自由职业者用它来在报价前核对一遍。",
-  },
-  {
-    q: "为什么看着数字跳动真的有用？",
-    a: "实时计数器让工作时间与估算税前收入的关系更直观，可能有助于个人规划或激励。本站尚无研究证明它能改变行为或改善薪资谈判结果。",
-  },
+    "q": "需要注册或安装应用吗？",
+    "a": "无需注册或安装，可在手机、平板和电脑的浏览器中使用。除非清除本地数据，设置会在同一浏览器中保留供下次访问使用；隐私浏览可能在会话结束时删除这些设置。"
+  }
 ];

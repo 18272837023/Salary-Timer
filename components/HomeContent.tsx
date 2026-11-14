@@ -1,3 +1,4 @@
+import { HomeCalculation } from "@/components/HomeCalculation";
 import { EntityLede } from "@/components/EntityLede";
 import { Hero } from "@/components/Hero";
 import { SalaryApp } from "@/components/SalaryApp";
@@ -7,9 +8,7 @@ import {
   Features,
   HowItWorks,
   LearnLinks,
-  PainPoints,
   Personas,
-  Scenarios,
   ToolLinks,
 } from "@/components/sections";
 import { HOME_FAQ, HOME_FAQ_ZH } from "@/lib/home-faq";
@@ -112,28 +111,24 @@ export function HomeContent({ lang }: { lang: Lang }) {
         <SalaryApp />
       </Hero>
 
-      {/* Entity definition, in the plainest possible words, above the fold of
-          the content: the one sentence a search engine or an AI answer should
-          be able to lift without reading anything else. */}
       <section className="section tight" aria-label={zh ? "什么是薪资计时器" : "What Salary Timer is"}>
         <div className="wrap">
           <EntityLede />
         </div>
       </section>
 
-      <PainPoints />
+      <HowItWorks />
+      <HomeCalculation lang={lang} />
       <Features />
       <Personas />
-      <Scenarios />
-      <HowItWorks />
       <Faq
         items={faqItems}
         title={zh ? "薪资计时器常见问题" : "Salary timer FAQ"}
         lede={zh ? "简短回答，没有废话。" : "Short answers, no small print."}
         eyebrow={zh ? "常见问题" : "Questions"}
       />
-      <LearnLinks />
       <ToolLinks current="/" />
+      <LearnLinks />
       <CtaBand />
     </main>
   );

@@ -16,10 +16,10 @@ export const SITE_NAME = "Salary Timer";
  *  can never drift apart. */
 /** The homepage <title>. Kept here so the tab title, og:title and twitter:title
  *  can never drift apart. */
-export const SITE_TITLE = `${SITE_NAME} — Free to See What You Earn Every Second`;
+export const SITE_TITLE = `${SITE_NAME} — Free Live Earnings Counter`;
 
 export const SITE_DESCRIPTION =
-  "A free salary timer that shows what you earn per second, minute and hour — live. Built for hourly workers, shift workers and salaried 9-to-5ers.";
+  "Track your estimated earnings in real time with a free salary timer. Set your pay, work schedule and unpaid breaks. Includes a floating desktop counter.";
 
 export const OG_IMAGE = "/og.png";
 
@@ -236,8 +236,8 @@ export const TOOLS: ToolRoute[] = [
     label: "Salary per second",
     title: "Salary Per Second — live earn rate",
     description:
-      "Work out your salary per second, per minute and per hour, then watch it tick up live. The most honest number in personal finance, and the smallest.",
-    blurb: "The smallest number in personal finance, and the most honest.",
+      "Work out your salary per second, per minute and per hour, then watch it tick up live. Uses your scheduled paid hours, with a live earnings counter.",
+    blurb: "Convert hourly or annual pay into earnings per second.",
     emoji: "⏱️",
     cluster: "hourly-rate",
     relatedLearnHref: "/learn/hourly-rate-from-annual-salary",
@@ -247,8 +247,8 @@ export const TOOLS: ToolRoute[] = [
     label: "Paycheck countdown",
     title: "Paycheck Countdown — days until payday",
     description:
-      "Set your payday once and see exactly how many days, working hours and shifts stand between you and the money. A live countdown that also shows what you've earned so far.",
-    blurb: "How many shifts until the money lands?",
+      "Count calendar days until your next monthly payday. Choose a pay date or month-end, and track estimated gross earnings alongside the countdown.",
+    blurb: "Count calendar days until your next monthly payday.",
     emoji: "📅",
     cluster: "pay-schedule",
     relatedLearnHref: "/learn/how-pay-periods-work",

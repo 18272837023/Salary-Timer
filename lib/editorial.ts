@@ -3,11 +3,11 @@ import { LEGAL_UPDATED, type ClusterId } from "./site";
 // Actual content changes, maintained explicitly. Never replace these with build time.
 // Shared calculation/source notes were added to the listed guides on this date.
 export const CONTENT_UPDATES: Readonly<Record<string, string>> = {
-  "/": "2026-11-12",
-  "/zh": "2026-11-12",
+  "/": "2026-11-14",
+  "/zh": "2026-11-14",
   "/hourly-rate-calculator": "2026-11-12",
-  "/salary-per-second": "2026-11-12",
-  "/paycheck-countdown": "2026-11-12",
+  "/salary-per-second": "2026-11-14",
+  "/paycheck-countdown": "2026-11-14",
   "/shift-worker-salary-timer": "2026-11-12",
   "/overtime-pay-calculator": "2026-11-12",
   "/learn/hourly-rate": "2026-11-12",

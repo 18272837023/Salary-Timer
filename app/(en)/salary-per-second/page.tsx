@@ -21,7 +21,7 @@ const faq: FaqItem[] = [
   },
   {
     q: "Is per-second pay a real thing?",
-    a: "Legally, no — nobody is paid by the second. Conceptually, yes: your pay accrues continuously, it is just settled monthly. Per-second is simply the smallest unit of a number you already earn, which is exactly why it is useful for feeling the cost of small blocks of time.",
+    a: "This is a conversion of your gross hourly rate into a per-second estimate. It does not change your employment terms, payment schedule or payroll rounding rules. The live counter adds earnings only during your configured paid working time.",
   },
   {
     q: "Why show four decimal places?",
@@ -45,10 +45,10 @@ export default function SalaryPerSecondPage() {
         <>
           Salary per second:
           <br />
-          the smallest number in <span className="hl">personal finance</span>.
+          calculate your <span className="hl">earnings per second</span>.
         </>
       }
-      lede="Your salary arrives once a month, in one lump, already spoken for. But it accrues every second — including the ones you are spending right now. Here is what a second is worth, and why that tiny number changes decisions."
+      lede="Enter your hourly, monthly or annual pay and working schedule to calculate gross salary per second, minute and hour. Watch the live counter during your paid working hours."
       faq={faq}
     >
       <script
@@ -85,13 +85,13 @@ export default function SalaryPerSecondPage() {
               </tr>
               <tr>
                 <td>Per minute</td>
-                <td>28.85 ÷ 60</td>
+                <td>60,000 ÷ 2,080 ÷ 60</td>
                 <td>$0.4808</td>
               </tr>
               <tr>
                 <td>Per second</td>
-                <td>28.85 ÷ 3,600</td>
-                <td>$0.008013</td>
+                <td>60,000 ÷ 2,080 ÷ 3,600</td>
+                <td>$0.00801282</td>
               </tr>
             </tbody>
           </table>
@@ -160,19 +160,14 @@ export default function SalaryPerSecondPage() {
       </section>
 
       <section>
-        <h2>Why the second is the right unit</h2>
-        <p>
-          There is a well-known finding in behavioural economics: the closer a reward is to the
-          effort, the more motivating it is. A monthly payslip is about as far from the effort as a
-          reward can get — thirty days of separation, filtered through rent, bills and a bank
-          balance that never shows the work.
-        </p>
-        <p>
-          A per-second counter collapses that distance to zero. The reward for sitting in a meeting
-          is arriving while you are still sitting in it. That is not a gimmick; it is the whole
-          mechanism. It is also why the counter has to be honest to work: if it kept running during
-          an unpaid lunch, the number would stop meaning anything, and so would the motivation.
-        </p>
+        <h2>How to use the salary per second calculator</h2>
+        <ol className="checks">
+          <li>Open <b>Set my salary</b> and enter your pay type, amount and currency.</li>
+          <li>Set your working days, shift times and unpaid breaks, then save.</li>
+          <li>Read the per-second rate and watch estimated earnings accumulate during paid time.</li>
+        </ol>
+        <p>Monthly pay is multiplied by 12, then divided by scheduled paid hours per week × 52 to find the hourly equivalent. Hourly pay uses your entered rate directly. Divide that rate by 3,600 for salary per second. Examples above retain the unrounded rate until the final display.</p>
+        <p>For the assumptions behind the annual-hours divisor, read <Link href="/learn/2080-hours-in-a-year/">when to use 2,080 hours per year</Link>. This is gross pay before taxes and deductions, not a prediction of take-home income.</p>
       </section>
 
       <section>
