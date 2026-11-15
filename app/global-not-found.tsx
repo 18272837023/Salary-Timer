@@ -18,7 +18,7 @@ export default function GlobalNotFound() {
           <h1>Page not found</h1>
           <p className="lede">The page you requested does not exist.</p>
           <p><a className="btn btn-mint" href="/">Open Salary Timer</a></p>
-          <p><a href="/learn/">Browse the guides</a> · <a href="/zh/">简体中文首页</a></p>
+          <p><a href="/zh/">简体中文首页</a></p>
         </main>
         <footer className="wrap section">
           <a href="/privacy/">Privacy Policy</a> · <a href="/terms/">Terms of Use</a>

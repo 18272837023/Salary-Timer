@@ -23,7 +23,8 @@ function walk(dir) {
   }
 }
 walk(root);
-assert(pages.length >= 24, "Missing exported routes");
+const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
+assert(pages.length >= 4, "Missing retained routes");
 const sitemap = read("sitemap.xml");
 const modified = new Map([...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => [
   m[1].match(/<loc>(.*?)<\/loc>/)[1], m[1].match(/<lastmod>(.*?)<\/lastmod>/)?.[1].slice(0, 10),
@@ -37,6 +38,7 @@ for (const file of pages) {
   const visible = text(html);
   const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]*)"/)?.[1];
   assert(canonical && canonical.endsWith("/"), `${file}: canonical missing or inconsistent`);
+  assert(allowed.has(canonical), `${file}: retired or unexpected page exported`);
   assert(modified.has(canonical), `${file}: absent from sitemap`);
   assert.equal((html.match(/<h1\b/g) || []).length, 1, `${file}: expected one main heading`);
   const nodes = jsonLd(html);
@@ -71,12 +73,19 @@ assert.match(read("index.html"), /<html[^>]*lang="en"/);
 assert(!text(zh).includes("Salary Timer is a free web tool"), "English entity definition leaked into Chinese content");
 assert.equal(jsonLd(zh).find((n) => n["@type"] === "WebSite").inLanguage, "zh-CN");
 console.log("PASS: Chinese language and definition are correct before JavaScript");
-const lunch = read("learn/are-lunch-breaks-paid/index.html");
-assert(text(lunch).includes("$1.70"));
-assert(!lunch.includes("$3–4"));
-assert(text(read("learn/monthly-salary-to-hourly-rate/index.html")).includes("valid annualized convention"));
-assert(text(read("learn/how-overtime-is-calculated/index.html")).includes("covered, nonexempt"));
-console.log("PASS: corrected lunch example, monthly average and overtime scope are exported");
+assert.equal(published, 4, "Only homepages and policies may be published");
+assert.equal(modified.size, 4, "Sitemap must list only retained pages");
+for (const rel of ["learn", "hourly-rate-calculator", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator"]) {
+  assert(!fs.existsSync(path.join(root, rel)), `Retired export still exists: ${rel}`);
+}
+for (const file of pages) {
+  const html = fs.readFileSync(file, "utf8").replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  for (const link of html.matchAll(/href="(\/[^"#?]*)(?:[?#][^"]*)?"/g)) {
+    const url = link[1];
+    assert(fs.existsSync(path.join(root, url)) || fs.existsSync(path.join(root, url, "index.html")), `${file}: dead link ${url}`);
+  }
+}
+console.log("PASS: retired routes absent, four-page sitemap and remaining internal links");
 const config = fs.readFileSync(path.join(__dirname, "..", "nginx.conf"), "utf8");
 assert(!/try_files[^;]*\/index\.html\s*;/.test(config), "Homepage fallback still enabled");
 assert.match(config, /try_files\s+\$uri\s+\$uri\/\s+\$uri\.html\s+=404;/);

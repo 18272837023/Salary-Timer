@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { LegalPage } from "@/components/LegalPage";
-import { CONTACT_EMAIL, LEGAL_PAGES, SAME_AS, SITE_NAME } from "@/lib/site";
+import { CONTACT_EMAIL, LEGAL_PAGES, SOCIAL_IMAGE, SAME_AS, SITE_NAME } from "@/lib/site";
 
 const page = LEGAL_PAGES.find((p) => p.href === "/terms")!;
 
@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   title: page.title,
   description: page.description,
   alternates: { canonical: page.href },
+  twitter: { card: "summary_large_image", title: page.title, description: page.description, images: [SOCIAL_IMAGE.url] },
   openGraph: {
+    images: [SOCIAL_IMAGE],
     title: page.title,
     description: page.description,
     url: page.href,
@@ -42,10 +44,9 @@ export default function TermsPage() {
         <p>
           {SITE_NAME} is a static website with no backend. You enter a pay amount and a schedule,
           and your browser derives an hourly rate and accrues it during paid time. The{" "}
-          <Link href="/">free live salary timer</Link> on the homepage is the main tool; the
-          calculators, countdowns and Learn guides are supporting pages. The arithmetic is
+          <Link href="/">free live salary timer</Link> on the homepage is the main tool. The arithmetic is
           explained in{" "}
-          <Link href="/learn/how-salary-timers-work">how a salary timer works</Link>.
+          <Link href="/#calculation">how a salary timer works</Link>.
         </p>
         <p>
           Every calculation runs locally on your device. Nothing you type is sent to a server for

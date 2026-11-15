@@ -44,19 +44,26 @@ export type StorageStatus =
 
 function getStorage(): Storage | null {
   try {
-    if (typeof window === "undefined") return null;
-    const probe = "__salarytimer_probe__";
-    window.localStorage.setItem(probe, "1");
-    window.localStorage.removeItem(probe);
-    return window.localStorage;
+    // Reading must not depend on a write probe: a full store can still contain
+    // valid settings that should be restored.
+    return typeof window === "undefined" ? null : window.localStorage;
   } catch {
     return null;
   }
 }
 
-/** True when the browser will actually keep data (false in Safari private mode). */
+/** Check write access; this cannot predict private-mode data retention. */
 export function isStorageAvailable(): boolean {
-  return getStorage() !== null;
+  const store = getStorage();
+  if (!store) return false;
+  try {
+    const probe = "__salarytimer_probe__";
+    store.setItem(probe, "1");
+    store.removeItem(probe);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

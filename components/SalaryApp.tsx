@@ -17,8 +17,9 @@ import {
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import type { Snapshot } from "@/lib/types";
-import { track, trackOnce } from "@/lib/analytics";
-import { QuickStart } from "./QuickStart";
+import { track } from "@/lib/analytics";
+import { SalaryStart } from "./SalaryStart";
+import { EarningsBuddy } from "./EarningsBuddy";
 import { SetupPanel } from "./SetupPanel";
 import { SettlementModal } from "./SettlementModal";
 import { FloatingSalary } from "./FloatingSalary";
@@ -55,8 +56,9 @@ function pad2(n: number): string {
 }
 
 export function SalaryApp() {
-  const { t } = useI18n();
-  const { settings, hydrated, update } = useSettings();
+  const { t, lang } = useI18n();
+  const zh = lang === "zh";
+  const { settings, hydrated, storageOk, update } = useSettings();
   const { show } = useToast();
   const now = useNow(100);
 
@@ -66,44 +68,14 @@ export function SalaryApp() {
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [settleOpen, setSettleOpen] = useState(false);
-  const [qsOpen, setQsOpen] = useState(false);
   const [slack, setSlack] = useState({ on: false, startedAt: 0, totalSec: 0 });
   const [extraAmount, setExtraAmount] = useState("");
 
   const closePanel = useCallback(() => setPanelOpen(false), []);
-    const closeSettle = useCallback(() => setSettleOpen(false), []);
+  const closeSettle = useCallback(() => setSettleOpen(false), []);
 
-  const busyRef = useRef(false);
-  busyRef.current = panelOpen || settleOpen;
-
-  /** Until the visitor saves their own pay there is nothing to count. */
+  /** Render setup until the visitor saves their own pay. */
   const onboarded = settings.onboarded;
-
-  useEffect(() => {
-    if (!live || onboarded) return;
-    let dismissed = false;
-    try {
-      dismissed = sessionStorage.getItem("st.qs.skip") === "1";
-    } catch {
-      dismissed = false;
-    }
-    if (dismissed) return;
-    const timer = setTimeout(() => {
-      if (busyRef.current) return;
-      setQsOpen(true);
-      trackOnce("quickstart_shown");
-    }, 12_000);
-    return () => clearTimeout(timer);
-  }, [live, onboarded]);
-
-  const closeQuickStart = useCallback(() => {
-    setQsOpen(false);
-    try {
-      sessionStorage.setItem("st.qs.skip", "1");
-    } catch {
-      /* private mode */
-    }
-  }, []);
 
   const dayKey = dateKey(now);
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
@@ -232,7 +204,6 @@ export function SalaryApp() {
 
   const ticker = splitCents(live ? snapshot.earnedCents : 0, settings.currency);
   const privacy = settings.privacy;
-  const ringC = 2 * Math.PI * 62;
 
   const blur = privacy ? " blurred" : "";
 
@@ -298,7 +269,10 @@ export function SalaryApp() {
 
   return (
     <div className="app-shell" id="timer">
-      <div className="app">
+      {!hydrated ? <div className="salary-restoring" role="status" aria-live="polite">
+        <EarningsBuddy resting />
+        <p>{zh ? "正在恢复你的计薪设置…" : "Restoring your pay settings…"}</p>
+      </div> : !onboarded ? <SalaryStart onAdvanced={() => setPanelOpen(true)} /> : <div className="app earnings-dashboard">
         <div className="app-top">
           <div className={`status${statusInfo.live ? "" : " idle"}`}>
             <span className="dot" />
@@ -327,8 +301,8 @@ export function SalaryApp() {
             </button>
             <button
               type="button"
-              className="btn btn-ink btn-sm"
-              onClick={() => (onboarded ? setPanelOpen(true) : setQsOpen(true))}
+              className="btn btn-ghost btn-sm"
+              onClick={() => setPanelOpen(true)}
             >
               {t("action.setPay")}
             </button>
@@ -345,7 +319,7 @@ export function SalaryApp() {
             </div>
             {live && earning && mileSeconds > 0 ? (
               <div className="next-mile">
-                <span>{t("tick.nextMilestone")} {formatCents(mileNextCents, settings.currency, { digits: mileDigits })}</span>
+                <span className={privacy ? "blurred" : undefined}>{t("tick.nextMilestone")} {formatCents(mileNextCents, settings.currency, { digits: mileDigits })}</span>
                 <span className="bar" aria-hidden="true">
                   <i style={{ width: `${(mileProgress * 100).toFixed(1)}%` }} />
                 </span>
@@ -356,21 +330,10 @@ export function SalaryApp() {
 
             <div className="tick-sub">
               <span>
-                {t("tick.atRate")} <b className={privacy ? "blurred" : undefined}>{formatRate(rateHour, settings.currency)}/hr</b>
-              </span>
-              <span className="sep" />
-              <span>
                 <b className={privacy ? "blurred" : undefined}>
                   {live ? formatHM(snapshot.paidElapsedMin) : "0h 00m"}
                 </b>{" "}
                 {t("tick.paidToday")}
-              </span>
-              <span className="sep" />
-              <span>
-                <b className={privacy ? "blurred" : undefined}>
-                  {live ? formatCents(monthTotalCents, settings.currency) : formatCents(0, settings.currency)}
-                </b>{" "}
-                {t("tick.thisMonth")}
               </span>
               {(() => {
                 const pd = daysUntilPayday(settings, now);
@@ -409,24 +372,11 @@ export function SalaryApp() {
 
           <div className="side-stack">
             <div className="ring-card">
-              <div className="ring-wrap">
-                <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
-                  <circle className="ring-bg" cx="75" cy="75" r="62" />
-                  <circle
-                    className="ring-fg"
-                    cx="75"
-                    cy="75"
-                    r="62"
-                    strokeDasharray={ringC.toFixed(1)}
-                    strokeDashoffset={(ringC * (1 - (live ? snapshot.progress : 0))).toFixed(1)}
-                  />
-                </svg>
-                <div className="ring-center">
-                  <div className={`ring-pct${blur}`}>
-                    {Math.round((live ? snapshot.progress : 0) * 100)}%
-                  </div>
-                  <div className="ring-cap">{t("tick.ofShift")}</div>
-                </div>
+              <EarningsBuddy resting={!earning} />
+              <p className="buddy-note">{zh ? (earning ? "每一秒，都在慢慢积累。" : "歇一歇，也是一种节奏。") : (earning ? "Little by little, it adds up." : "A little pause. A softer pace.")}</p>
+              <div className="shift-progress">
+                <div><span>{t("tick.ofShift")}</span><b className={`ring-pct${blur}`}>{Math.round((live ? snapshot.progress : 0) * 100)}%</b></div>
+                <div className="shift-progress-track" role="progressbar" aria-label={t("tick.ofShift")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round((live ? snapshot.progress : 0) * 100)}><i style={{width: `${Math.min(100, Math.max(0, snapshot.progress * 100))}%`}} /></div>
               </div>
               <div className={`cd${idle ? " idle" : ""}`} title={idle?.when}>
                 <div className="k">{idle?.label ?? cdLabel}</div>
@@ -469,6 +419,11 @@ export function SalaryApp() {
           </div>
         </div>
 
+        <p className={`salary-save-status${storageOk ? "" : " save-failed"}`} role={storageOk ? "status" : "alert"}>
+          {storageOk
+            ? (zh ? "✓ 设置已保存在此浏览器，下次打开自动恢复。" : "✓ Settings saved in this browser. They will be restored next time.")
+            : (zh ? "设置未能保存到此浏览器。当前仍可计薪，但重新打开后可能需要再次输入；请检查浏览器的站点存储权限。" : "Settings could not be saved in this browser. The timer still works, but you may need to enter them again after reopening. Check site storage permissions.")}
+        </p>
         <FloatingSalary />
 
         <div className="grid-1">
@@ -548,10 +503,9 @@ export function SalaryApp() {
             </div>
           </details>
         </div>
-      </div>
+      </div>}
 
       <SetupPanel open={panelOpen} onClose={closePanel} />
-      <QuickStart open={qsOpen} onClose={closeQuickStart} />
       <SettlementModal
         open={settleOpen}
         onClose={closeSettle}

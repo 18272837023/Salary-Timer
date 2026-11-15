@@ -27,7 +27,7 @@ interface SettingsContextValue {
   /** whether the browser is actually persisting our data */
   storageOk: boolean;
   update: (patch: Partial<Settings>) => void;
-  replace: (next: Settings) => void;
+  replace: (next: Settings) => StorageStatus;
   reset: () => void;
   /** marks the setup as complete and persists */
   commit: () => StorageStatus;
@@ -59,30 +59,26 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const update = useCallback((patch: Partial<Settings>) => {
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      saveSettings(next);
-      return next;
-    });
-  }, []);
-
-  const replace = useCallback((next: Settings) => {
+    const next = { ...settingsRef.current, ...patch };
+    settingsRef.current = next;
     setSettings(next);
-    saveSettings(next);
-  }, []);
+    persist(next);
+  }, [persist]);
 
-  const reset = useCallback(() => {
-    clearSettings();
-    const fresh = defaultSettings();
-    setSettings(fresh);
-    saveSettings(fresh);
-  }, []);
-
-  const commit = useCallback((): StorageStatus => {
-    const next = { ...settingsRef.current, onboarded: true };
+  const replace = useCallback((next: Settings): StorageStatus => {
+    settingsRef.current = next;
     setSettings(next);
     return persist(next);
   }, [persist]);
+
+  const reset = useCallback(() => {
+    clearSettings();
+    replace(defaultSettings());
+  }, [replace]);
+
+  const commit = useCallback((): StorageStatus => {
+    return replace({ ...settingsRef.current, onboarded: true });
+  }, [replace]);
 
   const value = useMemo<SettingsContextValue>(
     () => ({

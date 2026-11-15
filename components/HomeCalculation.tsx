@@ -1,4 +1,3 @@
-import { Link } from "@/components/SmartLink";
 import type { Lang } from "@/lib/i18n";
 
 export function HomeCalculation({ lang }: { lang: Lang }) {
@@ -23,7 +22,7 @@ export function HomeCalculation({ lang }: { lang: Lang }) {
       <p className="sec-lede">{zh
         ? "今日收入按排班中已过去的计薪时间估算。它不计算税费、扣款或具体休假日期；排班变化需要手动更新。"
         : "Today’s total estimates pay for elapsed paid time in your saved schedule. It excludes taxes, deductions and individual leave dates; update your settings when your schedule changes."}</p>
-      <p className="learn-related">{zh ? "进一步核对（英文）：" : "Check the details: "}<Link href="/hourly-rate-calculator/">{zh ? "时薪换算方法" : "convert salary to an hourly rate"}</Link>{" · "}<Link href="/salary-per-second/">{zh ? "每秒工资计算示例" : "salary per second examples"}</Link>.</p>
+
     </div>
   </section>;
 }

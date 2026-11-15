@@ -37,7 +37,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_KEY }}
-          source: "out/*,scripts/apply-nginx-seo.py"
+          source: "out/*,scripts/apply-nginx-seo.py,scripts/prune-retired-pages.py"
           target: "/var/www/salarytimer/"
           strip_components: 1
           overwrite: true
@@ -63,6 +63,8 @@ jobs:
             sudo cp /var/www/salarytimer/ard.json /var/www/salarytimer/.well-known/ard.json
             sudo find /var/www/salarytimer -type d -exec chmod 755 {} \;
             sudo find /var/www/salarytimer -type f -exec chmod 644 {} \;
+            sudo python3 /var/www/salarytimer/prune-retired-pages.py --root /var/www/salarytimer
+            sudo rm /var/www/salarytimer/prune-retired-pages.py
             sudo python3 /var/www/salarytimer/apply-nginx-seo.py
             sudo rm /var/www/salarytimer/apply-nginx-seo.py
 
@@ -129,6 +131,13 @@ jobs:
             echo "::error::Unknown route returned ${missing_status}; apply the repository nginx.conf routing rules"
             exit 1
           fi
+          for route in learn hourly-rate-calculator salary-per-second paycheck-countdown shift-worker-salary-timer overtime-pay-calculator; do
+            retired_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
+            if [ "$retired_status" != "410" ]; then
+              echo "::error::Retired route /${route}/ returned ${retired_status}, expected 410"
+              exit 1
+            fi
+          done
           www_target=$(curl -sS -o /dev/null -w '%{redirect_url}' "https://www.salarytimer.work/?cb=${GITHUB_SHA}")
           if [ "$www_target" != "https://salarytimer.work/?cb=${GITHUB_SHA}" ]; then
             echo "::error::www hostname must redirect to the canonical hostname"

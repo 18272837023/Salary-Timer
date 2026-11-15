@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { LegalPage } from "@/components/LegalPage";
-import { CONTACT_EMAIL, LEGAL_PAGES, SITE_NAME } from "@/lib/site";
+import { CONTACT_EMAIL, LEGAL_PAGES, SOCIAL_IMAGE, SITE_NAME } from "@/lib/site";
 
 const page = LEGAL_PAGES.find((p) => p.href === "/privacy")!;
 
@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   title: page.title,
   description: page.description,
   alternates: { canonical: page.href },
+  twitter: { card: "summary_large_image", title: page.title, description: page.description, images: [SOCIAL_IMAGE.url] },
   openGraph: {
+    images: [SOCIAL_IMAGE],
     title: page.title,
     description: page.description,
     url: page.href,
@@ -36,8 +38,8 @@ export default function PrivacyPage() {
           analytics does not break the timer.
         </p>
         <p>
-          This policy applies to {SITE_NAME} and every page on this domain, including the guides
-          in Learn and the <Link href="/">free live salary timer</Link> on the homepage.
+          This policy applies to the <Link href="/">free live salary timer</Link>
+          and the other pages published on this domain.
         </p>
       </section>
 
@@ -71,8 +73,8 @@ export default function PrivacyPage() {
           </li>
         </ul>
         <p>
-          The arithmetic behind that local calculation is documented in our guide to{" "}
-          <Link href="/learn/how-salary-timers-work">
+          The homepage explains{" "}
+          <Link href="/#calculation">
             how a salary timer turns your schedule into a live counter
           </Link>
           .

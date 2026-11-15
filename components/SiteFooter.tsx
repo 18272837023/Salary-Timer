@@ -2,7 +2,7 @@
 
 import { useHref, useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
-import { LEARN, LEGAL_PAGES, TOOLS } from "@/lib/site";
+import { LEGAL_PAGES } from "@/lib/site";
 
 export function SiteFooter() {
   const { t } = useI18n();
@@ -28,28 +28,6 @@ export function SiteFooter() {
             >
               {t("footer.tagline")}
             </p>
-          </div>
-
-          <div>
-            <h5>{t("footer.tools")}</h5>
-            <ul>
-              {TOOLS.map((tool) => (
-                <li key={tool.href}>
-                  <Link href={tool.href}>{tool.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h5>{t("footer.learn")}</h5>
-            <ul>
-              {LEARN.map((article) => (
-                <li key={article.href}>
-                  <Link href={article.href}>{article.label}</Link>
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div>

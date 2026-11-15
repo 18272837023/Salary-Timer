@@ -881,3 +881,95 @@ ol.checks li::before{
 }
 
 #calculation caption{padding:0 0 12px;text-align:left;font-weight:700}
+
+/* Salary workspace: calm setup, one earnings focus, supporting details. */
+.salary-start{display:grid;grid-template-columns:.9fr 1.1fr;background:#fbfaf6;border:1px solid #e6e8df;border-radius:30px;overflow:hidden;box-shadow:0 16px 48px #364a3710}
+.start-intro{padding:42px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;background:radial-gradient(circle at 30% 20%,#fff1cb88,transparent 65%)}
+.start-eyebrow{font-size:10px;letter-spacing:.2em;font-weight:800;color:#7c806b}
+.earnings-buddy{width:150px;height:132px;flex-shrink:0}
+.start-intro .earnings-buddy{width:170px;height:148px;margin:20px 0 4px}
+.start-intro h2{font-size:clamp(27px,3.2vw,38px);line-height:1.3;letter-spacing:-.025em;margin:0 0 16px}
+.start-intro p{font-size:15px;color:var(--muted);max-width:340px;line-height:1.9}
+.start-private{font-size:11px;color:#777e72;margin-top:24px;line-height:1.7}
+.start-form{background:#fff;padding:30px 36px;border-radius:26px;margin:14px 14px 14px 0;box-shadow:0 4px 20px #364a3705;min-width:0}
+.start-form-head{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.13em;color:var(--faint);margin-bottom:24px}
+.start-pay-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}
+.start-pay-row select{width:auto;max-width:160px;border:0;background-color:var(--cream);padding:8px 30px 8px 12px;font-size:13px}
+.start-amount{display:flex;gap:10px;align-items:center;margin:14px 0 0;padding-bottom:20px;border-bottom:1px solid #eeeee8}
+.start-amount select{width:100px;font-size:12px;background-color:#f8f9f5;padding:11px 20px 11px 8px;border:1px solid #e9ece4;min-width:0}
+.start-amount input{width:100%;min-width:0;border:0!important;background:#f8f9f5;font-family:var(--display);font-weight:800;font-size:clamp(22px,3vw,32px);padding:10px 12px;text-align:right;border-radius:12px}
+.start-amount input::placeholder{color:#b0b6ae;font-size:20px}
+.start-days{border:0;padding:20px 0;margin:0;border-bottom:1px solid #eeeee8;min-width:0}
+.start-days legend{float:left;font-size:13px;font-weight:800;margin:0 0 12px;width:100%}
+.start-days>div{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;clear:both}
+.start-days button{border:1px solid transparent;border-radius:11px;background:#f6f7f2;color:#858c81;padding:10px 0;font-weight:700;cursor:pointer}
+.start-days button[aria-pressed=true]{background:#e4f3e9;border-color:#cce6d5;color:#29664c}
+.start-time-row,.start-break-row{padding:18px 0;border-bottom:1px solid #eeeee8;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:700;flex-wrap:wrap}
+.start-time-row>div,.start-break-row>div{display:flex;align-items:center;gap:8px;color:#9a9e93;max-width:100%}
+.start-form input[type=time]{font-family:var(--body);width:110px;min-width:0;border:1px solid #e7ebe4;background:#fafbf8;border-radius:9px;padding:7px 5px;font-size:12px;color:#526654}
+.start-break-row label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.start-form input[type=checkbox]{accent-color:#43876a;width:16px;height:16px}
+.start-submit{display:flex;align-items:center;justify-content:center;gap:30px;width:100%;margin:24px 0 12px;min-height:52px;box-shadow:none}
+.start-submit span{font-size:21px;font-weight:400}.start-submit:disabled{opacity:.5;cursor:wait}
+.start-advanced{display:block;margin:auto;border:0;background:transparent;color:#7b8377;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:4px;padding:8px;line-height:1.6}
+.start-error{color:#a33f37;font-size:12px;margin-top:12px;line-height:1.7}
+.salary-start button:focus-visible,.salary-start input:focus-visible,.salary-start select:focus-visible{outline:3px solid #68a988;outline-offset:3px}
+.earnings-dashboard{background:#fffefa;border:1px solid #e4e8dd;border-radius:30px;padding:26px;box-shadow:0 14px 42px #3d54350a}
+.earnings-dashboard .app-top{padding:0 4px 18px;margin-bottom:0}
+.earnings-dashboard .status{border:0;background:#eaf5ee;font-size:12px;padding:7px 11px}
+.earnings-dashboard .app-actions .btn{border:0;background:transparent;box-shadow:none;font-size:12px;color:#7c8276;padding:8px}
+.earnings-dashboard .app-actions .btn:hover{color:#263f30;background:#edf3e8;transform:none}
+.earnings-dashboard .grid-main{grid-template-columns:minmax(0,1fr) 270px;gap:0;background:linear-gradient(120deg,#eff8f0,#fbfaf3);border-radius:23px;overflow:hidden}
+.earnings-dashboard .tick-card{background:transparent;border:0;border-radius:0;padding:34px 34px 26px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.earnings-dashboard .tick-card::after{display:none}
+.earnings-dashboard .tick-label{font-size:12px;color:#6d806b;letter-spacing:.08em}
+.earnings-dashboard .ticker{font-size:clamp(46px,6.7vw,86px);margin:14px 0 20px;color:#294333;letter-spacing:-.045em;min-width:0}
+.earnings-dashboard .ticker .cur{font-size:.38em;color:#82927b;margin-right:5px}
+.earnings-dashboard .ticker .cents{color:#649c79}
+.earnings-dashboard .ticker>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
+.earnings-dashboard .next-mile{font-size:11px;max-width:410px;margin:0 0 22px;gap:10px}
+.earnings-dashboard .next-mile .bar{height:5px;border:0;background:#dce8d8}
+.earnings-dashboard .next-mile .bar>i{background:#73ad88}
+.earnings-dashboard .tick-sub{font-size:11px;gap:8px;color:#82907c}
+.earnings-dashboard .tick-sub b{color:#63745a}
+.earnings-dashboard .chip-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid #dce7d5}
+.earnings-dashboard .chip{background:transparent;border:0;border-radius:0;padding:0;min-width:0}
+.earnings-dashboard .chip .k{font-size:10px;letter-spacing:0;color:#89947e}
+.earnings-dashboard .chip .v{font-size:16px;color:#506849;overflow-wrap:anywhere}
+.earnings-dashboard .side-stack{border-left:1px solid #e1e8d8;margin:22px 0;padding:0 22px;gap:15px;min-width:0}
+.earnings-dashboard .ring-card{background:transparent;border:0;padding:0;gap:5px}
+.earnings-dashboard .ring-card .earnings-buddy{width:120px;height:104px}
+.buddy-note{font-size:11px;color:#7b886e;text-align:center;line-height:1.6}
+.shift-progress{width:100%;margin-top:14px}
+.shift-progress>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#829071}
+.shift-progress .ring-pct{font-size:15px;color:#526a45}
+.shift-progress-track{height:5px;border-radius:10px;background:#e0e8d5;overflow:hidden;margin:9px 0 12px}
+.shift-progress-track>i{display:block;height:100%;background:#8eae73;border-radius:inherit;transition:width 1s linear}
+.earnings-dashboard .cd{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px;text-align:left;margin:0}
+.earnings-dashboard .cd .k{font-size:10px;letter-spacing:0;color:#849076}
+.earnings-dashboard .cd .v{font-size:15px;color:#526a45}
+.earnings-dashboard .slack-card{border:0;border-top:1px solid #e0e8d5;border-radius:0;background:transparent;padding:13px 0 0;gap:8px}
+.earnings-dashboard .slack-card .k{font-size:11px;color:#819072}.earnings-dashboard .slack-card .v{font-size:10px;line-height:1.6;max-width:125px}
+.earnings-dashboard .slack-btn{font-size:11px;padding:7px 10px;border:1px solid #d9e2ce;box-shadow:none;background:#fbfcf8;color:#7b8d67}
+.earnings-dashboard .floating-entry{margin-top:18px}.earnings-dashboard .floating-launch{min-height:50px;font-size:13px;box-shadow:none}
+.earnings-dashboard .mod.monthly-income{border:0;border-top:1px solid #e8eadf;border-radius:0;background:transparent;box-shadow:none}
+.earnings-dashboard .month-summary{padding:14px 4px;min-height:52px}.earnings-dashboard .month-title{font-size:13px}.earnings-dashboard .month-summary-total{font-size:15px}
+@media(max-width:960px){
+ .salary-start{grid-template-columns:1fr}.start-intro{padding:28px 32px 26px;position:relative;min-height:180px}.start-intro h2{font-size:28px;margin-top:14px}.start-intro .earnings-buddy{position:absolute;right:28px;top:20px;width:125px;height:115px;margin:0}.start-intro h2,.start-intro p{max-width:65%}.start-private{margin-top:12px}.start-form{margin:0 14px 14px;padding:26px}
+ .earnings-dashboard .grid-main{grid-template-columns:minmax(0,1fr) 240px}.earnings-dashboard .side-stack{flex-direction:column;margin:20px 0;padding:0 18px}
+}
+@media(max-width:620px){
+ .salary-start{border-radius:23px}.start-intro{padding:24px 22px}.start-eyebrow{font-size:8px}.start-intro h2{font-size:25px}.start-intro p{font-size:12px;max-width:75%}.start-intro .earnings-buddy{right:14px;top:26px;width:105px;height:98px}.start-private{font-size:9px}.start-form{padding:22px 18px;margin:0 10px 10px}.start-time-row,.start-break-row{font-size:12px}.start-form input[type=time]{width:100px}
+ .earnings-dashboard{padding:14px;border-radius:23px}.earnings-dashboard .app-top{gap:8px}.earnings-dashboard .status{font-size:10px;padding:6px 9px}.earnings-dashboard .app-actions{gap:1px}.earnings-dashboard .app-actions .btn{font-size:10px;padding:6px 4px}
+ .earnings-dashboard .grid-main{grid-template-columns:1fr}.earnings-dashboard .tick-card{padding:26px 20px 22px}.earnings-dashboard .ticker{font-size:clamp(40px,11vw,62px);margin:14px 0 18px}.earnings-dashboard .chip:nth-child(3){grid-column:auto}.earnings-dashboard .chip-row{gap:6px}.earnings-dashboard .chip .v{font-size:14px}
+ .earnings-dashboard .side-stack{margin:0 20px 18px;padding:16px 0 0;border-left:0;border-top:1px solid #dce7d5;display:grid;grid-template-columns:1fr}.earnings-dashboard .side-stack>*{min-width:0}
+ .earnings-dashboard .ring-card{position:relative;align-items:stretch;padding-right:90px;min-height:100px;justify-content:center}.earnings-dashboard .ring-card .earnings-buddy{position:absolute;right:-7px;top:0;width:95px;height:90px}.buddy-note{text-align:left;font-size:10px}.shift-progress{margin-top:8px}.shift-progress-track{margin-bottom:8px}.earnings-dashboard .cd .v{font-size:14px}.earnings-dashboard .slack-card .v{max-width:none}.earnings-dashboard .slack-card{justify-content:space-between;padding-top:12px}.earnings-dashboard .floating-launch{font-size:12px}.earnings-dashboard .month-summary{gap:8px}.earnings-dashboard .month-title{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){#timer *,#timer *::before,#timer *::after{animation:none!important;transition:none!important}}
+
+.salary-restoring{min-height:340px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#fbfaf6;border:1px solid #e6e8df;border-radius:30px;color:#7b886e;font-size:13px;gap:12px}
+.salary-save-status{margin:14px 4px 0;color:#74846d;font-size:11px;line-height:1.7}
+.salary-save-status.save-failed{padding:10px 14px;background:#fff3df;border:1px solid #f2d7a5;border-radius:12px;color:#8a5b22}
+
+.foot-grid{grid-template-columns:minmax(0,1fr) auto}
+@media(max-width:620px){.foot-grid{grid-template-columns:1fr}}

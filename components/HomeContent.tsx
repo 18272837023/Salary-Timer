@@ -7,9 +7,7 @@ import {
   Faq,
   Features,
   HowItWorks,
-  LearnLinks,
   Personas,
-  ToolLinks,
 } from "@/components/sections";
 import { HOME_FAQ, HOME_FAQ_ZH } from "@/lib/home-faq";
 import type { Lang } from "@/lib/i18n";
@@ -127,8 +125,6 @@ export function HomeContent({ lang }: { lang: Lang }) {
         lede={zh ? "简短回答，没有废话。" : "Short answers, no small print."}
         eyebrow={zh ? "常见问题" : "Questions"}
       />
-      <ToolLinks current="/" />
-      <LearnLinks />
       <CtaBand />
     </main>
   );

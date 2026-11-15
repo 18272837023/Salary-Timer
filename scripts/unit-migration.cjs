@@ -150,5 +150,46 @@ check("旧载荷没有 currency 字段时用默认美元", () => {
   assert.strictEqual(D.normalize({ amountCents: 100 }).currency, "USD");
 });
 
+console.log("\n=== J. 重新进入与存储写入受限 ===");
+reset();
+const personal = { ...D.defaultSettings(), mode: "monthly", amountCents: 1234500,
+  currency: "CNY", start: "08:30", end: "18:00", onboarded: true };
+check("首次保存后重新读取可恢复薪资、排班及已设置状态", () => {
+  assert.strictEqual(D.saveSettings(personal).ok, true);
+  const restored = D.loadSettings();
+  assert.strictEqual(restored.onboarded, true);
+  assert.strictEqual(restored.amountCents, personal.amountCents);
+  assert.strictEqual(restored.currency, "CNY");
+  assert.strictEqual(restored.start, "08:30");
+});
+const savedSetItem = window.localStorage.setItem;
+window.localStorage.setItem = () => { const e = new Error("full"); e.name = "QuotaExceededError"; throw e; };
+try {
+  check("存储写满时仍然恢复已有设置，不应再次引导填写", () => {
+    assert.strictEqual(D.loadSettings().onboarded, true);
+    assert.strictEqual(D.loadSettings().amountCents, personal.amountCents);
+  });
+  check("写入受限时明确返回 quota，且不覆盖旧设置", () => {
+    assert.deepStrictEqual(D.saveSettings({ ...personal, amountCents: 1 }), { ok: false, reason: "quota" });
+    assert.strictEqual(D.loadSettings().amountCents, personal.amountCents);
+    assert.strictEqual(D.isStorageAvailable(), false);
+  });
+} finally { window.localStorage.setItem = savedSetItem; }
+check("读取不会写入存储探针", () => {
+  let writes = 0;
+  window.localStorage.setItem = (...args) => { writes++; savedSetItem(...args); };
+  try { D.loadSettings(); assert.strictEqual(writes, 0); }
+  finally { window.localStorage.setItem = savedSetItem; }
+});
+const savedWindow = global.window;
+try {
+  global.window = { get localStorage() { throw new Error("blocked"); } };
+  check("存储完全不可用时安全返回失败", () => {
+    assert.strictEqual(D.loadSettings(), null);
+    assert.strictEqual(D.saveSettings(personal).ok, false);
+    assert.strictEqual(D.isStorageAvailable(), false);
+  });
+} finally { global.window = savedWindow; }
+
 console.log(`\n结果: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -2,7 +2,7 @@
   "name": "salary-timer",
   "version": "1.0.0",
   "private": true,
-  "description": "Salary Timer — a live earnings counter for your workday. Static-exported Next.js site built for long-tail SEO.",
+  "description": "Salary Timer — a live earnings counter for your workday. Static-exported Next.js site focused on the live salary timer.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

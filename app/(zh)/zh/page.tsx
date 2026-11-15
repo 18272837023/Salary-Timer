@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SOCIAL_IMAGE } from "@/lib/site";
 import { HomeContent } from "@/components/HomeContent";
 
 const ZH_TITLE = "薪资计时器 — 免费实时计薪与收入计算";
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
     canonical: "/zh/",
     languages: { en: "/", "zh-CN": "/zh/", "x-default": "/" },
   },
+  twitter: { card: "summary_large_image", title: ZH_TITLE, description: ZH_DESCRIPTION, images: [SOCIAL_IMAGE.url] },
   openGraph: {
+    images: [SOCIAL_IMAGE],
     title: ZH_TITLE,
     description: ZH_DESCRIPTION,
     url: "/zh/",

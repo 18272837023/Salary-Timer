@@ -163,8 +163,12 @@ export function SetupPanel({
       return;
     }
     const next: Settings = { ...draft, amountCents: cents, onboarded: true };
-    replace(next);
+    const saved = replace(next);
     onClose();
+    if (!saved.ok) {
+      show(lang === "zh" ? "设置仅在本次访问中生效，浏览器未能保存。" : "Settings apply for this visit, but could not be saved in this browser.");
+      return;
+    }
 
     const snap = compute(next, new Date());
     if (snap.status === "working" || snap.status === "overtime") {

@@ -71,7 +71,7 @@ const links = [...llms.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)].map((m) => ({
   label: m[1],
   url: m[2],
 }));
-check("contains a useful number of links", links.length >= 20, `${links.length} links`);
+check("lists the four retained pages and discovery manifest", links.length === 5 && links.filter(l => l.url !== `${SITE}/ard.json`).length === 4, `${links.length} links`);
 check(
   "every link is an absolute salarytimer.work URL",
   links.every((l) => l.url.startsWith(`${SITE}/`)),
@@ -133,7 +133,7 @@ for (const [i, e] of (ard?.entries ?? []).entries()) {
 // ------------------------------------------------------- discovery + modal
 console.log("\nDiscovery signal and accessibility");
 const pages = allHtmlPages();
-check("found the prerendered pages", pages.length >= 25, `${pages.length} HTML pages`);
+check("found the prerendered pages", pages.length >= 4, `${pages.length} HTML pages`);
 check(
   'every page advertises <link rel="ard" href="/ard.json">',
   pages.every((p) => /<link[^>]*rel="ard"[^>]*href="\/ard\.json"/.test(fs.readFileSync(p, "utf8"))),

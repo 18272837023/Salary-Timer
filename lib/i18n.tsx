@@ -131,9 +131,9 @@ const en: Dict = {
   // Slack card
   "slack.slackingFor": "Slacking for",
   "slack.slackedToday": "Slacked today",
-  "slack.mode": "Slack mode",
-  "slack.clockPaused": "clock paused",
-  "slack.noPay": "no pay, no guilt",
+  "slack.mode": "A moment away",
+  "slack.clockPaused": "earnings follow your schedule",
+  "slack.noPay": "time away recorded",
   "slack.tap": "Tap when you wander off",
   "slack.backToWork": "Back to work",
   "slack.away": "☕ Away",
@@ -493,9 +493,9 @@ const zh: Dict = {
   // Slack card
   "slack.slackingFor": "摸鱼中",
   "slack.slackedToday": "今日摸鱼",
-  "slack.mode": "摸鱼模式",
-  "slack.clockPaused": "计时暂停",
-  "slack.noPay": "不计薪，不愧疚",
+  "slack.mode": "给自己一点空隙",
+  "slack.clockPaused": "计薪仍按排班运行",
+  "slack.noPay": "只记录暂离时间",
   "slack.tap": "走开时点一下",
   "slack.backToWork": "回来工作",
   "slack.away": "☕ 离开",
@@ -852,7 +852,7 @@ export function useI18n(): I18nContextValue {
 
 /**
  * Localise an internal href for the active language. Homepage anchors stay on
- * the Chinese homepage; links into /learn/* and the tool pages keep pointing at
+ * the Chinese homepage; links to the English legal policies keep pointing at
  * the English site, which is the only place those pages exist.
  */
 export function useHref(): (href: string) => string {
