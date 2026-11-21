@@ -92,8 +92,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           We also send a few interaction events so we can tell which parts of the tool are worth
-          keeping. Here is the complete list — including the numeric parameters, rather than hiding
-          them behind &ldquo;anonymous usage data&rdquo;:
+          improving. These events describe setup progress and feature operations:
         </p>
         <div className="table-wrap legal-table">
           <table>
@@ -114,45 +113,54 @@ export default function PrivacyPage() {
               </tr>
               <tr>
                 <td>
-                  <code>quickstart_shown</code>
+                  <code>setup_view</code>, <code>setup_start</code>, <code>quickstart_shown</code>
                 </td>
-                <td>none</td>
-                <td>Whether the setup wizard appeared</td>
+                <td><code>entry_point</code></td>
+                <td>Whether people see and begin setup</td>
               </tr>
               <tr>
                 <td>
                   <code>setup_complete</code>
                 </td>
                 <td>
-                  <code>mode</code>, <code>days</code>, <code>hours</code>,{" "}
-                  <code>annual_hours</code>
+                  <code>mode</code>, <code>entry_point</code>, <code>storage_result</code>,{" "}
+                  <code>feature</code>, <code>action</code>
                 </td>
-                <td>Which schedule shape people choose</td>
+                <td>Whether initial setup completes and settings can be saved</td>
+              </tr>
+              <tr>
+                <td><code>timer_view</code>, <code>timer_engaged</code></td>
+                <td><code>entry_point</code></td>
+                <td>Whether the configured timer is displayed or visible for at least 60 seconds</td>
+              </tr>
+              <tr>
+                <td><code>feature_use</code>, <code>feature_availability</code></td>
+                <td><code>feature</code>, <code>action</code>, <code>entry_point</code>, <code>mode</code>, <code>storage_result</code></td>
+                <td>Use of settings, privacy, desktop timer, monthly income, extra income, unpaid days, work schedules, breaks, payday, overtime and language controls. Desktop availability helps distinguish support from use.</td>
               </tr>
               <tr>
                 <td>
                   <code>milestone</code>
                 </td>
                 <td>
-                  <code>n</code>, <code>step_cents</code>
+                  <code>n</code>
                 </td>
-                <td>How far the live counter gets</td>
+                <td>A milestone occurrence count, capped at five per timer mount</td>
               </tr>
               <tr>
                 <td>
                   <code>settle_open</code>, <code>slack_toggle</code>
                 </td>
-                <td>none; <code>on</code> for the toggle</td>
+                <td><code>feature</code>, <code>action</code>, <code>entry_point</code>; <code>on</code> for the toggle</td>
                 <td>Whether secondary panels are opened</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p>
-          <code>step_cents</code> is the size of one milestone step in the smallest unit of your
-          chosen currency — a derived counter interval, not your salary, your running total or your
-          payslip. It is a numeric value derived from your settings, so we name it here explicitly.
-          No event carries your name, email address, employer, tax identifier or bank details, and
+          Feature events carry fixed labels such as &ldquo;desktop_timer&rdquo; and &ldquo;open&rdquo;.
+          Salary amounts, income entries, shift times, workday selections and milestone amounts
+          stay on your device. No event carries your name, email address, employer, tax identifier or bank details, and
           we do not set a GA user ID or otherwise link events to an identity.
         </p>
       </section>

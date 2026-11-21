@@ -19,8 +19,8 @@ import { RouteAnalytics } from "./RouteAnalytics";
  *    and is how Google's own snippet works: `gtag()` only appends to
  *    `dataLayer`, and gtag.js drains that queue whenever it arrives.
  *
- * What it deliberately does *not* do: touch the salary settings. Those stay in
- * localStorage; only the page URL and title are reported.
+ * Product interaction events are sent separately by lib/analytics. Pay amounts
+ * and detailed schedule values stay in localStorage.
  */
 export function Analytics() {
   // Keep local development out of the production property.

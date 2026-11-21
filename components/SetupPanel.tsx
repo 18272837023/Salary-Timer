@@ -8,6 +8,7 @@ import { compute, dateKey, derive, formatHM } from "@/lib/schedule";
 import { makeId } from "@/lib/defaults";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import type { PayMode, Settings } from "@/lib/types";
+import { track, trackFeature, trackOnce } from "@/lib/analytics";
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -41,6 +42,8 @@ export function SetupPanel({
 
   useEffect(() => {
     if (!open) return;
+    trackFeature("settings", "open", "settings_panel");
+    if (!settings.onboarded) trackOnce("setup_start", { entry_point: "settings_panel" });
     setDraft(settings);
     setAmountText(centsToInput(settings.amountCents, settings.currency));
     setOtHoursText(null);
@@ -164,6 +167,25 @@ export function SetupPanel({
     }
     const next: Settings = { ...draft, amountCents: cents, onboarded: true };
     const saved = replace(next);
+    track(settings.onboarded ? "feature_use" : "setup_complete", {
+      feature: "settings", action: "save", entry_point: "settings_panel", mode: next.mode,
+      storage_result: saved.ok ? "saved" : "unavailable",
+    });
+    if (draft.start !== settings.start || draft.end !== settings.end || draft.days.join() !== settings.days.join()) {
+      trackFeature("work_schedule", "update", "settings_panel");
+    }
+    if (JSON.stringify(draft.breaks) !== JSON.stringify(settings.breaks)) {
+      trackFeature("unpaid_breaks", "update", "settings_panel");
+    }
+    if (draft.payday !== settings.payday) trackFeature("payday", "update", "settings_panel");
+    if (draft.privacy !== settings.privacy) {
+      trackFeature("privacy", draft.privacy ? "enable" : "disable", "settings_panel");
+    }
+    if (draft.overtime !== settings.overtime) {
+      trackFeature("overtime", draft.overtime ? "enable" : "disable", "settings_panel");
+    } else if (draft.otMult !== settings.otMult || JSON.stringify(draft.otOverride) !== JSON.stringify(settings.otOverride)) {
+      trackFeature("overtime", "update", "settings_panel");
+    }
     onClose();
     if (!saved.ok) {
       show(lang === "zh" ? "设置仅在本次访问中生效，浏览器未能保存。" : "Settings apply for this visit, but could not be saved in this browser.");

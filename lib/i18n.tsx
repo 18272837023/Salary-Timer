@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { trackFeature } from "./analytics";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -810,6 +811,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLang = useCallback(
     (next: Lang) => {
       if (next === lang) return;
+      trackFeature("language", "update", "header");
       router.push(next === "zh" ? ZH_HOME : EN_HOME);
     },
     [lang, router],

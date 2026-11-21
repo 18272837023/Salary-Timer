@@ -116,7 +116,7 @@ check(
 check(
   "WebPage dateModified matches the published update date",
   [privacyGraphs, termsGraphs].every((graphs) =>
-    graphs.some((g) => g["@type"] === "WebPage" && g.dateModified === "2026-11-15"),
+    graphs.some((g) => g["@type"] === "WebPage" && g.dateModified === "2026-11-21"),
   ),
 );
 check(
@@ -156,7 +156,7 @@ check(
 );
 check(
   "both pages show a machine-readable Last updated date",
-  /dateTime="2026-11-15"/.test(privacy) && /dateTime="2026-11-15"/.test(terms),
+  /dateTime="2026-11-21"/.test(privacy) && /dateTime="2026-11-21"/.test(terms),
 );
 check(
   "both pages publish the official contact address as mailto",
@@ -180,7 +180,7 @@ for (const [label, needle] of [
   ["GA4 is named as the analytics provider", "Google Analytics 4"],
   ["GA cookies are disclosed", "_ga"],
   ["the milestone event is listed", "milestone"],
-  ["the numeric step parameter is disclosed", "step_cents"],
+  ["feature interaction parameters are disclosed", "entry_point"],
   ["the setup event is listed", "setup_complete"],
   ["no-account claim is present", "no account"],
 ]) {

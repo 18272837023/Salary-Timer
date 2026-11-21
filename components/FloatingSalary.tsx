@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { formatCents } from "@/lib/money";
 import { breaksToday, compute, formatClock, nextShift } from "@/lib/schedule";
 import { useSettings } from "@/lib/store";
+import { trackFeature, trackOnce } from "@/lib/analytics";
 
 interface PictureInPicture {
   requestWindow(options: { width: number; height: number }): Promise<Window>;
@@ -97,7 +98,10 @@ function FloatingCard({ ownerWindow, onReturn }: { ownerWindow: Window; onReturn
         <button className="float-privacy" type="button" aria-pressed={settings.privacy}
           aria-label={t(settings.privacy ? "float.show" : "float.hide")}
           title={t(settings.privacy ? "float.show" : "float.hide")}
-          onClick={() => update({ privacy: !settings.privacy })}>
+          onClick={() => {
+            update({ privacy: !settings.privacy });
+            trackFeature("privacy", settings.privacy ? "disable" : "enable", "desktop");
+          }}>
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" />
             {settings.privacy && <path d="m3 3 18 18" />}
@@ -132,7 +136,9 @@ export function FloatingSalary() {
 
   useEffect(() => {
     mountedRef.current = true;
-    setSupported(Boolean(window.isSecureContext && pictureInPicture()?.requestWindow));
+    const available = Boolean(window.isSecureContext && pictureInPicture()?.requestWindow);
+    setSupported(available);
+    trackOnce("feature_availability", { feature: "desktop_timer", action: available ? "available" : "unavailable", entry_point: "dashboard" });
     return () => {
       mountedRef.current = false;
       windowRef.current?.close();
@@ -143,6 +149,7 @@ export function FloatingSalary() {
   useEffect(() => {
     if (!pipWindow) return;
     const onClose = () => {
+      trackFeature("desktop_timer", "close", "desktop");
       if (windowRef.current === pipWindow) windowRef.current = null;
       if (mountedRef.current) setPipWindow(null);
     };
@@ -153,6 +160,7 @@ export function FloatingSalary() {
   async function open() {
     if (windowRef.current && !windowRef.current.closed) {
       windowRef.current.focus();
+      trackFeature("desktop_timer", "focus");
       return;
     }
     const api = pictureInPicture();
@@ -169,7 +177,9 @@ export function FloatingSalary() {
       opened.document.head.append(style);
       windowRef.current = opened;
       setPipWindow(opened);
+      trackFeature("desktop_timer", "open");
     } catch {
+      trackFeature("desktop_timer", "open_failed");
       windowRef.current?.close();
       windowRef.current = null;
       if (mountedRef.current) { setPipWindow(null); setFailed(true); }
@@ -196,7 +206,10 @@ export function FloatingSalary() {
       <p id={hintId} className={`floating-help${supported && ready ? " floating-help-sr" : ""}`}>{t(hint)}</p>
       {failed && <p className="floating-error" role="alert">{t("float.error")}</p>}
       {pipWindow && createPortal(
-        <FloatingCard ownerWindow={pipWindow} onReturn={() => { window.focus(); pipWindow.close(); }} />,
+        <FloatingCard ownerWindow={pipWindow} onReturn={() => {
+          trackFeature("desktop_timer", "return", "desktop");
+          window.focus(); pipWindow.close();
+        }} />,
         pipWindow.document.body,
       )}
     </aside>

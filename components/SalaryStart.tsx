@@ -1,12 +1,12 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { useI18n } from "@/lib/i18n";
 import { CURRENCIES, parseAmountToCents, currencyName } from "@/lib/money";
 import { toMinutes } from "@/lib/schedule";
 import { useSettings, useToast } from "@/lib/store";
 import { SETTINGS_VERSION } from "@/lib/defaults";
-import { track } from "@/lib/analytics";
+import { track, trackOnce } from "@/lib/analytics";
 import type { CurrencyCode, PayMode } from "@/lib/types";
 import { EarningsBuddy } from "./EarningsBuddy";
 
@@ -27,6 +27,9 @@ export function SalaryStart({ onAdvanced }: { onAdvanced: () => void }) {
   const [breakEnd, setBreakEnd] = useState("13:00");
   const [error, setError] = useState("");
   const modes: PayMode[] = ["monthly", "annual", "daily", "hourly"];
+  useEffect(() => {
+    if (hydrated) trackOnce("setup_view", { entry_point: "inline_setup" });
+  }, [hydrated]);
   function save(e: FormEvent) {
     e.preventDefault();
     const cents = parseAmountToCents(amount);
@@ -41,7 +44,7 @@ export function SalaryStart({ onAdvanced }: { onAdvanced: () => void }) {
       setError(zh ? "请确认班次时间有效，且无薪休息完整位于班次内。夜班可跨午夜。" : "Check shift times and keep the unpaid break inside your shift. Overnight shifts are supported."); return;
     }
     const saved = replace({ ...settings, mode, currency, amountCents: cents, start, end, days: [...days].sort(), breaks: lunch ? [{ id: "start-break", start: breakStart, end: breakEnd }] : [], onboarded: true, v: SETTINGS_VERSION });
-    track("setup_complete", { mode, days: days.length });
+    track("setup_complete", { mode, entry_point: "inline_setup", storage_result: saved.ok ? "saved" : "unavailable" });
     show(saved.ok ? (zh ? "设置好了，今天的收入从这里看。" : "All set. Your workday, in earnings.") : (zh ? "当前浏览器无法保存设置，关闭页面后可能丢失。" : "This browser cannot save settings; they may be lost when you close the page."));
   }
   return <div className="salary-start">
@@ -52,7 +55,7 @@ export function SalaryStart({ onAdvanced }: { onAdvanced: () => void }) {
       <p>{zh ? "把工作中的时间，变成看得见的收入。先告诉我们你的薪资和排班，剩下的交给计时器。" : "Make the value of your working time visible. Add your pay and schedule, and let the timer take it from here."}</p>
       <span className="start-private">{zh ? "本机保存 · 无需注册 · 税前估算" : "Saved on this device · No account · Gross-pay estimates"}</span>
     </div>
-    <form className="start-form" onSubmit={save}>
+    <form className="start-form" onSubmit={save} onFocusCapture={() => trackOnce("setup_start", { entry_point: "inline_setup" })}>
       <div className="start-form-head"><span>{zh ? "开始设置" : "MAKE IT YOURS"}</span><span>01 / 01</span></div>
       <div className="start-pay-row">
         <label htmlFor={`${id}-amount`}>{zh ? "你的薪资" : "Your pay"}</label>

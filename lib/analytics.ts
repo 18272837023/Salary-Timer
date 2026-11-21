@@ -1,20 +1,26 @@
-/**
- * GA4 event helper.
- *
- * The site only ever sent `page_view` (see `RouteAnalytics`), which means every
- * question worth asking — did they finish setup? do they stick around? how long
- * did they actually stay? — was unanswerable. These are the five events that
- * make the funnel visible.
- *
- * Two rules:
- *  1. Never throw. Analytics must not be able to break the clock: gtag may not
- *     be loaded yet (blocked by an ad blocker, offline, still downloading), and
- *     the counter re-renders ten times a second.
- *  2. Never send money. Salary figures stay in localStorage; events carry
- *     structural facts only (mode, day count, hours), never amounts.
- */
+import { GA_MEASUREMENT_ID } from "./site";
 
-type EventParams = Record<string, string | number | boolean>;
+export type Feature = "settings" | "privacy" | "settlement" | "slack" | "desktop_timer"
+  | "monthly_income" | "extra_income" | "unpaid_days" | "work_schedule" | "unpaid_breaks"
+  | "payday" | "overtime" | "language";
+type Action = "open" | "close" | "save" | "update" | "add" | "enable" | "disable"
+  | "start" | "stop" | "focus" | "return" | "open_failed" | "available" | "unavailable";
+export type EntryPoint = "inline_setup" | "settings_panel" | "quickstart"
+  | "dashboard" | "desktop" | "restored" | "header";
+type EventName = "setup_view" | "setup_start" | "setup_complete" | "quickstart_shown"
+  | "timer_view" | "timer_engaged" | "feature_use" | "feature_availability"
+  | "milestone" | "settle_open" | "slack_toggle";
+
+// Allowlisted structural parameters keep pay amounts and form values out of events.
+interface EventParams {
+  feature?: Feature;
+  action?: Action;
+  entry_point?: EntryPoint;
+  mode?: "annual" | "monthly" | "daily" | "hourly";
+  storage_result?: "saved" | "unavailable";
+  n?: number;
+  on?: boolean;
+}
 
 type GtagFn = (command: string, ...args: unknown[]) => void;
 
@@ -24,21 +30,27 @@ function gtag(): GtagFn | undefined {
   return typeof fn === "function" ? fn : undefined;
 }
 
-export function track(event: string, params: EventParams = {}): void {
-  const fn = gtag();
-  if (!fn) return;
+export function track(event: EventName, params: EventParams = {}): boolean {
   try {
-    fn("event", event, params);
+    if (process.env.NODE_ENV !== "production" || !GA_MEASUREMENT_ID) return false;
+    const fn = gtag();
+    if (!fn) return false;
+    fn("event", event, { ...params, send_to: GA_MEASUREMENT_ID });
+    return true;
   } catch {
-    /* ignore — see rule 1 */
+    // A blocked or unavailable analytics tag must not interrupt the timer.
+    return false;
   }
+}
+
+export function trackFeature(feature: Feature, action: Action, entry_point: EntryPoint = "dashboard"): void {
+  track("feature_use", { feature, action, entry_point });
 }
 
 const fired = new Set<string>();
 
 /** Fire at most once per page load. For events that describe the visit, not a click. */
-export function trackOnce(event: string, params: EventParams = {}): void {
+export function trackOnce(event: EventName, params: EventParams = {}): void {
   if (fired.has(event)) return;
-  fired.add(event);
-  track(event, params);
+  if (track(event, params)) fired.add(event);
 }

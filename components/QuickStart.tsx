@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useI18n } from "@/lib/i18n";
-import { track } from "@/lib/analytics";
+import { track, trackOnce } from "@/lib/analytics";
 import { SETTINGS_VERSION } from "@/lib/defaults";
 import { CURRENCIES, currencyName, formatRate, symbolFor } from "@/lib/money";
 import { derive, toHHMM, toMinutes } from "@/lib/schedule";
@@ -124,6 +124,8 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
 
   useEffect(() => {
     if (!open) return;
+    track("quickstart_shown", { entry_point: "quickstart" });
+    if (!settings.onboarded) trackOnce("setup_view", { entry_point: "quickstart" });
     setStep(STEP_PAY);
     const saved = derive(settings);
     // Keep existing hourly accounts compatible: show equivalent pay per working day.
@@ -245,13 +247,10 @@ export function QuickStart({ open, onClose }: { open: boolean; onClose: () => vo
       setStep(STEP_PAY);
       return;
     }
-    replace(draft);
-    track("setup_complete", {
-      mode,
-      currency,
-      days: days,
-      hours: preview.paidMin / 60,
-      annual_hours: Math.round(preview.annualHours),
+    const saved = replace(draft);
+    track(settings.onboarded ? "feature_use" : "setup_complete", {
+      feature: "settings", action: "save", mode, entry_point: "quickstart",
+      storage_result: saved.ok ? "saved" : "unavailable",
     });
     onClose();
     show(t("qs.saved"));

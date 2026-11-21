@@ -17,7 +17,7 @@ import {
 } from "@/lib/schedule";
 import { useNow, useSettings, useToast } from "@/lib/store";
 import type { Snapshot } from "@/lib/types";
-import { track } from "@/lib/analytics";
+import { track, trackFeature, trackOnce } from "@/lib/analytics";
 import { SalaryStart } from "./SalaryStart";
 import { EarningsBuddy } from "./EarningsBuddy";
 import { SetupPanel } from "./SetupPanel";
@@ -76,6 +76,39 @@ export function SalaryApp() {
 
   /** Render setup until the visitor saves their own pay. */
   const onboarded = settings.onboarded;
+  const initiallyOnboarded = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (!live) return;
+    if (initiallyOnboarded.current === null) initiallyOnboarded.current = onboarded;
+    if (onboarded) {
+      trackOnce("timer_view", {
+        entry_point: initiallyOnboarded.current ? "restored" : "dashboard",
+      });
+    }
+  }, [live, onboarded]);
+
+  useEffect(() => {
+    if (!live || !onboarded) return;
+    let elapsed = 0;
+    let visibleSince: number | null = document.hidden ? null : performance.now();
+    const check = () => {
+      const current = performance.now();
+      if (visibleSince !== null) elapsed += current - visibleSince;
+      visibleSince = document.hidden ? null : current;
+      if (elapsed >= 60_000) {
+        trackOnce("timer_engaged", { entry_point: "dashboard" });
+        window.clearInterval(timer);
+        document.removeEventListener("visibilitychange", check);
+      }
+    };
+    const timer = window.setInterval(check, 1000);
+    document.addEventListener("visibilitychange", check);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [live, onboarded]);
 
   const dayKey = dateKey(now);
   const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
@@ -240,7 +273,7 @@ export function SalaryApp() {
     setPop(true);
     if (popsRef.current < 5) {
       popsRef.current += 1;
-      track("milestone", { n: popsRef.current, step_cents: mileStepCents });
+      track("milestone", { n: popsRef.current });
     }
     const timer = setTimeout(() => setPop(false), 900);
     return () => clearTimeout(timer);
@@ -263,6 +296,7 @@ export function SalaryApp() {
         },
       ],
     });
+    trackFeature("extra_income", "add");
     setExtraAmount("");
     show(t("toast.extraAdded"));
   }
@@ -284,6 +318,7 @@ export function SalaryApp() {
               className="btn btn-ghost btn-sm"
               onClick={() => {
                 update({ privacy: !privacy });
+                trackFeature("privacy", privacy ? "disable" : "enable");
                 show(privacy ? t("toast.numbersVisible") : t("toast.numbersHidden"));
               }}
             >
@@ -293,7 +328,7 @@ export function SalaryApp() {
               type="button"
               className="btn btn-ghost btn-sm"
               onClick={() => {
-                track("settle_open");
+                track("settle_open", { feature: "settlement", action: "open", entry_point: "dashboard" });
                 setSettleOpen(true);
               }}
             >
@@ -401,7 +436,7 @@ export function SalaryApp() {
                 type="button"
                 className={`slack-btn${slack.on ? " on" : ""}`}
                 onClick={() => {
-                  track("slack_toggle", { on: !slack.on });
+                  track("slack_toggle", { on: !slack.on, feature: "slack", action: slack.on ? "stop" : "start", entry_point: "dashboard" });
                   setSlack((prev) =>
                     prev.on
                       ? {
@@ -427,7 +462,9 @@ export function SalaryApp() {
         <FloatingSalary />
 
         <div className="grid-1">
-          <details className="mod monthly-income">
+          <details className="mod monthly-income" onToggle={(event) => {
+            trackFeature("monthly_income", event.currentTarget.open ? "open" : "close");
+          }}>
             <summary className="month-summary">
               <span className="month-title">{t("month.title")}</span>
               <b className={`month-summary-total${blur}`}>{formatCents(live ? monthTotalCents : 0, settings.currency)}</b>
@@ -496,6 +533,12 @@ export function SalaryApp() {
                   const v = clampNumber(e.target.value, 0, 31);
                   update({ unpaidDays: v === null ? 0 : Math.round(v) });
                 }}
+                onBlur={(e) => {
+                  if (e.currentTarget.value !== e.currentTarget.dataset.previousValue) {
+                    trackFeature("unpaid_days", "update");
+                  }
+                }}
+                onFocus={(e) => { e.currentTarget.dataset.previousValue = e.currentTarget.value; }}
                 aria-label={t("month.unpaidThisMonth")}
                 style={{ width: 64, padding: "6px 8px", fontSize: 13, textAlign: "center" }}
               />

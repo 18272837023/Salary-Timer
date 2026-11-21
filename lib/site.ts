@@ -50,8 +50,8 @@ export const ZH_ENTITY_DEFINITION =
   "薪资计时器是一个免费的网页工具，按你的真实排班、无薪休息和加班倍率，实时显示你每秒、每分钟、每小时赚多少钱。";
 
 /**
- * GA4 measurement ID. Page-view analytics only — the timer's numbers live in
- * localStorage and are never sent anywhere. Override with NEXT_PUBLIC_GA_ID
+ * GA4 measurement ID for page views and structural product interactions.
+ * Pay amounts stay in localStorage. Override with NEXT_PUBLIC_GA_ID
  * to point a staging build at a different property, or set it to an empty
  * string to switch analytics off entirely.
  */
@@ -68,7 +68,7 @@ export const GA_MEASUREMENT_ID =
 export const CONTACT_EMAIL = "oiwagok@gmail.com";
 
 /** Bump whenever either legal page changes — shown as "Last updated" on both. */
-export const LEGAL_UPDATED = "2026-11-15";
+export const LEGAL_UPDATED = "2026-11-21";
 
 export interface LegalPageRoute {
   href: string;
