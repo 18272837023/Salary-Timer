@@ -18,6 +18,10 @@ export const HOME_FAQ: FaqItem[] = [
     "a": "A salary timer is a live earnings counter. Enter your pay and working schedule to see estimated gross earnings for elapsed paid time, along with your rates per second, minute and hour."
   },
   {
+    "q": "Is a salary timer the same as a salary clock or a money clock?",
+    "a": "Yes. Salary timer, salary clock, money clock and live earnings counter are different names for the same thing: a page that shows what you have earned so far today and updates as you work. This one reads your saved schedule, unpaid breaks and overtime rate, so the number follows the hours you are actually paid for instead of a flat daily rate."
+  },
+  {
     "q": "Does the counter run outside my working hours?",
     "a": "The counter follows your saved schedule. It pauses during configured unpaid breaks and does not add regular earnings before or after the shift. Enabling overtime lets it count after the scheduled shift end at your chosen multiplier."
   },
@@ -51,6 +55,10 @@ export const HOME_FAQ_ZH: FaqItem[] = [
   {
     "q": "什么是薪资计时器？",
     "a": "薪资计时器是一种实时收入计数器。输入薪资与排班，便可查看已过去计薪时间对应的税前收入估算，以及每秒、每分钟和每小时的收入。"
+  },
+  {
+    "q": "薪资计时器和 salary clock、money clock 是一回事吗？",
+    "a": "是同一类工具。薪资计时器、salary clock、money clock、实时收入计数器，说的都是同一个东西：一边工作一边显示今天已经赚了多少。这个计时器会读取你保存的排班、无薪休息和加班倍率，所以数字跟着真正计薪的小时走，而不是按固定日薪平摊。"
   },
   {
     "q": "工作时间之外也会计薪吗？",

@@ -107,6 +107,28 @@ export const LEGAL_PAGES: LegalPageRoute[] = [
   },
 ];
 
+export interface SitePageRoute {
+  href: string;
+  label: string;
+  /** <title> (the layout appends "· Salary Timer", so never repeat the brand) */
+  title: string;
+  description: string;
+}
+
+/**
+ * The one non-legal editorial page. Not a legal route — it carries no "last
+ * updated" line and no policy cross-links — but it follows the same rule: the
+ * footer and the sitemap read it from here, so it cannot be published without
+ * being reachable.
+ */
+export const ABOUT_PAGE: SitePageRoute = {
+  href: "/about",
+  label: "About",
+  title: "About this site — the person behind the timer",
+  description:
+    "Who builds Salary Timer, why the counter follows your real schedule instead of dividing by 2,080, what happens to the figures you type in, and how to report a mistake.",
+};
+
 export function absoluteUrl(path = "/"): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

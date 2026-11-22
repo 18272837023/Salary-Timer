@@ -34,6 +34,10 @@ export function SiteFooter() {
             <h5>{t("footer.about")}</h5>
             <ul>
               <li>
+                {/* English-only, like the legal pages: one URL, no /zh twin. */}
+                <Link href="/about">{t("footer.aboutPage")}</Link>
+              </li>
+              <li>
                 <Link href={href("/#how")}>{t("footer.howWorks")}</Link>
               </li>
               <li>

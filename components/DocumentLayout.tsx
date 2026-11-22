@@ -4,6 +4,7 @@ import { Analytics } from "@/components/Analytics";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { I18nProvider } from "@/lib/i18n";
+import { AUTHOR_ID } from "@/lib/author";
 import { SettingsProvider, ToastProvider } from "@/lib/store";
 import { OG_IMAGE, ORGANIZATION_ID, SAME_AS, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import "@/app/globals.css";
@@ -81,6 +82,9 @@ const websiteSchema = {
     name: SITE_NAME,
     url: SITE_URL,
     sameAs: SAME_AS,
+    // The person is described in full once, on /about. Every other page points
+    // at that node by @id, so the site has one author, not one per page.
+    founder: { "@id": AUTHOR_ID },
   },
 };
 

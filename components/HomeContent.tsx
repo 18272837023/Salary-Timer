@@ -2,6 +2,7 @@ import { HomeCalculation } from "@/components/HomeCalculation";
 import { EntityLede } from "@/components/EntityLede";
 import { Hero } from "@/components/Hero";
 import { SalaryApp } from "@/components/SalaryApp";
+import { AuthorStrip } from "@/components/AuthorStrip";
 import {
   CtaBand,
   Faq,
@@ -119,6 +120,13 @@ export function HomeContent({ lang }: { lang: Lang }) {
       <HomeCalculation lang={lang} />
       <Features />
       <Personas />
+      {/* Between the personas and the FAQ: by the time someone has read this
+          far they may want to know who is behind the number. */}
+      <section className="section tight" aria-label={zh ? "关于本站" : "About this site"}>
+        <div className="wrap">
+          <AuthorStrip lang={zh ? "zh" : "en"} />
+        </div>
+      </section>
       <Faq
         items={faqItems}
         title={zh ? "薪资计时器常见问题" : "Salary timer FAQ"}
