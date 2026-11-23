@@ -141,11 +141,16 @@ jobs:
               exit 1
             fi
           done
-          tool_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/hourly-rate-calculator/")
-          if [ "$tool_status" != "200" ]; then
-            echo "::error::/hourly-rate-calculator/ returned ${tool_status}, expected 200 — the 410 rule or the prune list still covers it"
-            exit 1
-          fi
+          # Live tool pages, listed rather than derived: naming a route here is
+          # the deploy-time half of the same decision verify-geo makes at build
+          # time. Both must return 200; the retired five above must return 410.
+          for route in hourly-rate-calculator hourly-to-annual-salary; do
+            tool_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
+            if [ "$tool_status" != "200" ]; then
+              echo "::error::/${route}/ returned ${tool_status}, expected 200 — the 410 rule or the prune list still covers it"
+              exit 1
+            fi
+          done
           www_target=$(curl -sS -o /dev/null -w '%{redirect_url}' "https://www.salarytimer.work/?cb=${GITHUB_SHA}")
           if [ "$www_target" != "https://salarytimer.work/?cb=${GITHUB_SHA}" ]; then
             echo "::error::www hostname must redirect to the canonical hostname"

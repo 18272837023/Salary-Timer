@@ -201,6 +201,11 @@ export default function HourlyRateCalculatorPage() {
           hours. <b>Weekly</b> skips the month entirely: multiply by the weeks you are actually paid,
           then divide by the hours inside those weeks.
         </p>
+        <p>
+          Going the other way — an hourly wage turned into a year, a month or a week — is the{" "}
+          <Link href="/hourly-to-annual-salary">hourly to annual salary conversion</Link>, which
+          keeps the 52-or-50 paid-week decision visible instead of folding it into a constant.
+        </p>
       </section>
 
       <section>

@@ -8,6 +8,7 @@ export const CONTENT_UPDATES: Readonly<Record<string, string>> = {
   // Retired with the content cluster, then rebuilt as a standalone converter
   // and republished — so the date is the republication, not the first draft.
   "/hourly-rate-calculator": "2026-11-23",
+  "/hourly-to-annual-salary": "2026-11-23",
   "/privacy": LEGAL_UPDATED,
   "/terms": LEGAL_UPDATED,
 };

@@ -7,6 +7,7 @@ Salary Timer is a free live gross-earnings counter. Enter pay, weekly working da
 - [Salary Timer homepage](https://salarytimer.work/): live earnings, calculation method, setup instructions and frequently asked questions.
 - [Chinese Salary Timer homepage](https://salarytimer.work/zh/): Chinese version of the same live counter and instructions.
 - [Salary to hourly calculator](https://salarytimer.work/hourly-rate-calculator/): convert annual, monthly or weekly pay into a real hourly rate using your paid hours per week and paid weeks per year. Compares the result against the standard 2,080-hour divisor.
+- [Hourly to annual salary calculator](https://salarytimer.work/hourly-to-annual-salary/): convert an hourly wage into annual, monthly, weekly and biweekly pay, with a 52 or 50 paid-week switch. Includes worked examples for $20 and $25 an hour.
 - [About this site](https://salarytimer.work/about/): who maintains the site, how the guides are written, what happens to the figures you enter and how to report a mistake.
 - [Privacy Policy](https://salarytimer.work/privacy/): browser-local settings and analytics disclosure.
 - [Terms of Use](https://salarytimer.work/terms/): gross-pay estimates, service limits and acceptable use.

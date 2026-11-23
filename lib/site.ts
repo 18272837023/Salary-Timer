@@ -154,6 +154,19 @@ export const TOOL_PAGES: ToolRoute[] = [
     description:
       "Turn a yearly, monthly or weekly salary into a real hourly rate using the hours you actually work. Unpaid lunch, overtime and a 4-day week all change the number.",
   },
+  {
+    // The inverse direction, and deliberately not a rewrite of the page above:
+    // that one answers "what is my rate", this one answers "what is my year".
+    // The copy never uses the phrase "salary to hourly calculator" — the two
+    // pages would then compete for the same query instead of splitting it.
+    href: "/hourly-to-annual-salary",
+    label: "Hourly to annual salary calculator",
+    menuLabel: "Hourly to annual",
+    menuHint: "Hourly wage → year, month, week and biweekly pay",
+    title: "Hourly to Annual Salary Calculator — year, month, week",
+    description:
+      "Turn an hourly wage into annual, monthly, weekly and biweekly pay, with a 52 or 50 paid-week switch. Includes what $20 and $25 an hour come to in a year.",
+  },
 ];
 
 /** Throws rather than returning undefined: a page asking for a tool that is not
