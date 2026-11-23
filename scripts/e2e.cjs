@@ -332,7 +332,9 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   // ---------- 8. 长尾页与 SEO ----------
   await send('Page.navigate', { url: BASE + '/hourly-rate-calculator/' });
   await sleep(2600);
-  check('landing h1 present', (await text('h1'))?.includes('Hourly Rate Calculator'));
+  // The page's job is the conversion, so its H1 follows the query
+  // ("salary to hourly") rather than the older internal name.
+  check('landing h1 present', (await text('h1'))?.includes('Salary to hourly calculator'));
   const canonical = await evalJS(`document.querySelector('link[rel=canonical]')?.getAttribute('href')`);
   check('canonical is self-referencing', canonical === 'https://salarytimer.work/hourly-rate-calculator/', String(canonical));
   const ldCount = await evalJS(`document.querySelectorAll('script[type="application/ld+json"]').length`);

@@ -131,13 +131,21 @@ jobs:
             echo "::error::Unknown route returned ${missing_status}; apply the repository nginx.conf routing rules"
             exit 1
           fi
-          for route in learn hourly-rate-calculator salary-per-second paycheck-countdown shift-worker-salary-timer overtime-pay-calculator; do
+          # The converter was retired with the content cluster and has since been
+          # brought back as a live tool, so it is asserted separately below
+          # instead of being expected to 410 like the rest.
+          for route in learn salary-per-second paycheck-countdown shift-worker-salary-timer overtime-pay-calculator; do
             retired_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
             if [ "$retired_status" != "410" ]; then
               echo "::error::Retired route /${route}/ returned ${retired_status}, expected 410"
               exit 1
             fi
           done
+          tool_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/hourly-rate-calculator/")
+          if [ "$tool_status" != "200" ]; then
+            echo "::error::/hourly-rate-calculator/ returned ${tool_status}, expected 200 — the 410 rule or the prune list still covers it"
+            exit 1
+          fi
           www_target=$(curl -sS -o /dev/null -w '%{redirect_url}' "https://www.salarytimer.work/?cb=${GITHUB_SHA}")
           if [ "$www_target" != "https://salarytimer.work/?cb=${GITHUB_SHA}" ]; then
             echo "::error::www hostname must redirect to the canonical hostname"
