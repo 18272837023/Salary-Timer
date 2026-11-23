@@ -137,6 +137,11 @@ export default function AboutPage() {
             you have told it overtime is allowed.
           </p>
           <p>
+            Check the hourly rate behind that counter with the{" "}
+            <Link href="/hourly-rate-calculator/">salary to hourly calculator</Link>, using your
+            salary and paid working hours.
+          </p>
+          <p>
             That is also why the page shows a rate per second. Once you know what an hour of your
             working life is worth, the smaller units stop being a gimmick and start being the most
             honest way to display the number.

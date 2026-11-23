@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Link } from "@/components/SmartLink";
 import { formatCents, formatRate, symbolFor } from "@/lib/money";
 import { useSettings } from "@/lib/store";
 
@@ -151,6 +152,10 @@ export function SalaryConverter() {
             </>
           )}
         </div>
+        <p className="conv-note">
+          Know your hourly rate? Watch your earnings grow throughout the workday with our{" "}
+          <Link href="/">live salary timer</Link>.
+        </p>
       </div>
     </div>
   );

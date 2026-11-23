@@ -256,12 +256,19 @@ export function Faq({
         <div className="eyebrow">{eyebrow}</div>
         <h2>{title}</h2>
         <p className="sec-lede">{lede}</p>
-        {items.map((item, i) => (
+        {items.map((item, i) => {
+          const linkStart = item.link ? item.a.indexOf(item.link.text) : -1;
+          return (
           <details className="faq" key={item.q} open={i === 0}>
             <summary>{item.q}</summary>
-            <div className="a">{item.a}</div>
+            <div className="a">{item.link && linkStart >= 0 ? <>
+              {item.a.slice(0, linkStart)}
+              <Link href={item.link.href}>{item.link.text}</Link>
+              {item.a.slice(linkStart + item.link.text.length)}
+            </> : item.a}</div>
           </details>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

@@ -10,6 +10,7 @@
 export interface FaqItem {
   q: string;
   a: string;
+  link?: { href: string; text: string };
 }
 
 export const HOME_FAQ: FaqItem[] = [
@@ -20,6 +21,11 @@ export const HOME_FAQ: FaqItem[] = [
   {
     "q": "Is a salary timer the same as a salary clock or a money clock?",
     "a": "Yes. Salary timer, salary clock, money clock and live earnings counter are different names for the same thing: a page that shows what you have earned so far today and updates as you work. This one reads your saved schedule, unpaid breaks and overtime rate, so the number follows the hours you are actually paid for instead of a flat daily rate."
+  },
+  {
+    "q": "How does the salary timer calculate my hourly rate?",
+    "a": "The salary timer converts your pay into an hourly rate using your saved paid working hours, then applies that rate to elapsed paid time. To check the conversion separately, calculate your hourly rate from salary using the standalone calculator before setting up your live timer.",
+    "link": { "href": "/hourly-rate-calculator/", "text": "calculate your hourly rate from salary" }
   },
   {
     "q": "Does the counter run outside my working hours?",
