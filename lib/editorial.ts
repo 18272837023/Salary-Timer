@@ -5,6 +5,9 @@ export const CONTENT_UPDATES: Readonly<Record<string, string>> = {
   "/": "2026-11-22",
   "/zh": "2026-11-15",
   "/about": "2026-11-22",
+  // Retired with the content cluster, then rebuilt as a standalone converter
+  // and republished — so the date is the republication, not the first draft.
+  "/hourly-rate-calculator": "2026-11-23",
   "/privacy": LEGAL_UPDATED,
   "/terms": LEGAL_UPDATED,
 };

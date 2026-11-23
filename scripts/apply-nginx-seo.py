@@ -36,7 +36,7 @@ def patch_server(body):
     body = re.sub(r"(?m)^\s*error_page\s+404\s+[^;]+;", "", body)
     return body.rstrip() + "\n" + BEGIN + """
     if ($host = www.salarytimer.work) { return 301 https://salarytimer.work$request_uri; }
-    if ($uri ~ "^/(learn|hourly-rate-calculator|salary-per-second|paycheck-countdown|shift-worker-salary-timer|overtime-pay-calculator)(/|$|\\.html$)") { return 410; }
+    if ($uri ~ "^/(learn|salary-per-second|paycheck-countdown|shift-worker-salary-timer|overtime-pay-calculator)(/|$|\\.html$)") { return 410; }
     error_page 404 /404.html;
     location = /404.html { internal; }
     location / { try_files $uri $uri/ $uri.html =404; }

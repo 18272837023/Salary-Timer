@@ -44,6 +44,7 @@ const en: Dict = {
   "nav.calculators": "Calculators",
   "nav.openMenu": "Open menu",
   "nav.closeMenu": "Close menu",
+  "nav.tools": "Tools",
   "nav.lang": "中文",
 
   // Hero
@@ -407,6 +408,7 @@ const zh: Dict = {
   "nav.calculators": "计算器",
   "nav.openMenu": "打开菜单",
   "nav.closeMenu": "关闭菜单",
+  "nav.tools": "工具",
   "nav.lang": "EN",
 
   // Hero

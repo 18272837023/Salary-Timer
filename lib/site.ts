@@ -129,6 +129,55 @@ export const ABOUT_PAGE: SitePageRoute = {
     "Who builds Salary Timer, why the counter follows your real schedule instead of dividing by 2,080, what happens to the figures you type in, and how to report a mistake.",
 };
 
+/**
+ * Tool pages: single-purpose utilities that live at the root.
+ *
+ * Kept as a list rather than loose constants because four things have to agree
+ * on the same copy — the page's own <title>/description, the Tools menu in the
+ * header, the footer link, and the sitemap entry. Reading all of them from here
+ * means a tool cannot ship with a menu entry that calls it something else.
+ */
+export interface ToolRoute extends SitePageRoute {
+  /** Short label for the header menu, sized to fit one dropdown row. */
+  menuLabel: string;
+  /** The line under the menu label: what goes in, what comes out. */
+  menuHint: string;
+}
+
+export const TOOL_PAGES: ToolRoute[] = [
+  {
+    href: "/hourly-rate-calculator",
+    label: "Salary to hourly calculator",
+    menuLabel: "Salary to hourly",
+    menuHint: "Annual, monthly or weekly pay → your real hourly rate",
+    title: "Salary to Hourly Calculator — real hourly rate",
+    description:
+      "Turn a yearly, monthly or weekly salary into a real hourly rate using the hours you actually work. Unpaid lunch, overtime and a 4-day week all change the number.",
+  },
+];
+
+/** Throws rather than returning undefined: a page asking for a tool that is not
+ *  in the list is a build-time mistake, not something to paper over at runtime. */
+export function getTool(href: string): ToolRoute {
+  const tool = TOOL_PAGES.find((entry) => entry.href === href);
+  if (!tool) throw new Error(`Unknown tool route: ${href}`);
+  return tool;
+}
+
+/**
+ * Open Graph fields a page-level `openGraph` must carry.
+ *
+ * Next replaces the parent `openGraph` object wholesale instead of deep-merging
+ * it, so a page that only sets `title`/`url` loses the image, the site name and
+ * the type — the share card then renders blank. Spread this first.
+ */
+export const OG_DEFAULTS = {
+  type: "website" as const,
+  siteName: SITE_NAME,
+  locale: "en_US",
+  images: [SOCIAL_IMAGE],
+};
+
 export function absoluteUrl(path = "/"): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

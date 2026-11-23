@@ -479,7 +479,6 @@ footer{border-top:2px solid var(--line); padding:46px 0 34px; margin-top:20px}
   .feature{grid-template-columns:1fr; gap:20px}
   .feature:nth-child(even) .txt{order:0}
   .foot-grid{grid-template-columns:1fr 1fr}
-  .nav-links{display:none}
 }
 @media (max-width: 620px){
   body{font-size:16px}
@@ -793,8 +792,10 @@ ol.checks li::before{
 .lang-dd-check{font-size:13px; color:var(--mint-deep); width:14px; text-align:right}
 .nav-right-mobile{display:none; gap:8px; align-items:center}
 @media(max-width:680px){
-  .nav-links .lang-dd{display:none}
-  .nav-right-mobile{display:flex}
+  /* The language switcher used to be hidden below 680px because it lived in a
+     separate mobile cluster. It now sits in .nav-links next to Tools, and
+     hiding it would leave phone visitors with no way to switch language. */
+  .nav-links{gap:2px}
 }
 /* Visible provenance and calculation assumptions on guide/tool pages. */
 .content-byline { margin: 14px 0; color: #555; font-size: 14px; line-height: 1.7; }
@@ -971,7 +972,7 @@ ol.checks li::before{
 .salary-save-status{margin:14px 4px 0;color:#74846d;font-size:11px;line-height:1.7}
 .salary-save-status.save-failed{padding:10px 14px;background:#fff3df;border:1px solid #f2d7a5;border-radius:12px;color:#8a5b22}
 
-.foot-grid{grid-template-columns:minmax(0,1fr) auto}
+.foot-grid{grid-template-columns:minmax(0,1fr) auto auto}
 @media(max-width:620px){.foot-grid{grid-template-columns:1fr}}
 
 /* ---------- author byline ---------- */
@@ -994,3 +995,120 @@ p.author-links{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 0;font-size:13
 p.author-links a{color:var(--mint-deep);text-decoration:none;border-bottom:2px solid var(--mint-soft)}
 p.author-links a:hover{border-bottom-color:var(--mint)}
 @media(max-width:560px){.author-strip{flex-direction:column;gap:12px;padding:20px}}
+
+/* ---------- salary → hourly converter ---------- */
+/* Replaces the shared timer on /hourly-rate-calculator only: that page answers
+   "what is my rate", not "what am I earning right now". */
+.conv{
+  display:grid; grid-template-columns:1.1fr .9fr;
+  border:2px solid var(--line); border-radius:26px; background:#fff;
+  box-shadow:var(--shadow-card); overflow:hidden; margin-top:26px; margin-bottom:24px;
+}
+.conv-inputs{padding:24px 26px; display:flex; flex-direction:column; gap:14px}
+.conv-period{display:flex; gap:6px; flex-wrap:wrap}
+.conv-period button{
+  font-family:var(--body); font-size:13px; font-weight:800; cursor:pointer;
+  padding:7px 14px; border-radius:99px; border:2px solid var(--line);
+  background:#fff; color:var(--ink-2); transition:border-color .15s, background .15s, color .15s;
+}
+.conv-period button:hover{border-color:var(--mint)}
+.conv-period button[aria-pressed="true"]{
+  background:var(--mint-soft); border-color:var(--mint); color:var(--mint-deep);
+}
+.conv-field{display:flex; flex-direction:column; gap:6px}
+.conv-field > span:first-child{
+  font-size:11.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--faint);
+}
+.conv-field input{
+  width:100%; font-family:var(--display); font-size:19px; font-weight:800; color:var(--ink);
+  padding:10px 14px; border-radius:14px; border:2px solid var(--line);
+  background:var(--cream); outline:none;
+}
+.conv-field input:focus{border-color:var(--mint); background:#fff}
+.conv-money{
+  display:flex; align-items:center; gap:8px; padding-left:14px;
+  border:2px solid var(--line); border-radius:14px; background:var(--cream);
+}
+.conv-money:focus-within{border-color:var(--mint); background:#fff}
+.conv-money .cur{font-family:var(--display); font-size:19px; font-weight:800; color:var(--muted)}
+.conv-money input{flex:1; width:auto; border:none; background:transparent; padding-left:0}
+.conv-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.conv-note{margin:0; font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.55}
+
+.conv-out{
+  padding:24px 26px; background:var(--cream); border-left:2px solid var(--line);
+  display:flex; flex-direction:column; justify-content:center; gap:5px;
+}
+.conv-k{
+  font-size:11.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint);
+}
+.conv-v{
+  font-family:var(--display); font-weight:800; line-height:1.05; letter-spacing:-.02em;
+  font-size:clamp(34px, 4.6vw, 46px); color:var(--mint-deep); font-variant-numeric:tabular-nums;
+}
+.conv-sub{font-size:13.5px; font-weight:700; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.conv-cmp{
+  margin-top:8px; padding-top:10px; border-top:1px solid var(--line-2);
+  font-size:12.5px; font-weight:700; color:var(--muted); line-height:1.5;
+}
+@media (max-width:820px){
+  .conv{grid-template-columns:1fr}
+  .conv-out{border-left:none; border-top:2px solid var(--line)}
+}
+@media (max-width:430px){
+  .conv-row{grid-template-columns:1fr}
+}
+
+/* A table of pure figures — no sentences in any cell — does not need 520px of
+   room. Letting it shrink beats making a phone user scroll sideways to read the
+   third column of a conversion table. */
+@media (max-width:520px){
+  .table-wrap.fit table{min-width:0; font-size:12.5px}
+  .table-wrap.fit th, .table-wrap.fit td{padding-left:8px; padding-right:8px}
+  .table-wrap.fit th{font-size:10.5px; letter-spacing:.03em}
+}
+
+/* ---------- Tools menu ---------- */
+/* A click-to-open disclosure. It sits inside .nav-links so it inherits the same
+   hit area as the language switcher, but its panel resets the pill styling the
+   `.nav-links a` rule would otherwise give every row. */
+.nav-tools{position:relative}
+.nav-tools-btn{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--body); font-size:14.5px; font-weight:700; color:var(--muted);
+  background:none; border:none; cursor:pointer; padding:8px 13px; border-radius:999px;
+  transition:.15s;
+}
+.nav-tools-btn:hover,
+.nav-tools-btn[aria-expanded="true"]{color:var(--ink); background:var(--cream)}
+.nav-tools-btn svg{transition:transform .15s}
+.nav-tools-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.tools-menu{
+  position:absolute; top:calc(100% + 10px); right:0; z-index:60;
+  width:min(330px, calc(100vw - 32px));
+  background:#fff; border:2px solid var(--line); border-radius:18px;
+  box-shadow:0 18px 40px -22px rgba(51,49,59,.35);
+  padding:8px; display:flex; flex-direction:column; gap:2px;
+}
+.tools-menu a{
+  display:flex; flex-direction:column; gap:2px;
+  padding:11px 13px; border-radius:12px; text-decoration:none; transition:.15s;
+}
+.tools-menu a:hover{background:var(--cream)}
+.tools-menu b{font-family:var(--display); font-size:14.5px; font-weight:800; color:var(--ink)}
+.tools-menu span{font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.4}
+
+/* Below 380px the brand, the Tools button and the language picker together
+   exceed the viewport by ~27px. Shrink all three rather than dropping one: a
+   phone visitor still needs the menu and the language switch. */
+@media(max-width:380px){
+  .nav{gap:8px}
+  .nav-links{gap:0}
+  .brand{font-size:16px; gap:8px}
+  .brand .mark{width:30px; height:30px; border-radius:10px; font-size:16px; box-shadow:0 2px 0 var(--mint-deep)}
+  .nav-tools-btn{padding:7px 7px; font-size:13px; gap:4px}
+  .lang-dd-btn{padding:4px 7px; gap:4px; font-size:12px}
+  .lang-dd-globe{font-size:12px}
+}

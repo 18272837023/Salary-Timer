@@ -2,7 +2,7 @@
 
 import { useHref, useI18n } from "@/lib/i18n";
 import { Link } from "@/components/SmartLink";
-import { LEGAL_PAGES } from "@/lib/site";
+import { LEGAL_PAGES, TOOL_PAGES } from "@/lib/site";
 
 export function SiteFooter() {
   const { t } = useI18n();
@@ -46,6 +46,19 @@ export function SiteFooter() {
               <li>
                 <Link href={href("/#faq")}>{t("footer.faq")}</Link>
               </li>
+            </ul>
+          </div>
+
+          <div>
+            <h5>{t("nav.tools")}</h5>
+            <ul>
+              {/* Read from TOOL_PAGES, so a tool page cannot be published without
+                  a footer link pointing at it. */}
+              {TOOL_PAGES.map((tool) => (
+                <li key={tool.href}>
+                  <Link href={tool.href}>{tool.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

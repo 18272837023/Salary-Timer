@@ -27,8 +27,10 @@ walk(root);
 // added here on purpose. Homepages and policies were the whole site; /about is
 // the one editorial page that answers "who is behind this", and it is allowed
 // because it adds a Person entity rather than a second surface competing for
-// the same query. Anything else still fails the build.
-const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
+// the same query. /hourly-rate-calculator was retired with the content cluster
+// and brought back on its own, so its return is an explicit decision here rather
+// than a side effect of a restore. Anything else still fails the build.
+const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/hourly-rate-calculator/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
 assert(pages.length >= 4, "Missing retained routes");
 const sitemap = read("sitemap.xml");
 const modified = new Map([...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => [
@@ -78,9 +80,9 @@ assert.match(read("index.html"), /<html[^>]*lang="en"/);
 assert(!text(zh).includes("Salary Timer is a free web tool"), "English entity definition leaked into Chinese content");
 assert.equal(jsonLd(zh).find((n) => n["@type"] === "WebSite").inLanguage, "zh-CN");
 console.log("PASS: Chinese language and definition are correct before JavaScript");
-assert.equal(published, 5, "Only homepages, the about page and policies may be published");
-assert.equal(modified.size, 5, "Sitemap must list only retained pages");
-for (const rel of ["learn", "hourly-rate-calculator", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator"]) {
+assert.equal(published, 6, "Only homepages, the about page, the tool page and policies may be published");
+assert.equal(modified.size, 6, "Sitemap must list only retained pages");
+for (const rel of ["learn", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator"]) {
   assert(!fs.existsSync(path.join(root, rel)), `Retired export still exists: ${rel}`);
 }
 for (const file of pages) {
@@ -90,7 +92,7 @@ for (const file of pages) {
     assert(fs.existsSync(path.join(root, url)) || fs.existsSync(path.join(root, url, "index.html")), `${file}: dead link ${url}`);
   }
 }
-console.log("PASS: retired routes absent, five-page sitemap and remaining internal links");
+console.log("PASS: retired routes absent, six-page sitemap and remaining internal links");
 const config = fs.readFileSync(path.join(__dirname, "..", "nginx.conf"), "utf8");
 assert(!/try_files[^;]*\/index\.html\s*;/.test(config), "Homepage fallback still enabled");
 assert.match(config, /try_files\s+\$uri\s+\$uri\/\s+\$uri\.html\s+=404;/);

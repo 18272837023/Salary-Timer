@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 import shutil
 
-RETIRED = ("learn", "hourly-rate-calculator", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator")
+RETIRED = ("learn", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator")
 
 
 def prune(root):
