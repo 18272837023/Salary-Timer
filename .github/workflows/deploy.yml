@@ -143,8 +143,8 @@ jobs:
           done
           # Live tool pages, listed rather than derived: naming a route here is
           # the deploy-time half of the same decision verify-geo makes at build
-          # time. All three must return 200; the retired five above must return 410.
-          for route in pay-per-second-calculator hourly-rate-calculator hourly-to-annual-salary; do
+          # time. All four must return 200; the retired five above must return 410.
+          for route in pay-per-second-calculator salary-stopwatch hourly-rate-calculator hourly-to-annual-salary; do
             tool_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
             if [ "$tool_status" != "200" ]; then
               echo "::error::/${route}/ returned ${tool_status}, expected 200 — the 410 rule or the prune list still covers it"

@@ -158,6 +158,18 @@ export const TOOL_PAGES: ToolRoute[] = [
       "Turn an hourly wage or an annual salary into pay per second, per minute, per hour and per workday. Static figures you can read at a glance, with a link to the live counter.",
   },
   {
+    // Manual mode, and only allowed to exist because it is manual: the page
+    // ships its own start/pause/resume/reset watch rather than borrowing the
+    // schedule-driven timer from the homepage.
+    href: "/salary-stopwatch",
+    label: "Salary stopwatch",
+    menuLabel: "Salary stopwatch",
+    menuHint: "Start, pause and price a single session",
+    title: "Salary Stopwatch — start, pause and price a session",
+    description:
+      "A manual salary stopwatch: press start, pause for an unpaid break, and watch the paid time and earnings for that session. Reset to log it and start the next.",
+  },
+  {
     href: "/hourly-rate-calculator",
     label: "Salary to hourly calculator",
     menuLabel: "Salary to hourly",

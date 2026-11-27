@@ -10,7 +10,7 @@ export function HomeCalculation({ lang }: { lang: Lang }) {
         ? "时薪模式直接使用输入的费率。年薪除以每周计薪工时 × 52；月薪先乘以12，再按相同方法换算；日薪除以每天计薪工时。无薪休息只扣除一次。"
         : "Hourly mode uses your entered rate. Annual pay is divided by scheduled paid hours per week × 52. Monthly pay is multiplied by 12 before that conversion; daily pay is divided by paid hours per day. Unpaid breaks are deducted once."}</p>
       {!zh && <p className="sec-lede">
-        Want to check your hourly rate first? Use our <Link href="/hourly-rate-calculator/">hourly rate calculator</Link> with your salary and paid working hours. For the smallest unit, the <Link href="/pay-per-second-calculator/">pay per second calculator</Link> turns the same rate into seconds, minutes and a workday.
+        Want to check your hourly rate first? Use our <Link href="/hourly-rate-calculator/">hourly rate calculator</Link> with your salary and paid working hours. For the smallest unit, the <Link href="/pay-per-second-calculator/">pay per second calculator</Link> turns the same rate into seconds, minutes and a workday. If the hours are not on a schedule at all, the <Link href="/salary-stopwatch/">salary stopwatch</Link> starts and stops when you do.
       </p>}
       <div className="table-wrap">
         <table>
