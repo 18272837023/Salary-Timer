@@ -192,6 +192,18 @@ export const TOOL_PAGES: ToolRoute[] = [
       "Turn an hourly wage into annual, monthly, weekly and biweekly pay, with a 52 or 50 paid-week switch. Includes what $20 and $25 an hour come to in a year.",
   },
   {
+    // Sits next to the hourly→annual page because it is the same arithmetic
+    // stopped one step earlier: that page answers "what is my year", this one
+    // answers "what is one paycheck". The copy never says "hourly to annual".
+    href: "/biweekly-pay-calculator",
+    label: "Biweekly pay calculator",
+    menuLabel: "Biweekly pay",
+    menuHint: "Salary or wage → one two-week paycheck",
+    title: "Biweekly Pay Calculator — what one paycheck comes to",
+    description:
+      "Turn an annual salary or an hourly wage into the gross amount of one biweekly paycheck, with the semi-monthly comparison and the 26-check year behind it.",
+  },
+  {
     // The only page here that answers with a date instead of an amount. Kept
     // last in the menu because it is a different kind of question, and kept
     // money-free because the homepage already owns the "what is it worth" one.

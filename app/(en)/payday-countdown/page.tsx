@@ -155,6 +155,11 @@ export default function PaydayCountdownPage() {
           year one lands early enough that another follows inside the same month. It is not a bonus.
           The year still holds 26.
         </p>
+        <p>
+          If you want the two paycheck sizes side by side rather than the dates, the{" "}
+          <Link href="/biweekly-pay-calculator">biweekly pay calculator</Link> does that comparison
+          on one salary and spells out the 8.3% gap between them.
+        </p>
       </section>
 
       <section>
