@@ -191,6 +191,18 @@ export const TOOL_PAGES: ToolRoute[] = [
     description:
       "Turn an hourly wage into annual, monthly, weekly and biweekly pay, with a 52 or 50 paid-week switch. Includes what $20 and $25 an hour come to in a year.",
   },
+  {
+    // The only page here that answers with a date instead of an amount. Kept
+    // last in the menu because it is a different kind of question, and kept
+    // money-free because the homepage already owns the "what is it worth" one.
+    href: "/payday-countdown",
+    label: "Payday countdown",
+    menuLabel: "Payday countdown",
+    menuHint: "Days until your next paycheck, any pay cycle",
+    title: "Payday Countdown — days until your next paycheck",
+    description:
+      "Count the days to your next payday on a weekly, biweekly, semi-monthly or monthly cycle, with a weekend rule and the next three dates. A date countdown, not a wage estimate.",
+  },
 ];
 
 /** Throws rather than returning undefined: a page asking for a tool that is not

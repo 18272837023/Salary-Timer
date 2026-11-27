@@ -36,9 +36,12 @@ walk(root);
 // which is a lookup, not the live count the homepage owns. /salary-stopwatch is
 // the one page that counts live, and it is allowed only because it brings its
 // own manual mode (start/pause/resume/reset) instead of re-skinning the
-// schedule-driven homepage timer; that condition is asserted below. Anything
-// else still fails the build.
-const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/pay-per-second-calculator/", "https://salarytimer.work/salary-stopwatch/", "https://salarytimer.work/hourly-rate-calculator/", "https://salarytimer.work/hourly-to-annual-salary/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
+// schedule-driven homepage timer; that condition is asserted below.
+// /payday-countdown answers with a date rather than an amount, so it cannot
+// compete with the homepage for "what am I earning" — the copy never estimates
+// pay, which is the planning rule for that page. Anything else still fails the
+// build.
+const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/pay-per-second-calculator/", "https://salarytimer.work/salary-stopwatch/", "https://salarytimer.work/hourly-rate-calculator/", "https://salarytimer.work/hourly-to-annual-salary/", "https://salarytimer.work/payday-countdown/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
 assert(pages.length >= 4, "Missing retained routes");
 const sitemap = read("sitemap.xml");
 const modified = new Map([...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => [
@@ -88,8 +91,8 @@ assert.match(read("index.html"), /<html[^>]*lang="en"/);
 assert(!text(zh).includes("Salary Timer is a free web tool"), "English entity definition leaked into Chinese content");
 assert.equal(jsonLd(zh).find((n) => n["@type"] === "WebSite").inLanguage, "zh-CN");
 console.log("PASS: Chinese language and definition are correct before JavaScript");
-assert.equal(published, 9, "Only homepages, the about page, the four tool pages and policies may be published");
-assert.equal(modified.size, 9, "Sitemap must list only retained pages");
+assert.equal(published, 10, "Only homepages, the about page, the five tool pages and policies may be published");
+assert.equal(modified.size, 10, "Sitemap must list only retained pages");
 // The stopwatch page's licence to exist is its own manual mode. If a refactor
 // ever swaps it back for the schedule-driven timer, the four controls vanish
 // from the exported HTML and the build fails here rather than shipping a second
@@ -99,6 +102,14 @@ for (const control of ["Start", "Pause", "Resume", "Reset"]) {
   assert(new RegExp(`>${control}<`).test(stopwatch), `/salary-stopwatch: missing the ${control} control`);
 }
 assert(stopwatch.includes("sw-break") && stopwatch.includes("Take an unpaid break"), "/salary-stopwatch: missing the unpaid-break control");
+// The payday page's planning rule is that it counts dates, not money. Four
+// cycles and a date field are what make that true; if a refactor ever turns it
+// into an earnings card, these disappear and the build says so.
+const payday = read("payday-countdown/index.html");
+for (const cycle of ["Weekly", "Every two weeks", "Twice a month", "Monthly"]) {
+  assert(new RegExp(`>${cycle}<`).test(payday), `/payday-countdown: missing the ${cycle} cycle option`);
+}
+assert(payday.includes('type="date"'), "/payday-countdown: missing the payday date field");
 for (const rel of ["learn", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator"]) {
   assert(!fs.existsSync(path.join(root, rel)), `Retired export still exists: ${rel}`);
 }
@@ -109,7 +120,7 @@ for (const file of pages) {
     assert(fs.existsSync(path.join(root, url)) || fs.existsSync(path.join(root, url, "index.html")), `${file}: dead link ${url}`);
   }
 }
-console.log("PASS: retired routes absent, nine-page sitemap and remaining internal links");
+console.log("PASS: retired routes absent, ten-page sitemap and remaining internal links");
 const config = fs.readFileSync(path.join(__dirname, "..", "nginx.conf"), "utf8");
 assert(!/try_files[^;]*\/index\.html\s*;/.test(config), "Homepage fallback still enabled");
 assert.match(config, /try_files\s+\$uri\s+\$uri\/\s+\$uri\.html\s+=404;/);

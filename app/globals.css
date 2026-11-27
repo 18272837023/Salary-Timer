@@ -1173,6 +1173,29 @@ p.author-links a:hover{border-bottom-color:var(--mint)}
   .sw-face{gap:4px}
 }
 
+/* ---------- payday countdown ---------- */
+/* Date arithmetic, so the card reuses the converter shell: inputs left, the one
+   number the page exists for on the right. No money anywhere in it — the
+   countdown owns the date question and the homepage keeps the wage one. */
+.pd-date input{font-family:var(--body); font-size:16px; font-weight:700; letter-spacing:0}
+.pd-check{
+  display:flex; align-items:flex-start; gap:9px; cursor:pointer;
+  font-size:13px; font-weight:700; color:var(--ink-2); line-height:1.45;
+}
+.pd-check input{
+  appearance:none; flex:0 0 auto; width:20px; height:20px; margin:1px 0 0;
+  border:2px solid var(--line-2); border-radius:6px; background:#fff;
+  cursor:pointer; position:relative; transition:background .15s, border-color .15s;
+}
+.pd-check input:checked{background:var(--mint); border-color:var(--mint)}
+.pd-check input:checked::after{
+  content:""; position:absolute; left:5px; top:1px; width:5px; height:10px;
+  border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg);
+}
+.pd-check input:focus-visible{outline:2px solid var(--mint-deep); outline-offset:2px}
+.pd-hint{margin:0; font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.55}
+.conv-v.big{font-size:clamp(46px, 7.2vw, 62px)}
+
 /* A table of pure figures — no sentences in any cell — does not need 520px of
    room. Letting it shrink beats making a phone user scroll sideways to read the
    third column of a conversion table. */

@@ -12,6 +12,9 @@ export function HomeCalculation({ lang }: { lang: Lang }) {
       {!zh && <p className="sec-lede">
         Want to check your hourly rate first? Use our <Link href="/hourly-rate-calculator/">hourly rate calculator</Link> with your salary and paid working hours. For the smallest unit, the <Link href="/pay-per-second-calculator/">pay per second calculator</Link> turns the same rate into seconds, minutes and a workday. If the hours are not on a schedule at all, the <Link href="/salary-stopwatch/">salary stopwatch</Link> starts and stops when you do.
       </p>}
+      {!zh && <p className="sec-lede">
+        Wondering when the money lands rather than what it is worth? The <Link href="/payday-countdown/">payday countdown</Link> works out the days to your next paycheck on any pay cycle.
+      </p>}
       <div className="table-wrap">
         <table>
           <caption>{zh ? "示例：每小时30美元，不含加班" : "Example: $30 per paid hour, without overtime"}</caption>
