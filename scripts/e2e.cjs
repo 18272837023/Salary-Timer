@@ -340,6 +340,18 @@ const check = (name, ok, detail) => { results.push({ name, ok, detail }); };
   const ldCount = await evalJS(`document.querySelectorAll('script[type="application/ld+json"]').length`);
   check('json-ld blocks on landing page', ldCount >= 2, String(ldCount));
 
+  // The per-second page must open on a static figure, not on a running clock:
+  // that is the whole point of keeping it separate from the homepage.
+  await send('Page.navigate', { url: BASE + '/pay-per-second-calculator/' });
+  await sleep(1800);
+  check('per-second h1 present', (await text('h1'))?.includes('Pay per second calculator'));
+  const psCanonical = await evalJS(`document.querySelector('link[rel=canonical]')?.getAttribute('href')`);
+  check('per-second canonical is self-referencing', psCanonical === 'https://salarytimer.work/pay-per-second-calculator/', String(psCanonical));
+  const psValue = String(await text('.conv-v'));
+  check('per-second result is the static figure for $25/h', /0\.0069/.test(psValue), psValue);
+  const psCta = await evalJS(`document.querySelector('.conv-cta')?.getAttribute('href')`);
+  check('per-second page hands off to the live timer', psCta === '/', String(psCta));
+
   // ---------- 9. Chinese wizard, screenshot, mobile layout and persistence ----------
   await send('Page.navigate', { url: BASE + '/zh/' });
   await sleep(900);

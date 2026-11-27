@@ -146,6 +146,18 @@ export interface ToolRoute extends SitePageRoute {
 
 export const TOOL_PAGES: ToolRoute[] = [
   {
+    // The finest unit first, then the two directions of the same division. The
+    // page is static on purpose: "how much do I make per second" is a lookup,
+    // not a request for a clock, so it must not compete with the homepage.
+    href: "/pay-per-second-calculator",
+    label: "Pay per second calculator",
+    menuLabel: "Pay per second",
+    menuHint: "Hourly or annual pay → second, minute, workday",
+    title: "Pay Per Second Calculator — per second, minute and workday",
+    description:
+      "Turn an hourly wage or an annual salary into pay per second, per minute, per hour and per workday. Static figures you can read at a glance, with a link to the live counter.",
+  },
+  {
     href: "/hourly-rate-calculator",
     label: "Salary to hourly calculator",
     menuLabel: "Salary to hourly",

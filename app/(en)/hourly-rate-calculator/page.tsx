@@ -252,6 +252,12 @@ export default function HourlyRateCalculatorPage() {
           </li>
         </ul>
         <p>
+          Those sums get easier once the rate is broken down further. The{" "}
+          <Link href="/pay-per-second-calculator">pay per second calculator</Link> takes the same
+          hourly rate and gives you the second, the minute and the workday — which is the form a
+          meeting, a commute or a coffee actually gets measured in.
+        </p>
+        <p>
           Set your real numbers in the converter above and you have the honest figure for this job.
           If you would rather watch the number accrue than calculate it, open the{" "}
           <Link href="/">free salary timer</Link> — it reads the same hours you just entered, so the
