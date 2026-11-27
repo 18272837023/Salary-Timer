@@ -179,8 +179,10 @@ export default function BiweeklyPayCalculatorPage() {
           </li>
           <li>
             <b>Act as a two-week time card.</b> There is one hours field for the whole period and no
-            per-day rows. If you need to log shifts, that is a timesheet, and building a bad one
-            inside a pay calculator helps nobody.
+            per-day rows. Logging shifts is a different job with a different shape — the{" "}
+            <Link href="/time-card-calculator">time card calculator</Link> does it with a row per day
+            and adds the fortnight up — and building a bad version of it inside a pay calculator helps
+            nobody.
           </li>
           <li>
             <b>Guess at overtime, tips or bonuses.</b> The figure is your base rate across paid

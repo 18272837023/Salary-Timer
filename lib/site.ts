@@ -170,6 +170,21 @@ export const TOOL_PAGES: ToolRoute[] = [
       "A manual salary stopwatch: press start, pause for an unpaid break, and watch the paid time and earnings for that session. Reset to log it and start the next.",
   },
   {
+    // The only page here that logs a row per day. It exists because the two
+    // neighbours above deliberately refuse this job: the stopwatch prices one
+    // session and the biweekly page is one number for a fortnight, with no
+    // per-day grid at all. The hero is a table, never the live counter — the
+    // planning rule for this page forbids the homepage's ticker from being the
+    // main event, and the build asserts the grid is still there.
+    href: "/time-card-calculator",
+    label: "Time card calculator",
+    menuLabel: "Time card",
+    menuHint: "Clock in and out per day → hours, overtime, pay",
+    title: "Time Card Calculator — weekly and biweekly hours",
+    description:
+      "Log clock-in and clock-out for each day, subtract unpaid breaks, and total regular hours, overtime hours and gross pay across a 7 or 14-day card. Overnight shifts, print and CSV export.",
+  },
+  {
     href: "/hourly-rate-calculator",
     label: "Salary to hourly calculator",
     menuLabel: "Salary to hourly",

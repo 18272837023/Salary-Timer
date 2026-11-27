@@ -599,7 +599,10 @@ footer{border-top:2px solid var(--line); padding:46px 0 34px; margin-top:20px}
   padding:16px 18px; font-family:var(--display); font-weight:800; font-size:16px;
   color:var(--mint-deep); text-align:center;
 }
-.checks{list-style:none; padding:0; margin:14px 0 0; display:flex; flex-direction:column; gap:12px}
+/* Bottom margin because a paragraph often follows the list, and prose `p` has no
+   top margin of its own — without it the next line sits flush against the last
+   bullet. */
+.checks{list-style:none; padding:0; margin:14px 0 14px; display:flex; flex-direction:column; gap:12px}
 .checks li{
   position:relative; padding-left:30px; font-size:15.5px; color:var(--ink-2);
   font-weight:600; line-height:1.65;
@@ -1196,6 +1199,11 @@ p.author-links a:hover{border-bottom-color:var(--mint)}
 .pd-hint{margin:0; font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.55}
 .conv-v.big{font-size:clamp(46px, 7.2vw, 62px)}
 
+/* A comparison between two valid readings has no "answer" column to tint, so
+   the last-column highlight is switched off rather than silently picking a
+   side. */
+.table-wrap.plain td:last-child{font-family:var(--body); font-weight:700; color:var(--ink)}
+
 /* A table of pure figures — no sentences in any cell — does not need 520px of
    room. Letting it shrink beats making a phone user scroll sideways to read the
    third column of a conversion table. */
@@ -1235,6 +1243,15 @@ p.author-links a:hover{border-bottom-color:var(--mint)}
 .tools-menu b{font-family:var(--display); font-size:14.5px; font-weight:800; color:var(--ink)}
 .tools-menu span{font-size:12.5px; font-weight:600; color:var(--muted); line-height:1.4}
 
+/* On a phone the panel is wider than the space between the Tools button and the
+   left edge, so it hung off the screen and clipped every label. Dropping the
+   anchor to the header (which is already `position:sticky`, so it is a
+   containing block) lets the panel span the viewport instead of the button. */
+@media(max-width:520px){
+  .nav-tools{position:static}
+  .tools-menu{position:absolute; left:16px; right:16px; top:calc(100% + 8px); width:auto}
+}
+
 /* Below 380px the brand, the Tools button and the language picker together
    exceed the viewport by ~27px. Shrink all three rather than dropping one: a
    phone visitor still needs the menu and the language switch. */
@@ -1246,4 +1263,139 @@ p.author-links a:hover{border-bottom-color:var(--mint)}
   .nav-tools-btn{padding:7px 7px; font-size:13px; gap:4px}
   .lang-dd-btn{padding:4px 7px; gap:4px; font-size:12px}
   .lang-dd-globe{font-size:12px}
+}
+
+/* ---------- multi-day time card ---------- */
+/* The only card on the site built as a table, because the query behind it is a
+   row per day rather than a single number. No ticking element anywhere: the
+   planning rule for this page forbids the homepage counter from being the main
+   event, so the hero is a grid you fill in and a total you read afterwards. */
+.tc{
+  border:2px solid var(--line); border-radius:26px; background:#fff;
+  box-shadow:var(--shadow-card); margin:26px 0 24px; overflow:hidden;
+  max-width:860px;
+}
+.tc-top{
+  display:grid; grid-template-columns:140px 112px 1fr 1.2fr; gap:14px;
+  align-items:end; padding:20px 22px;
+  border-bottom:2px solid var(--line); background:var(--cream);
+}
+/* "Weekly over 40h" is the longest label on the page. Without the nowrap it
+   broke onto two lines and made its pill taller than the one beside it. */
+.tc-top .conv-period button{font-size:12.5px; white-space:nowrap}
+/* The money wrapper carries its own 2px border, so the bare input beside it
+   measured 4px shorter and the two boxes did not line up along the bottom. */
+.tc-top .conv-field > input{min-height:54px}
+.tc-switch{display:flex; flex-direction:column; gap:6px; min-width:0}
+.tc-label{
+  font-size:11.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--faint);
+}
+.tc-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+.tc-table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:352px}
+/* Above phone width the columns are pinned by percentage so no single cell can
+   absorb the slack — the break field stretched to a third of the card under
+   auto layout and pushed the two figures columns to the edge. Below 520px the
+   table goes back to auto layout, where it already fits 342px with no sideways
+   scroll. */
+@media(min-width:521px){
+  .tc-table{table-layout:fixed}
+  .tc-table th:nth-child(1){width:16%}
+  .tc-table th:nth-child(2), .tc-table th:nth-child(3){width:19%}
+  .tc-table th:nth-child(4){width:19%}
+  .tc-table th:nth-child(5){width:14%; text-align:right}
+  .tc-table th:nth-child(6){width:13%; text-align:right}
+}
+.tc-table th, .tc-table td{
+  padding:6px 9px; border-bottom:1px solid var(--line-2); text-align:left; vertical-align:middle;
+}
+.tc-table thead th{
+  font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--faint); background:#fff;
+}
+.tc-table tbody th{font-weight:800; color:var(--ink-2); white-space:nowrap}
+.tc-table tbody th b{font-family:var(--display); font-size:13.5px; color:var(--ink)}
+.tc-table tbody th i{
+  display:block; font-style:normal; font-size:9.5px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--faint);
+}
+.tc-table tr:last-child th, .tc-table tr:last-child td{border-bottom:none}
+.tc-table input{
+  width:100%; max-width:118px; min-width:0; font-family:var(--body); font-size:13px; font-weight:700;
+  color:var(--ink); padding:6px 7px; border-radius:9px; border:2px solid var(--line);
+  background:var(--cream); outline:none;
+}
+.tc-table input:focus{border-color:var(--mint); background:#fff}
+/* Chrome draws a clock glyph inside a time field; the extra right padding keeps
+   it off the digits on a 60px column. */
+.tc-table input[type="time"]{padding-right:2px}
+.tc-num{
+  font-family:var(--display); font-weight:800; font-variant-numeric:tabular-nums;
+  white-space:nowrap; color:var(--ink); text-align:right;
+}
+/* The only badge on the card: which shift crossed midnight. Without it a total
+   that looks too large has no visible explanation. */
+.tc-on{
+  display:inline-block; margin-left:5px; font-style:normal; font-size:9px; font-weight:800;
+  letter-spacing:.03em; text-transform:uppercase; vertical-align:2px;
+  color:var(--peach-deep); background:var(--peach-soft); border-radius:5px; padding:1px 4px;
+}
+.tc-sum{
+  display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center;
+  padding:20px 22px; border-top:2px solid var(--line); background:var(--cream);
+}
+/* .conv-mini already draws a top rule; inside the summary it would double up
+   with the panel border. */
+.tc-mini{margin-top:0; padding-top:0; border-top:none}
+.tc-foot{padding:16px 22px 20px; display:flex; flex-direction:column; gap:12px}
+.tc-actions{display:flex; gap:8px; flex-wrap:wrap}
+.tc-btn{
+  font-family:var(--body); font-size:13px; font-weight:800; cursor:pointer;
+  padding:10px 16px; border-radius:12px; border:2px solid var(--line);
+  background:#fff; color:var(--ink-2); transition:.15s;
+}
+.tc-btn:hover{border-color:var(--mint); color:var(--ink)}
+.tc-btn.ghost{border-style:dashed; border-color:var(--line-2); background:var(--cream); color:var(--muted)}
+.tc-btn.ghost:hover{border-color:var(--peach); color:var(--peach-deep); background:var(--peach-soft)}
+@media(max-width:820px){
+  .tc-top{grid-template-columns:1fr 1fr; gap:12px 14px}
+  .tc-sum{grid-template-columns:1fr; gap:14px}
+}
+@media(max-width:520px){
+  .tc-top{padding:16px 16px; grid-template-columns:1fr}
+  .tc-sum{padding:16px}
+  .tc-foot{padding:14px 16px 18px}
+  .tc-table{font-size:12.5px; min-width:0}
+  .tc-table th, .tc-table td{padding:5px 5px}
+  .tc-table input{font-size:12px; padding:5px 5px}
+  .tc-table thead th{font-size:9.5px; letter-spacing:.04em}
+  /* The day column is ~40px wide on a phone, so the badge drops under the day
+     name instead of being pushed out of the cell. */
+  .tc-on{display:block; margin-left:0; width:max-content; font-size:8px; padding:0 3px}
+}
+
+/* ---------- print: the card, and nothing else ---------- */
+/* Scoped with :has() so printing any other page is unaffected — a global rule
+   hiding .prose would silently gut every article on the site. */
+@media print{
+  body:has(.tc) header,
+  body:has(.tc) footer,
+  body:has(.tc) .tool-hero,
+  body:has(.tc) .prose,
+  body:has(.tc) #faq,
+  body:has(.tc) .tc-foot,
+  body:has(.tc) .blob{display:none !important}
+  body:has(.tc){background:#fff}
+  body:has(.tc) .wrap{padding-left:0; padding-right:0}
+  .tc{border:none; box-shadow:none; margin:0}
+  .tc-top{border-bottom:1px solid #000; background:#fff; padding:0 0 12px}
+  /* A printed record is a document, not a screenshot: drop the mint fill and
+     the picker glyph so the page is legible on a mono printer. */
+  .tc-top .conv-period button{background:#fff; color:#000; border-color:#999}
+  .tc-top .conv-period button[aria-pressed="true"]{border-color:#000; border-width:3px}
+  .tc-sum .conv-v{color:#000}
+  .tc-table input{border:none; background:none; padding:0; font-size:12px}
+  .tc-table input::-webkit-calendar-picker-indicator{display:none}
+  .tc-table th, .tc-table td{border-bottom:1px solid #ccc}
+  .tc-sum{border-top:1px solid #000; background:#fff; padding:12px 0 0}
 }

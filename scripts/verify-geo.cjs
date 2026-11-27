@@ -42,8 +42,12 @@ walk(root);
 // pay, which is the planning rule for that page. /biweekly-pay-calculator is the
 // same arithmetic as the hourly→annual page stopped one step earlier — one
 // paycheck instead of one year — and its copy never uses that page's phrasing.
+// /time-card-calculator is the only page that logs a row per day, which is the
+// job the biweekly page explicitly refuses and the stopwatch cannot do. Its
+// planning rule forbids the homepage ticker from being the main event, so the
+// hero is a table; that condition is asserted below.
 // Anything else still fails the build.
-const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/pay-per-second-calculator/", "https://salarytimer.work/salary-stopwatch/", "https://salarytimer.work/hourly-rate-calculator/", "https://salarytimer.work/hourly-to-annual-salary/", "https://salarytimer.work/biweekly-pay-calculator/", "https://salarytimer.work/payday-countdown/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
+const allowed = new Set(["https://salarytimer.work/", "https://salarytimer.work/zh/", "https://salarytimer.work/about/", "https://salarytimer.work/pay-per-second-calculator/", "https://salarytimer.work/salary-stopwatch/", "https://salarytimer.work/time-card-calculator/", "https://salarytimer.work/hourly-rate-calculator/", "https://salarytimer.work/hourly-to-annual-salary/", "https://salarytimer.work/biweekly-pay-calculator/", "https://salarytimer.work/payday-countdown/", "https://salarytimer.work/privacy/", "https://salarytimer.work/terms/"]);
 assert(pages.length >= 4, "Missing retained routes");
 const sitemap = read("sitemap.xml");
 const modified = new Map([...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => [
@@ -93,8 +97,8 @@ assert.match(read("index.html"), /<html[^>]*lang="en"/);
 assert(!text(zh).includes("Salary Timer is a free web tool"), "English entity definition leaked into Chinese content");
 assert.equal(jsonLd(zh).find((n) => n["@type"] === "WebSite").inLanguage, "zh-CN");
 console.log("PASS: Chinese language and definition are correct before JavaScript");
-assert.equal(published, 11, "Only homepages, the about page, the six tool pages and policies may be published");
-assert.equal(modified.size, 11, "Sitemap must list only retained pages");
+assert.equal(published, 12, "Only homepages, the about page, the seven tool pages and policies may be published");
+assert.equal(modified.size, 12, "Sitemap must list only retained pages");
 // The stopwatch page's licence to exist is its own manual mode. If a refactor
 // ever swaps it back for the schedule-driven timer, the four controls vanish
 // from the exported HTML and the build fails here rather than shipping a second
@@ -126,6 +130,33 @@ assert.equal(
   2,
   "/biweekly-pay-calculator: expected exactly two numeric inputs (pay and period hours); a per-day grid would make this a time card",
 );
+// The time card's planning rule is that it is a grid of shifts, not the
+// homepage's ticking counter. A 7-day card carries fourteen clock fields, the
+// 7/14 switch and the print/export pair; if a refactor ever swaps the hero back
+// to the live timer, all three disappear and the build says so.
+const timecard = read("time-card-calculator/index.html");
+assert(
+  (timecard.match(/type="time"/gi) || []).length >= 14,
+  "/time-card-calculator: a 7-day card needs at least fourteen clock in/out fields",
+);
+for (const control of ["7 days", "14 days", "Print", "Export CSV"]) {
+  assert(
+    new RegExp(`>${control}<`).test(timecard),
+    `/time-card-calculator: missing the ${control} control`,
+  );
+}
+assert(
+  timecard.includes("tc-table"),
+  "/time-card-calculator: the per-day table is missing — this page must not fall back to the live counter",
+);
+assert(
+  !/role="timer"/.test(timecard),
+  "/time-card-calculator: a ticking timer appeared; the planning rule forbids the homepage counter as the main function",
+);
+assert(
+  text(timecard).includes("Gross pay, before tax"),
+  "/time-card-calculator: the gross-only disclosure is missing",
+);
 for (const rel of ["learn", "salary-per-second", "paycheck-countdown", "shift-worker-salary-timer", "overtime-pay-calculator"]) {
   assert(!fs.existsSync(path.join(root, rel)), `Retired export still exists: ${rel}`);
 }
@@ -136,7 +167,7 @@ for (const file of pages) {
     assert(fs.existsSync(path.join(root, url)) || fs.existsSync(path.join(root, url, "index.html")), `${file}: dead link ${url}`);
   }
 }
-console.log("PASS: retired routes absent, eleven-page sitemap and remaining internal links");
+console.log("PASS: retired routes absent, twelve-page sitemap and remaining internal links");
 const config = fs.readFileSync(path.join(__dirname, "..", "nginx.conf"), "utf8");
 assert(!/try_files[^;]*\/index\.html\s*;/.test(config), "Homepage fallback still enabled");
 assert.match(config, /try_files\s+\$uri\s+\$uri\/\s+\$uri\.html\s+=404;/);

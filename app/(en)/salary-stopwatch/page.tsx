@@ -251,6 +251,12 @@ export default function SalaryStopwatchPage() {
           than the 2,080-hour standard.
         </p>
         <p>
+          If what you need is not one session but a week of them — seven rows of clock-in and
+          clock-out, a break on each, and a total that splits regular hours from overtime — the{" "}
+          <Link href="/time-card-calculator">time card calculator</Link> is the instrument for that.
+          A stopwatch prices a moment; a time card prices a pay period.
+        </p>
+        <p>
           And if the session you are timing is one of many across a fixed week, the live salary timer
           on the homepage will carry the running total for you instead of asking you to press
           anything.

@@ -11,6 +11,7 @@ export const CONTENT_UPDATES: Readonly<Record<string, string>> = {
   "/hourly-to-annual-salary": "2026-11-23",
   "/pay-per-second-calculator": "2026-11-27",
   "/salary-stopwatch": "2026-11-27",
+  "/time-card-calculator": "2026-11-27",
   "/payday-countdown": "2026-11-27",
   "/biweekly-pay-calculator": "2026-11-27",
   "/privacy": LEGAL_UPDATED,

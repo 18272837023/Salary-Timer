@@ -72,8 +72,8 @@ const links = [...llms.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)].map((m) => ({
   url: m[2],
 }));
 // Pinned on purpose: publishing a page means deciding, here, that agents should
-// be able to find it. Eleven pages plus the manifest.
-check("lists the eleven retained pages and discovery manifest", links.length === 12 && links.filter(l => l.url !== `${SITE}/ard.json`).length === 11, `${links.length} links`);
+// be able to find it. Twelve pages plus the manifest.
+check("lists the twelve retained pages and discovery manifest", links.length === 13 && links.filter(l => l.url !== `${SITE}/ard.json`).length === 12, `${links.length} links`);
 check(
   "every link is an absolute salarytimer.work URL",
   links.every((l) => l.url.startsWith(`${SITE}/`)),
