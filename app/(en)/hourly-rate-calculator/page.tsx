@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ExampleBars, ToolExample } from "@/components/ToolExample";
 import { SalaryConverter } from "@/components/SalaryConverter";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +10,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/hourly-rate-calculator");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -24,24 +25,24 @@ export const metadata: Metadata = {
 
 const faq: FaqItem[] = [
   {
-    q: "Why is salary ÷ 2,080 usually wrong?",
-    a: "2,080 is 40 hours × 52 weeks. It only holds if you work exactly eight paid hours a day, five days a week, every week of the year — with no unpaid lunch, no unpaid overtime and no holiday. Almost nobody does. If your lunch is unpaid, a 9-to-5:30 shift is 8 paid hours, not 8.5, and the divisor changes. If you work a 4-day week, it changes a lot.",
+    q: "When should I divide my annual salary by 2,080?",
+    a: "Use 2,080 when your salary covers 40 paid hours per week for 52 weeks. A 9:00 to 17:30 shift with 30 minutes of unpaid lunch still counts as 8 paid hours. Enter your own weekly hours and paid weeks in the hourly rate calculator if either figure differs.",
   },
   {
-    q: "Does this calculator include holiday or paid time off?",
-    a: "No, and that is deliberate. Your hourly rate is the price of an hour you actually spend working. Paid holiday is a benefit on top of that number, not part of it. If you add holiday back in, the rate you see goes up but stops describing the hour you are living through.",
+    q: "How does the hourly rate calculator handle paid time off?",
+    a: "The calculator uses the paid weeks you enter. Include paid time off in the denominator when estimating pay per paid hour. For an estimate per hour actually worked, keep the same gross annual pay and use the hours you actually worked.",
   },
   {
     q: "What is a good hourly rate?",
-    a: "There is no universal answer, but the useful comparison is against your own alternatives: your previous job, a local equivalent role, or your freelance day rate. What this calculator gives you is a consistent basis for that comparison — the same definition of an hour applied to every offer.",
+    a: "A useful comparison is against your own alternatives: your previous job, a similar local role, or a freelance day rate. Run each offer through the hourly rate calculator using the same definition of paid hours.",
   },
   {
     q: "Should I use gross or net pay?",
-    a: "Use gross. Tax is a percentage applied afterwards, and mixing net figures with gross hours produces a number that describes nothing. If you want a take-home rate, divide the net hourly figure by your effective tax rate separately.",
+    a: "Use gross pay for a before-tax estimate. If you already know your take-home pay, enter it to see the equivalent take-home rate. The hourly rate calculator divides the amount you enter by your paid hours and leaves taxes and deductions to payroll.",
   },
   {
     q: "How do I convert hourly back to an annual salary?",
-    a: "Multiply your hourly rate by your paid hours per week, then by 52. For a 40-hour week that is ×2,080. For a 37.5-hour week (a common European contract) it is ×1,950, which is why the same annual salary looks better in some countries than others.",
+    a: "Reverse the hourly rate calculator formula: multiply hourly pay by paid hours per week and paid weeks per year. At 52 paid weeks, use 2,080 hours for a 40-hour week or 1,950 hours for a 37.5-hour week.",
   },
 ];
 
@@ -52,12 +53,12 @@ export default function HourlyRateCalculatorPage() {
       hero={<SalaryConverter />}
       h1={
         <>
-          Salary to hourly calculator:
+          Hourly rate calculator:
           <br />
           what your salary <span className="hl">really pays</span> per hour.
         </>
       }
-      lede="Type in a yearly, monthly or weekly figure and get the hourly rate back. It does not divide by 2,080 behind your back — you give it the hours you actually work, so the rate you see is the rate you live."
+      lede="Convert yearly, monthly or weekly gross pay to an hourly rate using your paid hours per week and paid weeks per year."
       faq={faq}
     >
       <script
@@ -66,82 +67,55 @@ export default function HourlyRateCalculatorPage() {
       />
 
       <section>
-        <h2>The 2,080-hour myth</h2>
+        <h2>How the hourly rate calculator converts salary</h2>
         <p>
-          Every salary-to-hourly calculator you have used starts with the same assumption: 40 hours
-          a week, 52 weeks a year, 2,080 hours. It is a tidy number, it is easy to teach, and for
-          most people it is wrong by 10–20%.
+          A schedule of 40 paid hours per week for 52 paid weeks adds up to 2,080 hours.
+          Use your own figures when your schedule differs. For example, 37.5 paid hours over
+          52 weeks adds up to 1,950 hours.
         </p>
         <p>
-          The problem is that it double-counts reality in one direction and ignores it in another.
-          An unpaid lunch makes your real working day shorter than your contracted one. A commute,
-          a 47-hour week, or a sixth day makes it longer. Neither shows up in 2,080.
+          The hourly rate calculator first converts gross pay to an annual amount. It multiplies
+          monthly pay by 12 or weekly pay by the number of paid weeks, then divides by annual paid hours.
         </p>
-        <p>The honest formula is short:</p>
         <p className="formula">
-          hourly rate = salary ÷ (paid hours per day × working days per week × 52)
+          hourly rate = annual gross pay ÷ (paid hours per week × paid weeks per year)
         </p>
         <p>
-          The only hard part is <em>paid hours per day</em>, because that is where contracts get
-          creative. A 09:00–17:30 shift sounds like 8.5 hours. With a 30-minute unpaid lunch it is 8.
-          With two unpaid 15-minute breaks it is 7.5. Over a year, half an hour a day is 130 hours —
-          six and a half extra working days you are giving away.
-        </p>
-      </section>
-
-      <section>
-        <h2>Three salaries, three very different rates</h2>
-        <p>
-          Take the same $60,000 and run it through three realistic schedules. None of these are
-          contrived; all three are ordinary.
-        </p>
-
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Schedule</th>
-                <th>Paid hours / week</th>
-                <th>Hours / year</th>
-                <th>Real hourly rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>5 days · 8.5h shift · 30 min unpaid lunch</td>
-                <td>40.0</td>
-                <td>2,080</td>
-                <td>$28.85</td>
-              </tr>
-              <tr>
-                <td>5 days · 9h shift · 30 min unpaid lunch</td>
-                <td>42.5</td>
-                <td>2,210</td>
-                <td>$27.15</td>
-              </tr>
-              <tr>
-                <td>4 days · 8h paid</td>
-                <td>32.0</td>
-                <td>1,664</td>
-                <td>$36.06</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p>
-          Same salary, a spread from $27.15 to $36.06 an hour — a 33% difference in what an hour of
-          your life costs. The 4-day-week worker earns $7.21 more per hour for identical annual pay.
-          That is not a rounding error. That is the entire argument for a four-day week, expressed
-          in one column.
+          A 09:00–17:30 shift lasts 8.5 hours. Subtract a 30-minute unpaid lunch to count 8 paid hours.
+          Two additional unpaid 15-minute breaks bring that to 7.5 hours. Across five days a week
+          for 52 weeks, that extra half hour each day adds up to 130 hours of unpaid breaks,
+          equivalent to 16.25 eight-hour shifts.
         </p>
       </section>
 
       <section>
-        <h2>Salary to hourly, in one table</h2>
+        <h2>What does a $60,000 salary pay per hour?</h2>
         <p>
-          The same division across salaries people actually earn, at three common working years.
-          Every figure is annual pay ÷ (hours per week × paid weeks).
+          Enter $60,000 as annual pay and 52 paid weeks. Then compare the hourly rate for three
+          weekly schedules. Subtract unpaid lunch before entering the weekly hours.
+        </p>
+
+        <ToolExample title="Hourly rate calculator example for a $60,000 salary">
+          <ExampleBars items={[
+            { label: "40 paid hours a week", value: 60000 / (40 * 52), amount: "$28.85/hr" },
+            { label: "42.5 paid hours a week", value: 60000 / (42.5 * 52), amount: "$27.15/hr" },
+            { label: "32 paid hours a week", value: 60000 / (32 * 52), amount: "$36.06/hr" },
+          ]} />
+        </ToolExample>
+
+        <p>
+          Five 8.5-hour shifts with a 30-minute unpaid lunch each add up to 40 paid hours.
+          Five 9-hour shifts with the same lunch add up to 42.5 hours. Four 8-hour paid shifts
+          add up to 32 hours. Only the hours field changes in the hourly rate calculator across
+          these examples. Keep the annual pay and paid weeks the same.
+        </p>
+      </section>
+
+      <section>
+        <h2>Salary to hourly conversion table</h2>
+        <p>
+          The table shows hourly rate calculator results for three work schedules.
+          Each figure is annual pay ÷ (hours per week × paid weeks).
         </p>
 
         <div className="table-wrap fit">
@@ -198,8 +172,8 @@ export default function HourlyRateCalculatorPage() {
         <p>
           <b>Monthly</b> is the same sum with one extra step: multiply by 12 first. A $4,000 monthly
           salary is $48,000 a year — $23.08 an hour over 2,080 hours, or $24.62 if your week is 37.5
-          hours. <b>Weekly</b> skips the month entirely: multiply by the weeks you are actually paid,
-          then divide by the hours inside those weeks.
+          hours. In the hourly rate calculator, select <b>per month</b> to enter the $4,000
+          directly. For a weekly salary, select <b>per week</b> and enter your typical weekly amount.
         </p>
         <p>
           Going the other way — an hourly wage turned into a year, a month or a week — is the{" "}
@@ -209,20 +183,20 @@ export default function HourlyRateCalculatorPage() {
       </section>
 
       <section>
-        <h2>What actually moves your rate</h2>
+        <h2>Which hours should you enter in the hourly rate calculator?</h2>
         <ul className="checks">
           <li>
-            <b>Unpaid breaks.</b> The single most common error. If lunch is unpaid, it is not part of
-            your rate — subtract it before you divide.
+            <b>Unpaid breaks.</b> Remove unpaid lunch from your working hours before converting
+            your salary. A paid break stays in the weekly total.
           </li>
           <li>
             <b>Unpaid overtime.</b> Staying 45 minutes late three times a week adds 117 hours a year
             to your denominator without adding a cent to your numerator.
           </li>
           <li>
-            <b>The commute.</b> Not part of the legal calculation, but it is part of the decision. A
-            $62k job with a 90-minute daily commute and a $58k job from your spare room are not
-            $4,000 apart; they are roughly 375 hours apart.
+            <b>The commute.</b> Keep the commuting time separate from the paid-hours estimate.
+            If two jobs have different commutes, compare that time alongside the hourly rate
+            calculator results.
           </li>
           <li>
             <b>Working days.</b> Going from five to four days raises your hourly rate by 25% at
@@ -234,8 +208,8 @@ export default function HourlyRateCalculatorPage() {
       <section>
         <h2>How to use this number</h2>
         <p>
-          The rate is not the point. The point is that once you know it, every decision involving
-          time gets a price tag attached:
+          Use the hourly rate calculator to compare two offers with different weekly schedules.
+          The hourly result also puts the cost of a purchase or a block of time in perspective.
         </p>
         <ul className="checks">
           <li>
@@ -247,8 +221,8 @@ export default function HourlyRateCalculatorPage() {
             your working life, paid in advance.
           </li>
           <li>
-            A job offer with a 20% raise and a 15% longer week is not a raise. Run it through the
-            calculator before you accept.
+            With the same number of paid weeks, a 20% salary increase and a 15% longer workweek
+            raise your hourly rate by about 4.3%. Compare the hourly and annual figures together.
           </li>
         </ul>
         <p>
@@ -258,10 +232,8 @@ export default function HourlyRateCalculatorPage() {
           meeting, a commute or a coffee actually gets measured in.
         </p>
         <p>
-          Set your real numbers in the converter above and you have the honest figure for this job.
-          If you would rather watch the number accrue than calculate it, open the{" "}
-          <Link href="/">free salary timer</Link> — it reads the same hours you just entered, so the
-          two never disagree.
+          To track earnings through your workday, open the <Link href="/">free salary timer</Link>{" "}
+          and enter your hourly rate and work schedule in its settings.
         </p>
       </section>
     </ToolPage>

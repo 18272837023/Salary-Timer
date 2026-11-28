@@ -12,9 +12,7 @@ import { useEffect, useRef, useState } from "react";
  * visitor picks something, presses Escape or clicks outside. Hover menus are
  * unreachable by keyboard and disappear the moment the pointer overshoots.
  *
- * The list comes from TOOL_PAGES, so a tool that exists as a page cannot be
- * missing from the menu — and a menu entry cannot describe a page that does not
- * exist. Today that is one entry; the shape is what matters.
+ * Use the same labels and destinations as the footer.
  */
 function ToolsMenu() {
   const { t } = useI18n();
@@ -54,12 +52,17 @@ function ToolsMenu() {
 
       {open ? (
         <div className="tools-menu" id="tools-menu">
-          {TOOL_PAGES.map((tool) => (
-            <Link key={tool.href} href={tool.href} onClick={() => setOpen(false)}>
-              <b>{tool.menuLabel}</b>
-              <span>{tool.menuHint}</span>
-            </Link>
-          ))}
+          {TOOL_PAGES.map((tool) => {
+            const hintId = `tools-hint-${tool.href.slice(1)}`;
+            return (
+              <div key={tool.href} className="tools-menu-item">
+                <Link href={tool.href} aria-describedby={hintId} onClick={() => setOpen(false)}>
+                  {tool.label}
+                </Link>
+                <span id={hintId}>{tool.menuHint}</span>
+              </div>
+            );
+          })}
         </div>
       ) : null}
     </div>

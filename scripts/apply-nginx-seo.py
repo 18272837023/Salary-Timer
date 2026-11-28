@@ -9,6 +9,10 @@ import subprocess
 
 BEGIN = "    # BEGIN salarytimer SEO routing"
 END = "    # END salarytimer SEO routing"
+LEGACY_RETIREMENT_RULE = (
+    r'if ($uri ~ "^/(learn|salary-per-second|paycheck-countdown|'
+    r'shift-worker-salary-timer|overtime-pay-calculator)(/|$|\.html$)") { return 410; }'
+)
 
 
 def block_end(text, opening):
@@ -26,6 +30,8 @@ def block_end(text, opening):
 
 def patch_server(body):
     body = re.sub(re.escape(BEGIN) + r"[\s\S]*?" + re.escape(END), "", body)
+    # Older installs may have the original 410 rule outside the managed block.
+    body = re.sub(r"(?m)^[ \t]*" + re.escape(LEGACY_RETIREMENT_RULE) + r"[ \t]*\r?$", "", body)
     removals = []
     for loc in re.finditer(r"(?m)^\s*location\s+([^\n{]+)\{", body):
         header = " ".join(loc[1].split())
@@ -36,7 +42,9 @@ def patch_server(body):
     body = re.sub(r"(?m)^\s*error_page\s+404\s+[^;]+;", "", body)
     return body.rstrip() + "\n" + BEGIN + """
     if ($host = www.salarytimer.work) { return 301 https://salarytimer.work$request_uri; }
-    if ($uri ~ "^/(learn|salary-per-second|paycheck-countdown|shift-worker-salary-timer|overtime-pay-calculator)(/|$|\\.html$)") { return 410; }
+    if ($uri ~ "^/salary-per-second(/|[.]html)?$") { return 301 https://salarytimer.work/pay-per-second-calculator/$is_args$args; }
+    if ($uri ~ "^/paycheck-countdown(/|[.]html)?$") { return 301 https://salarytimer.work/payday-countdown/$is_args$args; }
+    if ($uri ~ "^/(learn|shift-worker-salary-timer|overtime-pay-calculator)(/|$|[.]html$)") { return 410; }
     error_page 404 /404.html;
     location = /404.html { internal; }
     location / { try_files $uri $uri/ $uri.html =404; }

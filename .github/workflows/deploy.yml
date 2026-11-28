@@ -131,19 +131,29 @@ jobs:
             echo "::error::Unknown route returned ${missing_status}; apply the repository nginx.conf routing rules"
             exit 1
           fi
-          # The converter was retired with the content cluster and has since been
-          # brought back as a live tool, so it is asserted separately below
-          # instead of being expected to 410 like the rest.
-          for route in learn salary-per-second paycheck-countdown shift-worker-salary-timer overtime-pay-calculator; do
+          # Retired routes without a replacement still return 410.
+          for route in learn shift-worker-salary-timer overtime-pay-calculator; do
             retired_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
             if [ "$retired_status" != "410" ]; then
               echo "::error::Retired route /${route}/ returned ${retired_status}, expected 410"
               exit 1
             fi
           done
+          for mapping in salary-per-second:pay-per-second-calculator paycheck-countdown:payday-countdown; do
+            old_route=${mapping%%:*}
+            new_route=${mapping#*:}
+            for suffix in '' '/' '.html'; do
+              result=$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "https://salarytimer.work/${old_route}${suffix}?seo_redirect_check=1")
+              expected="301 https://salarytimer.work/${new_route}/?seo_redirect_check=1"
+              if [ "$result" != "$expected" ]; then
+                echo "::error::/${old_route}${suffix} returned '$result', expected '$expected'"
+                exit 1
+              fi
+            done
+          done
           # Live tool pages, listed rather than derived: naming a route here is
           # the deploy-time half of the same decision verify-geo makes at build
-          # time. All seven must return 200; the retired five above must return 410.
+          # time. All seven must return 200.
           for route in pay-per-second-calculator salary-stopwatch time-card-calculator biweekly-pay-calculator payday-countdown hourly-rate-calculator hourly-to-annual-salary; do
             tool_status=$(curl -sS -o /dev/null -w '%{http_code}' "https://salarytimer.work/${route}/")
             if [ "$tool_status" != "200" ]; then

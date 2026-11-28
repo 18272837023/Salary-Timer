@@ -55,6 +55,7 @@ const modified = new Map([...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m
 ]));
 let guides = 0;
 let published = 0;
+let toolPages = 0;
 for (const file of pages) {
   const html = fs.readFileSync(file, "utf8");
   if (/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/.test(html)) continue;
@@ -66,6 +67,14 @@ for (const file of pages) {
   assert(modified.has(canonical), `${file}: absent from sitemap`);
   assert.equal((html.match(/<h1\b/g) || []).length, 1, `${file}: expected one main heading`);
   const nodes = jsonLd(html);
+  if (nodes.some((node) => node["@type"] === "WebPage" && node.about?.["@type"] === "Thing")) {
+    toolPages++;
+    const title = decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
+    const description = decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
+    assert(title && [...title].length <= 60, `${file}: tool title must fit 60 characters`);
+    assert(!/\bsalary timer\b/i.test(title), `${file}: tool title must omit the Salary Timer brand`);
+    assert(description && [...description].length <= 160, `${file}: tool description must fit 160 characters`);
+  }
   const faq = nodes.find((node) => node["@type"] === "FAQPage");
   if (faq) {
     for (const question of faq.mainEntity) {
@@ -99,6 +108,8 @@ assert.equal(jsonLd(zh).find((n) => n["@type"] === "WebSite").inLanguage, "zh-CN
 console.log("PASS: Chinese language and definition are correct before JavaScript");
 assert.equal(published, 12, "Only homepages, the about page, the seven tool pages and policies may be published");
 assert.equal(modified.size, 12, "Sitemap must list only retained pages");
+assert.equal(toolPages, 7, "Check metadata limits for all seven tool pages");
+console.log("PASS: tool titles and descriptions fit the 60/160 character limits");
 // The stopwatch page's licence to exist is its own manual mode. If a refactor
 // ever swaps it back for the schedule-driven timer, the four controls vanish
 // from the exported HTML and the build fails here rather than shipping a second

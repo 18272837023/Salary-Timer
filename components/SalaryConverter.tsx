@@ -147,8 +147,8 @@ export function SalaryConverter() {
             </>
           ) : (
             <>
-              Salary ÷ 2,080 would say {formatRate(standardCents, currency, 2)} —{" "}
-              {Math.abs(deltaPct).toFixed(1)}% too {deltaPct > 0 ? "low" : "high"}.
+              Salary ÷ 2,080 gives {formatRate(standardCents, currency, 2)}. Your rate is{" "}
+              {Math.abs(deltaPct).toFixed(1)}% {deltaPct > 0 ? "higher" : "lower"}.
             </>
           )}
         </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ExampleValues, ToolExample } from "@/components/ToolExample";
 import { PaydayCountdown } from "@/components/PaydayCountdown";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +10,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/payday-countdown");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -25,23 +26,23 @@ export const metadata: Metadata = {
 const faq: FaqItem[] = [
   {
     q: "How many days until payday?",
-    a: "Enter the next payday you already know and the card counts the calendar days from today to that date. If it is today the answer is zero, and the next three dates are listed underneath so the countdown does not simply stop. Nothing about your wage goes into the sum — it is date arithmetic only.",
+    a: "Choose your pay cycle and enter a known payday. The payday countdown shows the number of calendar days until the next eligible date. If that date is today, it shows zero and lists upcoming dates underneath.",
   },
   {
     q: "How many paychecks do I get in a year?",
-    a: "Weekly pay means 52. Every two weeks means 26. Twice a month means 24, and monthly means 12. The difference between 26 and 24 is the whole reason two people on identical salaries can compare paychecks that differ by more than a hundred dollars.",
+    a: "The usual annual counts are 52 for weekly pay, 26 for every two weeks, 24 for twice a month, and 12 for monthly pay. A particular calendar year can have an extra weekly or biweekly payday depending on where the dates fall.",
   },
   {
     q: "Why do I sometimes get three paychecks in a month?",
-    a: "Because a year holds 26 biweekly paydays but only 12 months, so two months a year contain three. Semi-monthly pay never does this: it pays on fixed dates, so every month gets exactly two. If your third paycheck feels like a bonus, it is not — the annual total is unchanged.",
+    a: "A biweekly cycle repeats every 14 days, so three paydays can fall in a longer month. Use the biweekly setting in the payday countdown to see upcoming dates in your particular cycle.",
   },
   {
-    q: "Does the countdown move payday for public holidays?",
+    q: "Does the payday countdown adjust for public holidays?",
     a: "No. It moves a payday that lands on a Saturday or Sunday back to the Friday before, and that is the only adjustment it makes. Public holidays differ by country and by employer, so guessing at them would produce a confident wrong date. Check your employer's payroll calendar for those.",
   },
   {
-    q: "Is a biweekly paycheck bigger than a semi-monthly one?",
-    a: "Yes, for the same salary, because there are fewer of them. On $52,000 a year a biweekly paycheck is $2,000 and a semi-monthly one is $2,166.67. Neither is a raise: the year totals are identical, and comparing the paychecks across two job offers without annualising them is a common and expensive mistake.",
+    q: "Does the payday countdown show how much I will be paid?",
+    a: "It shows dates and days remaining. For paycheck size, an annual salary of $52,000 gives about $2,000 per biweekly check at 26 checks a year or $2,166.67 per semi-monthly check at 24.",
   },
 ];
 
@@ -57,7 +58,7 @@ export default function PaydayCountdownPage() {
           how many days until <span className="hl">you get paid.</span>
         </>
       }
-      lede="Pick your pay cycle and the next payday you already know, and the card counts the days down to it — then shows the three after that. Dates only: this page will not guess what the payday is worth."
+      lede="Choose your pay cycle and enter a known payday. See how many calendar days remain and preview the next dates, with an optional Friday adjustment for weekend paydays."
       faq={faq}
     >
       <script
@@ -66,18 +67,15 @@ export default function PaydayCountdownPage() {
       />
 
       <section>
-        <h2>A date question, not a money question</h2>
+        <h2>How to use the payday countdown</h2>
         <p>
-          &ldquo;When is my next payday&rdquo; and &ldquo;how much will it be&rdquo; feel like one
-          question and are not. The first is arithmetic on a calendar: one date, one cycle, one
-          subtraction. The second needs your rate, your hours and your deductions, and the answer
-          changes every day you work.
+          Start with a scheduled pay date from a recent payslip or your employer’s payroll calendar.
+          The date should belong to the schedule you want to follow. For example, use a Friday
+          from your current cycle if you get paid every other Friday.
         </p>
         <p>
-          This page only does the first. The <Link href="/payday-countdown">payday countdown</Link>{" "}
-          above takes the payday you already know, repeats it on your cycle, and counts the calendar
-          days from today — which is why it can answer in one line instead of asking you to set up a
-          schedule first.
+          Enter that date and select your pay cycle. The payday countdown uses calendar days to
+          find the next date. The workdays figure below it counts weekdays and excludes weekends.
         </p>
         <p>
           If the other question is the one you actually have, the{" "}
@@ -87,11 +85,11 @@ export default function PaydayCountdownPage() {
       </section>
 
       <section>
-        <h2>Four cycles, four different years</h2>
+        <h2>Weekly, biweekly, semi-monthly, and monthly schedules</h2>
         <p>
-          The cycle decides how many paydays a year holds, and that number decides everything else —
-          how big a paycheck is, how often a month gets an extra one, and why two people on the same
-          salary never seem to agree about what a paycheck looks like.
+          Choose the payday countdown setting that matches the interval on your payroll calendar.
+          Compare two recent scheduled pay dates if you are unsure whether the cycle is biweekly
+          or semi-monthly.
         </p>
 
         <div className="table-wrap">
@@ -129,53 +127,60 @@ export default function PaydayCountdownPage() {
         </div>
 
         <p>
-          Notice that only the fortnightly cycle drifts. Weekly pay is tied to a weekday rather than
-          a date, so it also wanders across the calendar, but by four or five paydays a month instead
-          of a whole extra one twice a year. Twice-monthly and monthly pay are anchored to dates, and
-          an anchored date cannot produce a third payment in the same month.
+          A weekly or biweekly payday moves across calendar dates even if the weekday stays fixed.
+          The payday countdown uses calendar dates for monthly schedules. When that day does
+          not exist in a shorter month, it uses the last day of the month.
+        </p>
+        <p>
+          For twice-monthly pay, the date you enter also selects the pattern. A date on or before
+          the 15th uses the 1st and 15th. A later date uses the 15th and the last day of the month.
+          Check the pattern displayed below the date field against your payroll calendar.
+          If a weekend payday was moved to Friday, use the original scheduled date as your
+          starting point and enable the Friday adjustment. This keeps later dates on the right cycle.
         </p>
       </section>
 
       <section>
-        <h2>Why biweekly and semi-monthly are not the same</h2>
+        <h2>Biweekly vs. semi-monthly payday calendar</h2>
         <p>
-          26 versus 24. Two extra paychecks a year, for identical work, at identical pay — which is
-          the difference between a paycheck of $2,000 and one of $2,166.67 on a $52,000 salary.
+          A biweekly schedule repeats every 14 days. A semi-monthly schedule follows two dates
+          in each calendar month. The schedules can share one payday and differ on the next.
         </p>
+
+        <ToolExample title="Payday countdown example for August 2026">
+          <ExampleValues items={[
+            {
+              label: "Biweekly · every other Friday",
+              value: <><time dateTime="2026-08-14">Aug 14</time> · <time dateTime="2026-08-28">Aug 28</time></>,
+              detail: "14 days apart",
+            },
+            {
+              label: "Semi-monthly · 15th and month end",
+              value: <><time dateTime="2026-08-14">Aug 14</time> · <time dateTime="2026-08-31">Aug 31</time></>,
+              detail: "Aug 15 is Saturday, so the Friday rule moves it to Aug 14",
+            },
+          ]} />
+          <p>Both schedules start from a known payday of July 31, 2026, with the Friday rule enabled.</p>
+        </ToolExample>
+
         <p>
-          People compare those numbers all the time and conclude that the semi-monthly job pays
-          better. It does not; it just pays more often in smaller pieces. Annualising both is the only
-          honest comparison, and the{" "}
-          <Link href="/hourly-to-annual-salary">hourly to annual salary calculator</Link> is the
-          shortest route to it when your pay is quoted per hour rather than per year.
-        </p>
-        <p>
-          The three-paycheck month is the visible symptom of the same arithmetic. A biweekly year is
-          26 × 14 = 364 days, so the paydays slide two days earlier each year, and roughly twice a
-          year one lands early enough that another follows inside the same month. It is not a bonus.
-          The year still holds 26.
-        </p>
-        <p>
-          If you want the two paycheck sizes side by side rather than the dates, the{" "}
-          <Link href="/biweekly-pay-calculator">biweekly pay calculator</Link> does that comparison
-          on one salary and spells out the 8.3% gap between them.
+          Use the payday countdown preview to check whether the semi-monthly pattern matches your
+          employer’s scheduled dates. To compare gross amounts per check, use the{" "}
+          <Link href="/biweekly-pay-calculator">biweekly pay calculator</Link>.
         </p>
       </section>
 
       <section>
-        <h2>When payday moves</h2>
+        <h2>What happens when payday falls on a weekend?</h2>
         <p>
-          Payroll dates are promises about money arriving, so they move earlier and never later. A
-          payday that lands on a Saturday is usually paid on the Friday before; one that lands on a
-          Sunday is paid on the Friday too. Nobody shifts a payday forward into the following week,
-          because that would mean paying after the date the contract states.
+          Enable the Friday rule in the payday countdown to move a Saturday or Sunday payday
+          to the previous Friday.
+          Check your employer’s payroll calendar to see which rule applies to you.
         </p>
         <p>
-          Public holidays are the same idea with a messier calendar. Banks close, so payroll runs a
-          day or two early, and the exact behaviour depends on the country, the bank and the employer.
-          The countdown above deliberately does not model that: it handles weekends, states so, and
-          leaves holidays to your payroll calendar rather than inventing a rule that would be wrong
-          somewhere.
+          The payday countdown only adjusts for weekends when the Friday rule is enabled.
+          For a public holiday, check your employer’s posted date. Processing dates can vary with
+          the country, employer, and bank.
         </p>
         <p>
           One last distinction worth keeping: the <b>pay date</b> is when the money arrives, the{" "}

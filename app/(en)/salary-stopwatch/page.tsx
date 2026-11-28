@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ToolExample } from "@/components/ToolExample";
 import { SalaryStopwatch } from "@/components/SalaryStopwatch";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +11,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/salary-stopwatch");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -25,23 +27,23 @@ export const metadata: Metadata = {
 const faq: FaqItem[] = [
   {
     q: "How does a salary stopwatch work?",
-    a: "Enter your hourly rate, press Start when you begin working and Pause when you stop. The stopwatch multiplies the paid time between those two moments by your rate, so a 47-minute session at $25 an hour reads $19.67. Nothing else is involved: no schedule, no shift, no assumption about when you were supposed to be working.",
+    a: "Enter your hourly rate, press Start when you begin working and Pause when you stop. The screen shows paid time and estimated gross earnings. A session of 47 minutes and 12 seconds at $25 an hour comes to $19.67.",
   },
   {
     q: "What is the difference between Pause and the break button?",
-    a: "Both stop the money. Pause just stops the watch, while a break is recorded as unpaid time so you can see what it cost — a 15-minute break at $25 an hour is $6.25 that does not appear in the session total. Use the break button when the time off is part of the job rather than the end of it.",
+    a: "Both pause earnings. The salary stopwatch records unpaid time when you use the break button. At $25 an hour, a 15-minute break is $6.25 excluded from the session total. Use Pause when you need to freeze the display without adding to the break timer.",
   },
   {
-    q: "Does the stopwatch save my sessions?",
+    q: "Does the salary stopwatch save my sessions?",
     a: "No. The session and the log of finished sessions live in the page for as long as it is open, and reloading clears both. Nothing is written to storage and nothing is sent anywhere, so if you need a record for an invoice, note the figure down before you close the tab.",
   },
   {
     q: "How do I convert 00:47:12 into decimal hours?",
-    a: "Divide the seconds by 3,600. 47 minutes and 12 seconds is 2,832 seconds, which is 0.787 hours — so at $25 an hour the session is $19.67. Most timesheets want that decimal rather than the clock reading, and rounding it to 0.8 would hand over an extra 20 cents.",
+    a: "Divide the paid time on the salary stopwatch by 3,600 after converting it to seconds. 47 minutes and 12 seconds is 2,832 seconds, or about 0.787 hours. At $25 an hour that is $19.67 before any timesheet rounding.",
   },
   {
     q: "Can I leave it running all day?",
-    a: "You can, but it will bill every second between Start and Pause, including the ones you spent away from the desk. A stopwatch measures elapsed time, not effort, so the honest pattern is to start it when you start and stop it when you stop. If you want a counter that follows a fixed rota instead, use the timer on the homepage.",
+    a: "Yes. The salary stopwatch keeps counting while it is running. Pause or start an unpaid break when you step away. For a counter that follows a fixed work schedule, use the timer on the homepage.",
   },
 ];
 
@@ -52,12 +54,12 @@ export default function SalaryStopwatchPage() {
       hero={<SalaryStopwatch />}
       h1={
         <>
-          Salary stopwatch:
+          Manual salary stopwatch
           <br />
-          press start, and <span className="hl">time becomes money.</span>
+          <span className="hl">Track one work session.</span>
         </>
       }
-      lede="The timer on the homepage follows the schedule you saved. This one follows you: press Start when you begin, Pause when you stop, and read the paid time and the earnings for that one session. Reset to log it and start the next."
+      lede="Set an hourly rate, then start, pause or resume the stopwatch to track paid time and estimated gross earnings for one work session. Reset to log the session and begin another."
       faq={faq}
     >
       <script
@@ -66,11 +68,10 @@ export default function SalaryStopwatchPage() {
       />
 
       <section>
-        <h2>A stopwatch, not a schedule</h2>
+        <h2>When to use a manual salary stopwatch</h2>
         <p>
-          There are two honest ways to price working time, and they answer different questions. One
-          asks &ldquo;what is my workday worth&rdquo; and needs a rota to answer it. The other asks
-          &ldquo;what was that session worth&rdquo; and needs nothing but a start and a stop.
+          Manual timing works well for tasks with an unpredictable start and finish. It gives you
+          the gross value of one work session, independent of any schedule saved elsewhere.
         </p>
 
         <div className="table-wrap">
@@ -108,10 +109,8 @@ export default function SalaryStopwatchPage() {
         </div>
 
         <p>
-          If your hours are irregular — a client call, a Saturday of invoicing, an on-call window
-          that may or may not turn into work — a schedule cannot describe them and a{" "}
-          <Link href="/salary-stopwatch">salary stopwatch</Link> can. That is the whole case for this
-          page.
+          For irregular work such as a client call or a weekend task, start the salary stopwatch when
+          the paid session begins and pause it when you stop.
         </p>
         <p>
           The other case is a fixed shift, and for that the{" "}
@@ -122,10 +121,24 @@ export default function SalaryStopwatchPage() {
       </section>
 
       <section>
-        <h2>What the four buttons do</h2>
+        <h2>How to time one paid work session</h2>
+        <ToolExample title="Salary stopwatch example at $25 an hour">
+          <Image
+            src="/salary-stopwatch-session.webp"
+            width={820}
+            height={394}
+            loading="lazy"
+            alt="The paused Salary Stopwatch shows 45 minutes of paid time, $18.75 in gross earnings, and a 15-minute unpaid break."
+          />
+          <p>
+            Start the session, work 30 minutes, and use Unpaid break for a 15-minute break.
+            Resume for 15 minutes, then Pause. The stopwatch shows 45 minutes of paid time
+            and $18.75 gross. Press Reset to add the session to the log.
+          </p>
+        </ToolExample>
         <p>
-          Four controls, no hidden state. The button that does nothing is greyed out rather than
-          removed, so the layout never shifts under your finger mid-session.
+          The salary stopwatch keeps all four main controls in place. A disabled button
+          indicates that the action is unavailable in the current session state.
         </p>
         <ul className="checks">
           <li>
@@ -141,9 +154,8 @@ export default function SalaryStopwatchPage() {
             paused and resumed as many times as the work demands.
           </li>
           <li>
-            <b>Reset.</b> Ends the session, adds it to the log below the card and clears the clock.
-            The total is kept on purpose — resetting is how you close a session, not how you throw
-            one away.
+            <b>Reset.</b> Ends the session and clears the clock. The salary stopwatch logs
+            sessions of at least one second when you have entered a positive hourly rate.
           </li>
         </ul>
         <p>
@@ -153,17 +165,15 @@ export default function SalaryStopwatchPage() {
       </section>
 
       <section>
-        <h2>Pause and break are not the same button</h2>
+        <h2>When to use Pause or Unpaid break</h2>
         <p>
-          Pause means &ldquo;I have stopped looking&rdquo;. A break means &ldquo;I am not working and
-          I am not being paid&rdquo;. Both stop the money, and the difference only matters when you
-          want to know where the time went.
+          Use Pause to hold the paid total. Use Unpaid break when you also want the salary
+          stopwatch to show how long you were on break. Both modes stop earnings immediately.
         </p>
         <p>
-          The cost is larger than it feels. At $25 an hour a 15-minute break is $6.25, a 45-minute
-          lunch is $18.75, and that lunch five days a week is $4,875 a year — very close to a
-          month&rsquo;s pay, spent standing in a kitchen. Seeing it accumulate in the break line is
-          the point of keeping the two buttons apart.
+          At $25 an hour, a 15-minute unpaid break excludes $6.25 from gross earnings. To report
+          a full hour of elapsed time with that break, use the result of 45 paid
+          minutes and record the break separately.
         </p>
         <p>
           For anyone billing a client, the distinction is not cosmetic either: an unpaid break inside
@@ -173,11 +183,11 @@ export default function SalaryStopwatchPage() {
       </section>
 
       <section>
-        <h2>The decimal-hour trap</h2>
+        <h2>How to convert stopwatch time to decimal hours</h2>
         <p>
-          Timesheets rarely want 00:47:12. They want a decimal, and the conversion is where money
-          quietly goes missing, because <b>0.1 of an hour is 6 minutes, not 10</b>. One hour ten
-          minutes is 1.17, not 1.1.
+          If your timesheet expects decimal hours, convert the paid duration from the salary
+          stopwatch before copying it. <b>0.1 of an hour is 6 minutes.</b> One hour and ten
+          minutes is about 1.17 decimal hours.
         </p>
 
         <div className="table-wrap fit">
@@ -235,18 +245,17 @@ export default function SalaryStopwatchPage() {
         </div>
 
         <p>
-          The rule is seconds ÷ 3,600. Every minute is 0.0167 of an hour, so a session of 2,832
-          seconds is 0.787 hours, and rounding that up to 0.8 hands over 33 cents. Do it twice a day
-          for a year and it is a day&rsquo;s pay — which is why the stopwatch shows the clock reading
-          and leaves the rounding to you, rather than picking a convention on your behalf.
+          Divide seconds by 3,600. The stopwatch displays the clock reading and estimates
+          earnings from the paid duration. For 2,832 seconds at $25 an hour, writing 0.8 hours
+          instead of using the unrounded duration would increase the estimate by about 33 cents.
         </p>
       </section>
 
       <section>
         <h2>Where to go next</h2>
         <p>
-          The stopwatch needs one number to work: your hourly rate. If you only know your salary,
-          the <Link href="/hourly-rate-calculator">salary to hourly calculator</Link> turns annual,
+          The salary stopwatch needs one number to work: your hourly rate. If you only know your salary,
+          the <Link href="/hourly-rate-calculator">hourly rate calculator</Link> turns annual,
           monthly or weekly pay into the rate behind it, using the hours you actually work rather
           than the 2,080-hour standard.
         </p>
@@ -254,7 +263,7 @@ export default function SalaryStopwatchPage() {
           If what you need is not one session but a week of them — seven rows of clock-in and
           clock-out, a break on each, and a total that splits regular hours from overtime — the{" "}
           <Link href="/time-card-calculator">time card calculator</Link> is the instrument for that.
-          A stopwatch prices a moment; a time card prices a pay period.
+          Use the weekly card when you need an itemized record of multiple shifts.
         </p>
         <p>
           And if the session you are timing is one of many across a fixed week, the live salary timer

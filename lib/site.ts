@@ -126,7 +126,7 @@ export const ABOUT_PAGE: SitePageRoute = {
   label: "About",
   title: "About this site — the person behind the timer",
   description:
-    "Who builds Salary Timer, why the counter follows your real schedule instead of dividing by 2,080, what happens to the figures you type in, and how to report a mistake.",
+    "Meet the developer behind Salary Timer, learn how it estimates pay from your work schedule, and find out how to report a mistake.",
 };
 
 /**
@@ -138,8 +138,6 @@ export const ABOUT_PAGE: SitePageRoute = {
  * means a tool cannot ship with a menu entry that calls it something else.
  */
 export interface ToolRoute extends SitePageRoute {
-  /** Short label for the header menu, sized to fit one dropdown row. */
-  menuLabel: string;
   /** The line under the menu label: what goes in, what comes out. */
   menuHint: string;
 }
@@ -151,11 +149,10 @@ export const TOOL_PAGES: ToolRoute[] = [
     // not a request for a clock, so it must not compete with the homepage.
     href: "/pay-per-second-calculator",
     label: "Pay per second calculator",
-    menuLabel: "Pay per second",
     menuHint: "Hourly or annual pay → second, minute, workday",
-    title: "Pay Per Second Calculator — per second, minute and workday",
+    title: "Pay Per Second Calculator — From Hourly or Annual Pay",
     description:
-      "Turn an hourly wage or an annual salary into pay per second, per minute, per hour and per workday. Static figures you can read at a glance, with a link to the live counter.",
+      "Convert hourly or annual pay to gross earnings per paid second, minute, and workday. See how paid time differs from a full calendar year.",
   },
   {
     // Manual mode, and only allowed to exist because it is manual: the page
@@ -163,11 +160,10 @@ export const TOOL_PAGES: ToolRoute[] = [
     // schedule-driven timer from the homepage.
     href: "/salary-stopwatch",
     label: "Salary stopwatch",
-    menuLabel: "Salary stopwatch",
     menuHint: "Start, pause and price a single session",
-    title: "Salary Stopwatch — start, pause and price a session",
+    title: "Salary Stopwatch — Manual Timer for One Work Session",
     description:
-      "A manual salary stopwatch: press start, pause for an unpaid break, and watch the paid time and earnings for that session. Reset to log it and start the next.",
+      "Track paid time and gross earnings for one work session. Set your hourly rate, start the stopwatch, and pause for unpaid breaks.",
   },
   {
     // The only page here that logs a row per day. It exists because the two
@@ -178,20 +174,18 @@ export const TOOL_PAGES: ToolRoute[] = [
     // main event, and the build asserts the grid is still there.
     href: "/time-card-calculator",
     label: "Time card calculator",
-    menuLabel: "Time card",
     menuHint: "Clock in and out per day → hours, overtime, pay",
-    title: "Time Card Calculator — weekly and biweekly hours",
+    title: "Time Card Calculator — Weekly and Biweekly Hours",
     description:
-      "Log clock-in and clock-out for each day, subtract unpaid breaks, and total regular hours, overtime hours and gross pay across a 7 or 14-day card. Overnight shifts, print and CSV export.",
+      "Total weekly or biweekly hours, overtime, and gross pay. Enter shifts and unpaid breaks, including overnight work. Print or export your time card as CSV.",
   },
   {
     href: "/hourly-rate-calculator",
-    label: "Salary to hourly calculator",
-    menuLabel: "Salary to hourly",
+    label: "Hourly rate calculator",
     menuHint: "Annual, monthly or weekly pay → your real hourly rate",
-    title: "Salary to Hourly Calculator — real hourly rate",
+    title: "Hourly Rate Calculator — Convert Salary to Hourly Pay",
     description:
-      "Turn a yearly, monthly or weekly salary into a real hourly rate using the hours you actually work. Unpaid lunch, overtime and a 4-day week all change the number.",
+      "Convert annual, monthly, or weekly salary to gross hourly pay. Enter paid hours per week and paid weeks per year to see your rate.",
   },
   {
     // The inverse direction, and deliberately not a rewrite of the page above:
@@ -200,11 +194,10 @@ export const TOOL_PAGES: ToolRoute[] = [
     // pages would then compete for the same query instead of splitting it.
     href: "/hourly-to-annual-salary",
     label: "Hourly to annual salary calculator",
-    menuLabel: "Hourly to annual",
     menuHint: "Hourly wage → year, month, week and biweekly pay",
-    title: "Hourly to Annual Salary Calculator — year, month, week",
+    title: "Hourly to Annual Salary Calculator — 50 or 52 Paid Weeks",
     description:
-      "Turn an hourly wage into annual, monthly, weekly and biweekly pay, with a 52 or 50 paid-week switch. Includes what $20 and $25 an hour come to in a year.",
+      "Convert hourly pay to annual, monthly, and weekly gross earnings. Compare 50 and 52 paid weeks to see how unpaid time off changes annual pay.",
   },
   {
     // Sits next to the hourly→annual page because it is the same arithmetic
@@ -212,11 +205,10 @@ export const TOOL_PAGES: ToolRoute[] = [
     // answers "what is one paycheck". The copy never says "hourly to annual".
     href: "/biweekly-pay-calculator",
     label: "Biweekly pay calculator",
-    menuLabel: "Biweekly pay",
     menuHint: "Salary or wage → one two-week paycheck",
-    title: "Biweekly Pay Calculator — what one paycheck comes to",
+    title: "Biweekly Pay Calculator — Gross Pay for Two Weeks",
     description:
-      "Turn an annual salary or an hourly wage into the gross amount of one biweekly paycheck, with the semi-monthly comparison and the 26-check year behind it.",
+      "Estimate gross pay for one two-week paycheck from salary or hourly wages. Compare biweekly and twice-monthly pay on the same annual salary.",
   },
   {
     // The only page here that answers with a date instead of an amount. Kept
@@ -224,11 +216,10 @@ export const TOOL_PAGES: ToolRoute[] = [
     // money-free because the homepage already owns the "what is it worth" one.
     href: "/payday-countdown",
     label: "Payday countdown",
-    menuLabel: "Payday countdown",
     menuHint: "Days until your next paycheck, any pay cycle",
-    title: "Payday Countdown — days until your next paycheck",
+    title: "Payday Countdown — Days Until Your Next Paycheck",
     description:
-      "Count the days to your next payday on a weekly, biweekly, semi-monthly or monthly cycle, with a weekend rule and the next three dates. A date countdown, not a wage estimate.",
+      "See how many days until your next paycheck. Choose a weekly, biweekly, twice-monthly, or monthly schedule and preview upcoming paydays.",
   },
 ];
 

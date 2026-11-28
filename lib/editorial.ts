@@ -2,18 +2,16 @@ import { LEGAL_UPDATED } from "./site";
 
 // Actual content updates, never the build date.
 export const CONTENT_UPDATES: Readonly<Record<string, string>> = {
-  "/": "2026-11-23",
+  "/": "2026-11-27",
   "/zh": "2026-11-15",
-  "/about": "2026-11-23",
-  // Retired with the content cluster, then rebuilt as a standalone converter
-  // and republished — so the date is the republication, not the first draft.
-  "/hourly-rate-calculator": "2026-11-23",
-  "/hourly-to-annual-salary": "2026-11-23",
-  "/pay-per-second-calculator": "2026-11-27",
-  "/salary-stopwatch": "2026-11-27",
-  "/time-card-calculator": "2026-11-27",
-  "/payday-countdown": "2026-11-27",
-  "/biweekly-pay-calculator": "2026-11-27",
+  "/about": "2026-11-28",
+  "/hourly-rate-calculator": "2026-11-28",
+  "/hourly-to-annual-salary": "2026-11-28",
+  "/pay-per-second-calculator": "2026-11-28",
+  "/salary-stopwatch": "2026-11-28",
+  "/time-card-calculator": "2026-11-28",
+  "/payday-countdown": "2026-11-28",
+  "/biweekly-pay-calculator": "2026-11-28",
   "/privacy": LEGAL_UPDATED,
   "/terms": LEGAL_UPDATED,
 };

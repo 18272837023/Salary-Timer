@@ -125,16 +125,14 @@ export default function AboutPage() {
         <section>
           <h2>Why the counter works this way</h2>
           <p>
-            Most salary tools start from an annual figure and divide it by 2,080 — 40 hours a week,
-            52 weeks a year. It is a tidy number and it is wrong for most people, usually by 10–20%.
-            It assumes no unpaid lunch, no holidays, no overtime and a five-day week that never
-            changes.
+            Dividing annual pay by 2,080 assumes 40 paid hours per week for 52 weeks. If you work a
+            different schedule, use the weekly paid hours that apply to you. A 09:00–17:30 shift
+            with a 30-minute unpaid lunch still counts as eight paid hours.
           </p>
           <p>
-            This timer asks for your schedule instead. The days you actually work, the break you
-            actually take, the overtime rate you actually get. Then it counts only the paid time
-            that has passed, pauses during unpaid breaks, and stops at the end of your shift unless
-            you have told it overtime is allowed.
+            The timer uses your scheduled hours to estimate an hourly rate from your salary. It
+            counts elapsed paid time, pauses during unpaid breaks, and stops at the end of your
+            shift unless you enable overtime.
           </p>
           <p>
             Check the hourly rate behind that counter with the{" "}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ExampleValues, ToolExample } from "@/components/ToolExample";
 import { BiweeklyPay } from "@/components/BiweeklyPay";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +10,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/biweekly-pay-calculator");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -25,23 +26,23 @@ export const metadata: Metadata = {
 const faq: FaqItem[] = [
   {
     q: "How much is my biweekly paycheck?",
-    a: "Divide the annual salary by 26. On $52,000 a year one biweekly paycheck is $2,000 gross; on $75,000 it is $2,884.62. Dividing by 24 instead gives $2,166.67 and $3,125 — those are semi-monthly figures, and they are 8.3% higher because there are two fewer of them.",
+    a: "The biweekly pay calculator divides an annual salary by 26. On $52,000 a year that is $2,000 gross per check; on $75,000 it is $2,884.62. The semi-monthly amounts use 24 checks and come to $2,166.67 and $3,125.",
   },
   {
     q: "Is biweekly the same as twice a month?",
-    a: "No. Biweekly means every 14 days, which is 26 paychecks a year. Twice a month means two fixed dates a month, which is 24. Same salary, different paycheck size, and two months a year where the biweekly schedule pays three times.",
+    a: "Biweekly means every 14 days, usually 26 paychecks a year. Twice monthly means 24 paychecks a year. The biweekly pay calculator compares those two schedules for the same salary.",
   },
   {
     q: "How do I work out biweekly pay from an hourly wage?",
-    a: "Multiply the hourly wage by the paid hours in the two weeks. A full-time fortnight is 80 paid hours, so $25 an hour is $2,000 per paycheck and $52,000 a year across 26 of them. Unpaid lunch belongs outside the 80: a 9:00–17:30 shift with a half-hour break is 8 paid hours a day.",
+    a: "Select per hour in the biweekly pay calculator and enter the paid hours for the whole two-week period. For two 40-hour weeks at $25 an hour, enter 80 hours to get $2,000 gross. Leave unpaid breaks out of the total.",
   },
   {
-    q: "Does this calculator take out taxes?",
-    a: "No, and it will not pretend to. Payroll tax depends on where you live, what you filed, what you contribute and which tax year it is, so a net figure derived from a salary alone is a guess wearing a decimal point. Everything here is gross. Your employer's payroll system, or a payslip from a previous period, is the only reliable source for net.",
+    q: "Does the biweekly pay calculator take out taxes?",
+    a: "It shows gross pay before tax and other deductions. Compare it with the gross line of a payslip for the same pay period. The deposit amount can differ because of tax withholding, insurance or retirement contributions.",
   },
   {
     q: "Can I use it as a timesheet?",
-    a: "No. There is one field for the paid hours in the whole two-week period, with no per-day rows and no clock in or out — a two-week time card is a different tool and this page deliberately is not one. If you want to time a single session by hand, that is what the stopwatch on this site does.",
+    a: "The biweekly pay calculator accepts one total for your paid hours across two weeks. Add daily shifts and subtract unpaid breaks in the time card first, then use that total to estimate one check here.",
   },
 ];
 
@@ -66,17 +67,16 @@ export default function BiweeklyPayCalculatorPage() {
       />
 
       <section>
-        <h2>One paycheck, not a year</h2>
+        <h2>How to calculate one biweekly paycheck</h2>
         <p>
-          A yearly figure is a budget. A paycheck is a date. The gap between them is one division,
-          and the only thing that can go wrong is the divisor — which is exactly what goes wrong,
-          because there are two plausible numbers and they are three weeks apart in outcome.
+          Use the biweekly pay calculator when you want a gross estimate for one check on an
+          every-other-week schedule. If your employer pays twice a month, read the semi-monthly
+          amount in the comparison instead.
         </p>
         <p className="formula">biweekly paycheck = annual salary ÷ 26</p>
         <p>
-          The <Link href="/biweekly-pay-calculator">biweekly pay calculator</Link> above applies that
-          division, or the hourly equivalent — wage × paid hours in the fortnight — and shows the
-          semi-monthly figure beside it so the two cannot be confused for each other.
+          For hourly pay, the biweekly pay calculator multiplies your wage by total paid hours
+          in the period. If you work 36 hours one week and 40 the next, enter 76 hours.
         </p>
         <p>
           If what you want is the running total while you are actually working rather than a
@@ -87,12 +87,19 @@ export default function BiweeklyPayCalculatorPage() {
       </section>
 
       <section>
-        <h2>26, not 24</h2>
+        <h2>Biweekly vs. semi-monthly pay on the same salary</h2>
         <p>
-          A year holds 52 weeks. Paid every two weeks, that is 26 paychecks. Paid twice a month, it is
-          24. Both are called &ldquo;twice a month&rdquo; by people who are not thinking about it, and
-          they are not the same number.
+          Enter $52,000 as annual salary in the biweekly pay calculator. The example shows what
+          one check looks like in a 26-paycheck year alongside the 24-paycheck schedule.
         </p>
+
+        <ToolExample title="Gross pay per check on a $52,000 annual salary">
+          <ExampleValues items={[
+            { label: "Biweekly", value: "$2,000.00", detail: "Every two weeks · 26 checks in this estimate" },
+            { label: "Semi-monthly", value: "$2,166.67", detail: "Twice a month · 24 checks a year" },
+          ]} />
+          <p>Each semi-monthly check is about $166.67 larger in this example. Annual pay stays the same.</p>
+        </ToolExample>
 
         <div className="table-wrap fit">
           <table>
@@ -140,19 +147,18 @@ export default function BiweeklyPayCalculatorPage() {
         </div>
 
         <p>
-          The gap is always 8.3%, because 26 ÷ 24 does not care what you earn. What changes is the
-          money: on $100,000 the semi-monthly figure is $320.51 more per check, and someone comparing
-          two job offers by paycheck alone would read that as the better job. It is not. The year is
-          identical.
+          With 26 and 24 checks, each semi-monthly check is about 8.3% larger on the same salary.
+          The biweekly pay calculator uses 26. If your calendar has 27 paydays, check how your
+          employer handles base pay for that year.
         </p>
       </section>
 
       <section>
         <h2>The two extra paychecks</h2>
         <p>
-          26 paychecks spread across 12 months means two months a year get three of them. That is not
-          a bonus and it is not overtime — the annual total has not moved. It is simply the residue of
-          26 not dividing by 12.
+          In a 26-paycheck year, two months have three checks. The biweekly pay calculator
+          still reports the amount per check. For a monthly budget, multiply that amount by
+          the number of scheduled deposits in the month you are planning for.
         </p>
         <p>
           The reason it happens is that a biweekly year is 26 × 14 = 364 days, two short of a
@@ -168,7 +174,7 @@ export default function BiweeklyPayCalculatorPage() {
       </section>
 
       <section>
-        <h2>What this page will not do</h2>
+        <h2>What the biweekly pay calculator leaves out</h2>
         <ul className="checks">
           <li>
             <b>Estimate your tax.</b> Payroll tax is not a percentage you can apply to a salary:
@@ -191,9 +197,9 @@ export default function BiweeklyPayCalculatorPage() {
           </li>
         </ul>
         <p>
-          What it does do is one thing properly: turn a salary or a wage into the gross amount of a
-          single two-week paycheck, with the divisor stated so you can argue with it if your payroll
-          department uses a different one.
+          Use the biweekly pay calculator result for the base earnings portion of one check.
+          If your payslip includes a bonus or an overtime line, compare base pay separately
+          so you are looking at the same amounts.
         </p>
       </section>
     </ToolPage>

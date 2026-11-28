@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ExampleBars, ToolExample } from "@/components/ToolExample";
 import { HourlyToSalary } from "@/components/HourlyToSalary";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +10,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/hourly-to-annual-salary");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -25,23 +26,23 @@ export const metadata: Metadata = {
 const faq: FaqItem[] = [
   {
     q: "How do I convert an hourly wage to a yearly salary?",
-    a: "Multiply the hourly wage by your paid hours per week, then by your paid weeks per year. $25 an hour at 40 hours a week and 52 weeks is 25 × 40 × 52 = $52,000. If two of those weeks go unpaid it is $50,000, which is the same hourly wage and a different year.",
+    a: "The hourly to annual salary calculator multiplies hourly pay by paid hours per week and paid weeks per year. At $25 an hour, 40 hours and 52 paid weeks give $52,000. With 50 paid weeks it is $50,000.",
   },
   {
     q: "What is $20 an hour in a year?",
-    a: "At 40 hours a week and 52 paid weeks, $20 an hour is $41,600 a year, $3,466.67 a month and $800 a week. With two unpaid weeks it is $40,000. That range is why an advert quoting an hourly rate is not a salary figure until you know the paid weeks.",
+    a: "Enter $20 and 40 paid hours in the hourly to annual salary calculator. At 52 weeks the results are $41,600 a year, $3,466.67 a month on average, and $800 a week. At 50 weeks the annual result is $40,000.",
   },
   {
     q: "What is $25 an hour annually?",
-    a: "At 40 hours a week and 52 paid weeks, $25 an hour is $52,000 a year. Monthly that is $4,333.33, weekly $1,000 and biweekly $2,000. Over 50 paid weeks the annual figure drops to $50,000 — 3.8% less for identical hours per week.",
+    a: "At 40 hours a week and 52 paid weeks, $25 an hour is $52,000 a year. That averages $4,333.33 per month and comes to $1,000 per week or $2,000 per two paid weeks.",
   },
   {
-    q: "Should I use 50 or 52 weeks?",
+    q: "Should I select 50 or 52 weeks in the hourly to annual salary calculator?",
     a: "52 if you are paid for holiday and take no unpaid leave. 50 if two weeks a year go unpaid, which is common for contractors, seasonal work and anyone on a zero-hours arrangement. The difference is 3.8% of the annual figure, and it is the same 3.8% whether you earn $12 an hour or $40.",
   },
   {
     q: "Does this include overtime or tax?",
-    a: "Neither. The converter multiplies your base hourly wage, so overtime premium, tips, bonuses and commission are all outside it, and the result is gross pay before tax. For overtime, add the premium to the weekly figure first: five hours a week at time-and-a-half on $25 is an extra 5 × $12.50 = $62.50 a week, or $3,250 a year at 52 weeks.",
+    a: "The hourly to annual salary calculator treats every entered hour as base-rate pay and reports gross amounts before tax. If you've already entered overtime hours at the base rate, add only the overtime premium separately. Keep tips, commission and bonuses separate when comparing base wages.",
   },
 ];
 
@@ -52,7 +53,7 @@ export default function HourlyToAnnualSalaryPage() {
       hero={<HourlyToSalary />}
       h1={
         <>
-          Hourly to annual salary:
+          Hourly to annual salary calculator:
           <br />
           what an hour <span className="hl">adds up to</span> in a year.
         </>
@@ -66,31 +67,29 @@ export default function HourlyToAnnualSalaryPage() {
       />
 
       <section>
-        <h2>One multiplication, three numbers</h2>
+        <h2>How to convert hourly pay to annual salary</h2>
         <p>
-          Converting an hourly wage into a salary is not a conversion at all. There is no exchange
-          rate and nothing to look up — it is a multiplication, and the only question is what you
-          multiply by.
+          The hourly to annual salary calculator uses three inputs: your hourly wage, your paid
+          hours in a typical week, and the number of weeks you expect to be paid.
         </p>
         <p className="formula">annual salary = hourly wage × paid hours per week × paid weeks per year</p>
         <p>
-          Three numbers go in, one comes out, and two of the three are decisions rather than facts.
-          The paid weeks are the one people get wrong, because a contract rarely states them: it
-          states an hourly rate, and then holiday, unpaid leave and seasonal shutdowns quietly
-          change the multiplier.
+          Start with your contract or a representative payslip. For the hourly to annual salary
+          calculator, unpaid leave can change the weeks input while a regular unpaid lunch
+          reduces the paid hours input.
         </p>
         <p>
-          The <Link href="/hourly-to-annual-salary">hourly to annual salary calculator</Link> above
-          is exactly this formula with the paid-week count left to you, so the yearly figure moves
-          when the assumption moves instead of hiding behind 2,080.
+          The calculator shows biweekly pay for two weeks at the hours you entered. To estimate
+          one paycheck from an annual salary or from the hours in a specific two-week period,
+          use the <Link href="/biweekly-pay-calculator">biweekly pay calculator</Link>.
         </p>
       </section>
 
       <section>
-        <h2>What common hourly wages come to</h2>
+        <h2>Annual pay for common hourly wages</h2>
         <p>
-          Every figure below is the hourly wage × 40 hours × 52 weeks — the standard full-time year,
-          and the one an advert usually has in mind.
+          This table reproduces the hourly to annual salary calculator at 40 paid hours per week
+          and 52 weeks. Use your stated hours if a job advert quotes a different schedule.
         </p>
 
         <div className="table-wrap fit">
@@ -145,19 +144,26 @@ export default function HourlyToAnnualSalaryPage() {
         </div>
 
         <p>
-          The weekly column is the one to sanity-check an offer against. If a job pays weekly and
-          quotes an hourly rate, that column is your actual payslip before tax — and the annual
-          figure is only real if the weeks are.
+          Compare the weekly column with a typical gross paycheck. If the paycheck differs from
+          the hourly to annual salary calculator, check for extra hours, unpaid time or variable pay
+          before relying on the annual projection.
         </p>
       </section>
 
       <section>
-        <h2>Why 52 weeks overstates some jobs</h2>
+        <h2>Annual pay with 50 vs. 52 paid weeks</h2>
         <p>
-          52 assumes you are paid for every week of the year. Plenty of people are not: a
-          contractor between contracts, a seasonal worker, anyone whose holiday is unpaid. Two
-          unpaid weeks is not a dramatic assumption — it is a normal year for a lot of hourly work.
+          Enter $25 per hour and 40 paid hours per week in the hourly to annual salary calculator.
+          Switch from 52 to 50 weeks. Weekly pay stays at $1,000 while annual pay drops by $2,000.
         </p>
+
+        <ToolExample title="Annual gross pay at $25 an hour and 40 hours a week">
+          <ExampleBars items={[
+            { label: "52 paid weeks", value: 52000, amount: "$52,000" },
+            { label: "50 paid weeks", value: 50000, amount: "$50,000" },
+          ]} />
+          <p>Two unpaid weeks reduce annual gross pay by 3.8% in this example.</p>
+        </ToolExample>
 
         <div className="table-wrap fit">
           <table>
@@ -193,25 +199,23 @@ export default function HourlyToAnnualSalaryPage() {
         </div>
 
         <p>
-          The percentage is the same at every wage — 3.8%, because 2 ÷ 52 does not care what you
-          earn. What changes is the money. Two weeks off unpaid is $2,000 a year at $25 an hour, and
-          that is the number worth putting next to a salaried offer before deciding which one is
-          better paid.
+          The 3.8% difference assumes the same wage and hours each paid week. Compare the annual
+          amount from the hourly to annual salary calculator with any salaried offer that includes
+          paid leave.
         </p>
       </section>
 
       <section>
-        <h2>The four-week month that never existed</h2>
+        <h2>How to estimate monthly pay from an hourly wage</h2>
         <p>
           The most common arithmetic mistake in this conversion is not the annual figure, it is the
           monthly one. People take the weekly pay and multiply by four. At $25 an hour that gives
           $4,000 a month.
         </p>
         <p>
-          A month is not four weeks. It is 4.33 weeks on average — 52 weeks divided by 12 months.
-          The real monthly figure is $52,000 ÷ 12 = $4,333.33. Over a year the four-week shortcut
-          loses $4,000, which is close to an entire extra month of pay, and it is the reason a
-          monthly budget built on &ldquo;weekly × 4&rdquo; always feels slightly short.
+          The hourly to annual salary calculator divides annual pay by 12 to find a monthly
+          average. Here that is $52,000 ÷ 12 = $4,333.33. Multiplying weekly pay by four
+          accounts for only 48 weeks across 12 months.
         </p>
         <p>
           Biweekly is the one case where doubling does work, because two weeks really is two weeks.
@@ -220,7 +224,7 @@ export default function HourlyToAnnualSalaryPage() {
       </section>
 
       <section>
-        <h2>What this figure leaves out</h2>
+        <h2>What the hourly to annual salary calculator leaves out</h2>
         <ul className="checks">
           <li>
             <b>Tax and deductions.</b> Everything here is gross. Income tax, social insurance and
@@ -254,9 +258,9 @@ export default function HourlyToAnnualSalaryPage() {
           when you are comparing two salaried offers rather than two hourly ones.
         </p>
         <p>
-          And if you would rather watch the money arrive than multiply it, the{" "}
-          <Link href="/">live salary timer</Link> counts up from the same hourly wage and the same
-          hours, so the number on the homepage and the number on this page can never disagree.
+          The hourly to annual salary calculator gives a full-year estimate. To track paid time
+          and earnings during your shift, enter your wage and schedule in the{" "}
+          <Link href="/">live salary timer</Link>.
         </p>
       </section>
     </ToolPage>

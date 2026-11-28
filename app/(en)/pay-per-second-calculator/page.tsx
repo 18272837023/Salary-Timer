@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/components/SmartLink";
 import { ToolPage } from "@/components/ToolPage";
+import { ExampleValues, ToolExample } from "@/components/ToolExample";
 import { PayPerSecond } from "@/components/PayPerSecond";
 import type { FaqItem } from "@/lib/home-faq";
 import { toolSchemas } from "@/lib/tool-schema";
@@ -9,7 +10,7 @@ import { OG_DEFAULTS, getTool } from "@/lib/site";
 const tool = getTool("/pay-per-second-calculator");
 
 export const metadata: Metadata = {
-  title: tool.title,
+  title: { absolute: tool.title },
   description: tool.description,
   alternates: { canonical: tool.href },
   // Spread the defaults first: a page-level openGraph replaces the layout's
@@ -25,22 +26,22 @@ export const metadata: Metadata = {
 const faq: FaqItem[] = [
   {
     q: "How much do I make per second?",
-    a: "Divide your hourly rate by 3,600. At $25 an hour that is $0.0069 a second, at $40 an hour $0.0111, and at $60 an hour $0.0167. The figure looks tiny because a second is tiny — multiply it by 60 and you are back at a number you recognise.",
+    a: "The pay per second calculator divides your hourly rate by 3,600. At $25 an hour that is $0.0069 a second, at $40 an hour it is $0.0111, and at $60 an hour it is $0.0167. Multiply the unrounded result by 60 to find pay per minute.",
   },
   {
     q: "How do I work out pay per minute?",
-    a: "Hourly rate divided by 60. $25 an hour is $0.42 a minute, $30 is $0.50 and $18 is $0.30. From there a 25-minute meeting costs $10.42 at $25 an hour, which is usually the moment the per-minute figure stops being trivia.",
+    a: "Divide your hourly rate by 60. The pay per second calculator shows $0.42 per minute at $25 an hour, $0.50 at $30, and $0.30 at $18. Using the unrounded rate, 25 minutes of paid time at $25 an hour comes to $10.42.",
   },
   {
     q: "What is $60,000 a year per second?",
-    a: "About $0.008 a second at 40 hours a week and 52 paid weeks. The shortcut is annual pay divided by 7,488,000, because a standard year is 2,080 paid hours and every hour holds 3,600 seconds. Over 50 paid weeks the same salary works out at $0.0083.",
+    a: "Enter $60,000 and 40 paid hours per week in the pay per second calculator. It assumes 52 weeks, or 7,488,000 paid seconds, and displays $0.0080 per second. If you need 50 paid weeks, divide by 7,200,000 seconds separately to get about $0.0083.",
   },
   {
     q: "Is this my actual pay per second?",
-    a: "No. It is an average rate, gross of tax, across the seconds you are paid for. Income tax, pension contributions and any unpaid break come off it, while overtime premium, tips and bonuses are not in it. Treat it as the price of your time, not as money arriving.",
+    a: "The pay per second calculator estimates gross earnings at the rate you enter. Enter paid hours without unpaid breaks. Taxes, pension contributions, and any overtime, tips or bonuses you have not included in the pay input can change the amount you receive.",
   },
   {
-    q: "Does the per-second rate count every second of the day?",
+    q: "Does the pay per second calculator count every second of the day?",
     a: "It counts paid seconds only. A day holds 86,400 seconds, and an eight-hour working day is 28,800 of them — exactly a third of the clock. A 30-minute unpaid lunch removes another 1,800. That is why a per-second figure is always higher than the same salary divided across the whole day.",
   },
 ];
@@ -57,7 +58,7 @@ export default function PayPerSecondCalculatorPage() {
           what you make <span className="hl">in a second.</span>
         </>
       }
-      lede="Type your pay and your hours and the second comes back — then the minute, the hour and the workday. It is arithmetic, not a ticker: nothing moves until you change a number."
+      lede="Enter your hourly wage or annual salary to see estimated gross pay per paid second, minute, hour, and workday."
       faq={faq}
     >
       <script
@@ -66,7 +67,7 @@ export default function PayPerSecondCalculatorPage() {
       />
 
       <section>
-        <h2>A second is the honest unit, and the useless one</h2>
+        <h2>How the pay per second calculator works</h2>
         <p>
           An hourly rate is a quote. A per-second rate is what that quote actually buys, and it is
           the only unit that lets you price a 40-second walk to the kitchen against a two-hour
@@ -74,10 +75,9 @@ export default function PayPerSecondCalculatorPage() {
         </p>
         <p className="formula">pay per second = hourly rate ÷ 3,600</p>
         <p>
-          At $25 an hour a second is worth 0.69 cents. Nobody prices anything in cents, which is why
-          the number reads as trivia at first — until you use it to convert a price tag into time.
-          The <Link href="/pay-per-second-calculator">pay per second calculator</Link> above is that
-          division with your own numbers in it; the rest of this page is what the answer means.
+          At $25 an hour a paid second is worth about 0.69 cents. To use the pay per second
+          calculator for this example, select <b>per hour</b> and enter $25. The tool shows
+          dollars with four decimal places because the result is smaller than a cent.
         </p>
         <p>
           The other half of the arithmetic is the clock. A day holds 86,400 seconds. An eight-hour
@@ -89,8 +89,9 @@ export default function PayPerSecondCalculatorPage() {
       <section>
         <h2>What common wages come to</h2>
         <p>
-          Every row is the hourly rate ÷ 3,600 for the second, ÷ 60 for the minute, and × 8 for an
-          eight-hour workday.
+          These examples use the pay per second calculator at five eight-hour workdays a week.
+          Divide the hourly rate by 3,600 for seconds, by 60 for minutes, or multiply by eight
+          for one paid workday.
         </p>
 
         <div className="table-wrap fit">
@@ -157,20 +158,27 @@ export default function PayPerSecondCalculatorPage() {
           legible.
         </p>
         <p>
-          The workday column is the one to hold against a timesheet. $200 a day at $25 an hour is
-          eight paid hours; if your shift is 9:00–17:30 with a half-hour unpaid lunch, it is exactly
-          that, and if you stay an hour late unpaid it is still $200.
+          Compare the workday amount from the pay per second calculator with your paid shift hours.
+          A 9:00–17:30 shift with a half-hour unpaid lunch is eight paid hours, or $200 gross
+          at $25 an hour.
         </p>
       </section>
 
       <section>
-        <h2>Annual salary per second</h2>
+        <h2>Paid seconds vs. calendar seconds in a year</h2>
         <p>
-          For a salary rather than an hourly rate there is one shortcut worth memorising: divide the
-          annual figure by <b>7,488,000</b>. That number is 2,080 paid hours × 3,600 seconds, so it
-          is the count of paid seconds in a standard year.
+          The pay per second calculator divides annual pay by the seconds you are paid for. At 40 paid hours
+          per week and 52 paid weeks, that is 2,080 hours × 3,600 seconds, or 7,488,000 paid seconds.
         </p>
-        <p className="formula">pay per second = annual salary ÷ 7,488,000</p>
+        <p className="formula">pay per paid second = annual salary ÷ (annual paid hours × 3,600)</p>
+
+        <ToolExample title="Two ways to divide a $60,000 annual salary">
+          <ExampleValues items={[
+            { label: "Per paid second", value: "$0.008013", detail: "Based on 7,488,000 paid seconds" },
+            { label: "Per calendar second", value: "$0.001903", detail: "Based on all 31,536,000 seconds in a 365-day year" },
+          ]} />
+          <p>The pay per second calculator shows $0.0080 per paid second. The calendar average also includes nights, weekends and time off.</p>
+        </ToolExample>
 
         <div className="table-wrap fit">
           <table>
@@ -234,9 +242,9 @@ export default function PayPerSecondCalculatorPage() {
       <section>
         <h2>What a dollar costs in seconds</h2>
         <p>
-          The genuinely useful version of this number is its reciprocal: divide 3,600 by your hourly
-          rate and every price becomes a duration. That is the figure the calculator shows under the
-          result, and it is the one worth remembering.
+          The pay per second calculator also shows how many seconds of paid work earn one
+          dollar. Divide 3,600 by your hourly wage to find that number, then multiply by a price
+          to estimate how many seconds of work it represents.
         </p>
 
         <div className="table-wrap fit">
@@ -294,26 +302,24 @@ export default function PayPerSecondCalculatorPage() {
           full working weeks, handed over in advance.
         </p>
         <p>
-          This is where the unit earns its keep. A price in dollars is a number you compare with
-          other prices; a price in seconds is a number you compare with your evening.
+          The prices in this table are compared with gross earnings. Use the pay per second
+          calculator with your known take-home hourly rate if you want the comparison after deductions.
         </p>
       </section>
 
       <section>
-        <h2>Where the per-second number lies</h2>
+        <h2>What the pay per second calculator includes</h2>
         <ul className="checks">
           <li>
-            <b>It counts paid seconds, not clock seconds.</b> 28,800 of the day&rsquo;s 86,400. A
-            half-hour unpaid lunch removes 1,800 more, and the rate does not go up to compensate.
+            <b>Use paid hours.</b> Eight paid hours are 28,800 seconds. For an eight-hour shift
+            with a 30-minute unpaid break, enter 7.5 paid hours.
           </li>
           <li>
-            <b>It is gross.</b> Income tax, social insurance and pension contributions come off
-            afterwards. At a 20% effective rate the second is worth 20% less than the figure on
-            screen.
+            <b>Amounts are gross.</b> The result is before taxes and payroll deductions.
           </li>
           <li>
-            <b>Overtime is not linear.</b> Time-and-a-half does not raise your per-second rate; it
-            adds extra paid seconds after the shift ends. The two effects are not interchangeable.
+            <b>Use the applicable hourly rate.</b> To estimate overtime pay per second, enter
+            the overtime hourly rate separately. For example, time and a half on $20/hr is $30/hr.
           </li>
           <li>
             <b>An average hides a bad month.</b> A per-second figure spreads a year evenly. A

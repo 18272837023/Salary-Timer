@@ -35,7 +35,7 @@ export const AUTHOR = {
 
   /** The long version, one paragraph per section on /about. */
   bio: [
-    `I am the developer behind ${SITE_NAME}. The site started as a personal annoyance: almost every hourly-rate calculator divides an annual salary by 2,080 hours, and 2,080 describes a 40-hour week with no holidays, no unpaid lunch and no overtime. In other words, almost nobody.`,
+    `I am the developer behind ${SITE_NAME}. I wanted a way to see what I earn during a workday using my own schedule. A standard 2,080-hour estimate assumes 40 paid hours a week for 52 weeks, and my schedule can vary.`,
     "So the counter here runs the arithmetic the other way round. You describe the schedule you actually work — the days, the unpaid break, the overtime rate — and the page shows what an hour, a minute and a second of your working time are worth, then keeps counting while you work.",
     "It is free and there is no account, because a tool that asks for your salary should not also ask for your email address. Your settings stay in this browser's local storage; there is no server-side database for them to be uploaded to.",
   ],
